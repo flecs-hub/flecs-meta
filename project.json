@@ -1,0 +1,11 @@
+{
+    "id": "flecs.components.meta",
+    "type": "package",
+    "value": {
+        "author": "Sander Mertens",
+        "description": "Reflection components for Flecs components",
+        "use": [
+            "flecs"
+        ]
+    }
+}
