@@ -7,11 +7,18 @@
 extern "C" {
 #endif
 
+/* Convenience macro's */
+#define ECS_PRIMITIVE(world, component, primitive_kind)\
+    ecs_set(world, ecs_entity(component), EcsMetaPrimitive, {primitive_kind})
+
 #define ECS_ENUM_CONSTANT(world, component, constant)\
-    ecs_enum_push_constant(world, ecs_to_entity(component), #constant, constant)
+    ecs_enum_push_constant(world, ecs_entity(component), #constant, constant)
 
 #define ECS_STRUCT_MEMBER(world, component, member, type)\
-    ecs_struct_push_member(world, ecs_to_entity(component), #member, ecs_to_entity(type), offsetof(component, member))
+    ecs_struct_push_member(world, ecs_entity(component), #member, ecs_entity(type), offsetof(component, member))
+
+#define ECS_VECTOR(world, component, element_type, max_size)\
+    ecs_set(world, ecs_entity(component), EcsMetaVector, {ecs_entity(element_type), max_size})
 
 FLECS_COMPONENTS_META_EXPORT
 void ecs_enum_push_constant(
