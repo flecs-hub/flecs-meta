@@ -1,8 +1,8 @@
 #include <include/meta.h>
 
-ecs_vector_params_t EcsMetaEnumConstantVecParam = {.element_size = sizeof(EcsMetaEnumConstant)};
-ecs_vector_params_t EcsMetaBitmaskConstantVecParam = {.element_size = sizeof(EcsMetaBitmaskConstant)};
-ecs_vector_params_t EcsMetaMemberVecParam = {.element_size = sizeof(EcsMetaMember)};
+ecs_vector_params_t EcsMetaEnumConstantParam = {.element_size = sizeof(EcsMetaEnumConstant)};
+ecs_vector_params_t EcsMetaBitmaskConstantParam = {.element_size = sizeof(EcsMetaBitmaskConstant)};
+ecs_vector_params_t EcsMetaMemberParam = {.element_size = sizeof(EcsMetaMember)};
 
 static
 void load_reflection(
@@ -138,6 +138,7 @@ void EcsComponentsMeta(
     ECS_COMPONENT(world, EcsMetaArray);
     ECS_COMPONENT(world, EcsMetaVector);
     ECS_COMPONENT(world, EcsMetaMap);
+    ECS_TAG(world, EcsMetaDefined);
 
     ECS_COMPONENT(world, bool);
     ECS_COMPONENT(world, char);
@@ -163,6 +164,7 @@ void EcsComponentsMeta(
     ECS_SET_COMPONENT(handles, EcsMetaArray);
     ECS_SET_COMPONENT(handles, EcsMetaVector);
     ECS_SET_COMPONENT(handles, EcsMetaMap);
+    ECS_SET_ENTITY(handles, EcsMetaDefined);
 
     ECS_SET_COMPONENT(handles, bool);
     ECS_SET_COMPONENT(handles, char);

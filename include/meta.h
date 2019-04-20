@@ -11,9 +11,9 @@ extern "C" {
 
 typedef const char* ecs_string_t;
 
-extern ecs_vector_params_t EcsMetaEnumConstantVecParam;
-extern ecs_vector_params_t EcsMetaBitmaskConstantVecParam;
-extern ecs_vector_params_t EcsMetaMemberVecParam;
+extern ecs_vector_params_t EcsMetaEnumConstantParam;
+extern ecs_vector_params_t EcsMetaBitmaskConstantParam;
+extern ecs_vector_params_t EcsMetaMemberParam;
 
 typedef enum EcsMetaTypeKind {
     EcsPrimitive,
@@ -102,6 +102,8 @@ typedef struct EcsMetaMap {
     uint32_t max_size;
 } EcsMetaMap;
 
+#include "cache.h"
+
 typedef struct EcsComponentsMetaHandles {
     /* Meta components */
     ECS_DECLARE_COMPONENT(EcsMetaType);
@@ -112,6 +114,10 @@ typedef struct EcsComponentsMetaHandles {
     ECS_DECLARE_COMPONENT(EcsMetaArray);
     ECS_DECLARE_COMPONENT(EcsMetaVector);
     ECS_DECLARE_COMPONENT(EcsMetaMap);
+    
+    /* Meta framework components */
+    ECS_DECLARE_ENTITY(EcsMetaDefined);
+    ECS_DECLARE_COMPONENT(EcsMetaCache);
 
     /* Components for primitive types */
     ECS_DECLARE_COMPONENT(bool);
@@ -145,6 +151,8 @@ void EcsComponentsMeta(
     ECS_IMPORT_COMPONENT(handles, EcsMetaArray);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaVector);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaMap);\
+    ECS_IMPORT_ENTITY(handles, EcsMetaDefined);\
+    ECS_IMPORT_COMPONENT(handles, EcsMetaCache);\
     ECS_IMPORT_COMPONENT(handles, bool);\
     ECS_IMPORT_COMPONENT(handles, char);\
     ECS_IMPORT_COMPONENT(handles, uint8_t);\

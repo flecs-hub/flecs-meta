@@ -16,7 +16,27 @@ void ecs_enum_push_constant(
         r_enum = ecs_get_ptr(world, component, EcsMetaEnum);
     }
 
-    EcsMetaEnumConstant *c = ecs_vector_add(&r_enum->constants, &EcsMetaEnumConstantVecParam);
+    EcsMetaEnumConstant *c = ecs_vector_add(&r_enum->constants, &EcsMetaEnumConstantParam);
+    c->name = name;
+    c->value = value;
+}
+
+void ecs_bitmask_push_constant(
+    ecs_world_t *world,
+    ecs_entity_t component,
+    const char *name,
+    int32_t value)
+{
+    ecs_entity_t ecs_entity(EcsMetaBitmask) = ecs_lookup(world, "EcsMetaBitmask");
+    ecs_type_t ecs_type(EcsMetaBitmask) = ecs_type_from_entity(world, ecs_entity(EcsMetaBitmask));
+
+    EcsMetaBitmask *r_bitmask = ecs_get_ptr(world, component, EcsMetaBitmask);
+    if (!r_bitmask) {
+        ecs_add(world, component, EcsMetaBitmask);
+        r_bitmask = ecs_get_ptr(world, component, EcsMetaBitmask);
+    }
+
+    EcsMetaBitmaskConstant *c = ecs_vector_add(&r_bitmask->constants, &EcsMetaBitmaskConstantParam);
     c->name = name;
     c->value = value;
 }
@@ -37,7 +57,7 @@ void ecs_struct_push_member(
         r_struct = ecs_get_ptr(world, component, EcsMetaStruct);
     }
 
-    EcsMetaMember *c = ecs_vector_add(&r_struct->members, &EcsMetaMemberVecParam);
+    EcsMetaMember *c = ecs_vector_add(&r_struct->members, &EcsMetaMemberParam);
     c->name = name;
     c->type = type;
     c->offset = offset;
