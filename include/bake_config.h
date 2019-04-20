@@ -23,6 +23,7 @@
 #ifdef __BAKE__
 /* Headers of public dependencies */
 #include <flecs>
+#include <bake.util>
 
 /* Headers of private dependencies */
 #ifdef FLECS_COMPONENTS_META_IMPL

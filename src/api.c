@@ -12,7 +12,7 @@ void ecs_enum_push_constant(
 
     EcsMetaEnum *r_enum = ecs_get_ptr(world, component, EcsMetaEnum);
     if (!r_enum) {
-        ecs_add(world, component, EcsMetaEnum);
+        ecs_set(world, component, EcsMetaEnum, {0});
         r_enum = ecs_get_ptr(world, component, EcsMetaEnum);
     }
 
@@ -32,7 +32,7 @@ void ecs_bitmask_push_constant(
 
     EcsMetaBitmask *r_bitmask = ecs_get_ptr(world, component, EcsMetaBitmask);
     if (!r_bitmask) {
-        ecs_add(world, component, EcsMetaBitmask);
+        ecs_set(world, component, EcsMetaBitmask, {0});
         r_bitmask = ecs_get_ptr(world, component, EcsMetaBitmask);
     }
 
@@ -53,7 +53,7 @@ void ecs_struct_push_member(
 
     EcsMetaStruct *r_struct = ecs_get_ptr(world, component, EcsMetaStruct);
     if (!r_struct) {
-        ecs_add(world, component, EcsMetaStruct);
+        ecs_set(world, component, EcsMetaStruct, {0});
         r_struct = ecs_get_ptr(world, component, EcsMetaStruct);
     }
 

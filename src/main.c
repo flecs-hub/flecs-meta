@@ -1,4 +1,5 @@
 #include <include/meta.h>
+#include "systems.h"
 
 ecs_vector_params_t EcsMetaEnumConstantParam = {.element_size = sizeof(EcsMetaEnumConstant)};
 ecs_vector_params_t EcsMetaBitmaskConstantParam = {.element_size = sizeof(EcsMetaBitmaskConstant)};
@@ -203,6 +204,7 @@ void EcsComponentsMeta(
     ECS_COMPONENT(world, EcsMetaVector);
     ECS_COMPONENT(world, EcsMetaMap);
     ECS_TAG(world, EcsMetaDefined);
+    ECS_COMPONENT(world, EcsMetaCache);
 
     ECS_COMPONENT(world, bool);
     ECS_COMPONENT(world, char);
@@ -229,6 +231,7 @@ void EcsComponentsMeta(
     ECS_SET_COMPONENT(handles, EcsMetaVector);
     ECS_SET_COMPONENT(handles, EcsMetaMap);
     ECS_SET_ENTITY(handles, EcsMetaDefined);
+    ECS_SET_COMPONENT(handles, EcsMetaCache);
 
     ECS_SET_COMPONENT(handles, bool);
     ECS_SET_COMPONENT(handles, char);

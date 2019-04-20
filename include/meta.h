@@ -88,7 +88,7 @@ typedef struct EcsMetaStruct {
 
 typedef struct EcsMetaArray {
     ecs_entity_t element_type;
-    uint32_t size;
+    uint16_t size;
 } EcsMetaArray;
 
 typedef struct EcsMetaVector {

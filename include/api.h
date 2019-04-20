@@ -38,7 +38,7 @@ extern "C" {
     ECS_DEFINE(world, component)
 
 
-/* Meta API */
+/* Type construction */
 
 FLECS_COMPONENTS_META_EXPORT
 void ecs_enum_push_constant(

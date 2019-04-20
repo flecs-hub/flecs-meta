@@ -5,7 +5,8 @@
         "author": "Sander Mertens",
         "description": "Reflection components for Flecs components",
         "use": [
-            "flecs"
+            "flecs",
+            "bake.util"
         ]
     }
 }
