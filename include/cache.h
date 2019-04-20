@@ -10,23 +10,23 @@ extern "C" {
 typedef struct EcsMetaCache EcsMetaCache;
 
 typedef enum ecs_meta_cache_op_kind_t {
-    EcsMetaOpNothing,
+    EcsOpNothing,
 
     /* Primitives */
-    EcsMetaOpPrimitive,
+    EcsOpPrimitive,
 
     /* Enum / bitmask */
-    EcsMetaOpEnum,
-    EcsMetaOpBitmask,
+    EcsOpEnum,
+    EcsOpBitmask,
 
     /* Struct nesting */
-    EcsMetaOpPush,
-    EcsMetaOpPop,
+    EcsOpPush,
+    EcsOpPop,
 
     /* Collections */
-    EcsMetaOpArray,
-    EcsMetaOpVector,
-    EcsMetaOpMap
+    EcsOpArray,
+    EcsOpVector,
+    EcsOpMap
 } ecs_meta_cache_op_kind_t;
 
 typedef ecs_vector_t* ecs_meta_cache_op_vector_t;
@@ -34,6 +34,7 @@ typedef ecs_vector_t* ecs_meta_cache_op_vector_t;
 typedef struct ecs_meta_cache_op_t {
     ecs_meta_cache_op_kind_t kind;
     uint32_t offset;
+    uint32_t count;
     const char *name;
 
     union {
@@ -51,6 +52,8 @@ typedef struct ecs_meta_cache_op_t {
 struct EcsMetaCache {
     ecs_meta_cache_op_vector_t ops;
 };
+
+void InitCache(ecs_rows_t *rows);
 
 #ifdef __cplusplus
 }

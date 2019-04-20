@@ -37,9 +37,11 @@ void load_reflection(
     ECS_ENUM_CONSTANT(world, EcsMetaTypeKind, EcsArray);
     ECS_ENUM_CONSTANT(world, EcsMetaTypeKind, EcsVector);
     ECS_ENUM_CONSTANT(world, EcsMetaTypeKind, EcsMap);
+    ECS_DEFINE(world, EcsMetaTypeKind);
 
     /* EcsMetaType */
     ECS_STRUCT_MEMBER(world, EcsMetaType, kind, EcsMetaTypeKind);
+    ECS_DEFINE(world, EcsMetaType);
 
     /* EcsMetaPrimitiveKind */
     ECS_COMPONENT(world, EcsMetaPrimitiveKind);
@@ -59,6 +61,7 @@ void load_reflection(
 
     /* EcsMetaPrimitive */
     ECS_STRUCT_MEMBER(world, EcsMetaPrimitive, kind, EcsMetaPrimitiveKind);
+    ECS_DEFINE(world, EcsMetaPrimitive);
 
     
     /* -- EcsMetaEnum -- */
@@ -67,6 +70,7 @@ void load_reflection(
     ECS_COMPONENT(world, EcsMetaEnumConstant);
     ECS_STRUCT_MEMBER(world, EcsMetaEnumConstant, name, ecs_string_t);
     ECS_STRUCT_MEMBER(world, EcsMetaEnumConstant, value, int32_t);
+    ECS_DEFINE(world, EcsMetaEnumConstant);
 
     /* vector<EcsMetaEnumConstant> */
     ECS_COMPONENT(world, EcsMetaEnumConstantVector);
@@ -74,6 +78,7 @@ void load_reflection(
 
     /* EcsMetaEnum */
     ECS_STRUCT_MEMBER(world, EcsMetaEnum, constants, EcsMetaEnumConstantVector);
+    ECS_DEFINE(world, EcsMetaEnum);
 
 
     /* -- EcsMetaBitmask -- */
@@ -82,6 +87,7 @@ void load_reflection(
     ECS_COMPONENT(world, EcsMetaBitmaskConstant);
     ECS_STRUCT_MEMBER(world, EcsMetaBitmaskConstant, name, ecs_string_t);
     ECS_STRUCT_MEMBER(world, EcsMetaBitmaskConstant, value, uint64_t);
+    ECS_DEFINE(world, EcsMetaBitmaskConstant);
 
     /* vector<EcsMetaBitmaskConstant> */
     ECS_COMPONENT(world, EcsMetaBitmaskConstantVector);
@@ -89,6 +95,7 @@ void load_reflection(
 
     /* EcsMetaBitmask */
     ECS_STRUCT_MEMBER(world, EcsMetaBitmask, constants, EcsMetaBitmaskConstantVector);
+    ECS_DEFINE(world, EcsMetaBitmask);
 
 
     /* -- EcsMetaStruct -- */
@@ -98,6 +105,7 @@ void load_reflection(
     ECS_STRUCT_MEMBER(world, EcsMetaMember, name, ecs_string_t);
     ECS_STRUCT_MEMBER(world, EcsMetaMember, type, ecs_entity_t);
     ECS_STRUCT_MEMBER(world, EcsMetaMember, offset, uint32_t);
+    ECS_DEFINE(world, EcsMetaMember);
 
     /* vector<EcsMetaMember> */
     ECS_COMPONENT(world, EcsMetaMemberVector);
@@ -105,6 +113,7 @@ void load_reflection(
 
     /* EcsStruct */
     ECS_STRUCT_MEMBER(world, EcsMetaStruct, members, EcsMetaMemberVector);
+    ECS_DEFINE(world, EcsMetaStruct);
 
 
     /* -- Collections -- */
@@ -112,15 +121,70 @@ void load_reflection(
     /* EcsMetaArray */
     ECS_STRUCT_MEMBER(world, EcsMetaArray, element_type, ecs_entity_t);
     ECS_STRUCT_MEMBER(world, EcsMetaArray, size, uint32_t);
+    ECS_DEFINE(world, EcsMetaArray);
 
     /* EcsMetaVector */
     ECS_STRUCT_MEMBER(world, EcsMetaVector, element_type, ecs_entity_t);
     ECS_STRUCT_MEMBER(world, EcsMetaVector, max_size, uint32_t);
+    ECS_DEFINE(world, EcsMetaVector);
 
     /* EcsMetaMap */
     ECS_STRUCT_MEMBER(world, EcsMetaMap, key_type, ecs_entity_t);
     ECS_STRUCT_MEMBER(world, EcsMetaMap, value_type, ecs_entity_t);
     ECS_STRUCT_MEMBER(world, EcsMetaMap, max_size, uint32_t);
+    ECS_DEFINE(world, EcsMetaMap);
+}
+
+static
+void init_type(ecs_rows_t *rows, ecs_type_t ecs_type(EcsMetaType), EcsMetaTypeKind kind) {
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_set(rows->world, rows->entities[i], EcsMetaType, {
+            .kind = kind
+        });
+    }
+}
+
+static
+void InitPrimitive(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsPrimitive);
+}
+
+static
+void InitEnum(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsEnum);
+}
+
+static
+void InitBitmask(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsBitmask);
+}
+
+static
+void InitStruct(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsStruct);
+}
+
+static
+void InitArray(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsArray);
+}
+
+static
+void InitVector(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsVector);
+}
+
+static
+void InitMap(ecs_rows_t *rows) {
+    ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
+    init_type(rows, ecs_type(EcsMetaType), EcsMap);
 }
 
 void EcsComponentsMeta(
@@ -180,7 +244,17 @@ void EcsComponentsMeta(
     ECS_SET_COMPONENT(handles, float);
     ECS_SET_COMPONENT(handles, double);
     ECS_SET_COMPONENT(handles, ecs_string_t);
-    ECS_SET_COMPONENT(handles, ecs_entity_t);    
+    ECS_SET_COMPONENT(handles, ecs_entity_t);
+
+    ECS_SYSTEM(world, InitPrimitive, EcsOnAdd, EcsMetaPrimitive, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitEnum, EcsOnAdd, EcsMetaEnum, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitBitmask, EcsOnAdd, EcsMetaBitmask, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitStruct, EcsOnAdd, EcsMetaStruct, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitArray, EcsOnAdd, EcsMetaArray, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitVector, EcsOnAdd, EcsMetaVector, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitMap, EcsOnAdd, EcsMetaMap, ID.EcsMetaType);
+
+    ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $EcsComponentsMeta);
 
     load_reflection(world, *handles);
 }

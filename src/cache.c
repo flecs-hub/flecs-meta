@@ -10,6 +10,28 @@ ecs_vector_t* serialize_type(
     EcsComponentsMetaHandles *handles);
 
 static
+bool is_primitive(ecs_meta_cache_op_kind_t kind) {
+    if (kind == EcsOpPrimitive || 
+        kind == EcsOpEnum ||
+        kind == EcsOpBitmask)
+    {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static
+bool is_inline(ecs_meta_cache_op_kind_t kind) {
+    if (is_primitive(kind) || kind == EcsOpPush)
+    {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static
 ecs_vector_t* serialize_primitive(
     ecs_world_t *world,
     ecs_entity_t entity,
@@ -23,7 +45,8 @@ ecs_vector_t* serialize_primitive(
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
     *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpPrimitive, 
+        .kind = EcsOpPrimitive, 
+        .count = 1,
         .data.primitive_kind = type->kind
     };
 
@@ -44,7 +67,8 @@ ecs_vector_t* serialize_enum(
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
     *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpEnum, 
+        .kind = EcsOpEnum, 
+        .count = 1,
         .data.enum_constants = type->constants
     };
 
@@ -65,7 +89,8 @@ ecs_vector_t* serialize_bitmask(
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
     *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpBitmask, 
+        .kind = EcsOpBitmask,
+        .count = 1,
         .data.enum_constants = type->constants
     };
 
@@ -85,7 +110,9 @@ ecs_vector_t* serialize_struct(
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
-    *op = (ecs_meta_cache_op_t){.kind = EcsMetaOpPush};
+    *op = (ecs_meta_cache_op_t){
+        .kind = EcsOpPush
+    };
 
     EcsMetaMember *members = ecs_vector_first(type->members);
     int32_t i, count = ecs_vector_count(type->members);
@@ -97,7 +124,9 @@ ecs_vector_t* serialize_struct(
     }
 
     op = ecs_vector_add(&ops, &cache_op_param);
-    *op = (ecs_meta_cache_op_t){.kind = EcsMetaOpPop};
+    *op = (ecs_meta_cache_op_t){
+        .kind = EcsOpPop
+    };
     
     return ops;
 }
@@ -117,11 +146,26 @@ ecs_vector_t* serialize_array(
     EcsMetaCache *element_cache = ecs_get_ptr(world, type->element_type, EcsMetaCache);
     ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
-    *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpArray, 
-        .data.element_ops = element_cache->ops
-    };
+    ecs_meta_cache_op_t *elem_op = ecs_vector_first(element_cache->ops);
+
+    /* If element is inlined, don't add indirection to other cache */
+    if (ecs_vector_count(element_cache->ops) == 1 && is_inline(elem_op->kind))
+    {
+        /* Serialize element op inline, and set count on first inserted op */
+        uint32_t el_start = ecs_vector_count(ops);
+        serialize_type(world, type->element_type, ops, handles);
+        ecs_meta_cache_op_t *start = ecs_vector_get(ops, &cache_op_param, el_start);
+        ecs_assert(start != NULL, ECS_INTERNAL_ERROR, NULL);
+
+        start->count = type->size;
+    } else {
+        ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
+        *op = (ecs_meta_cache_op_t){
+            .kind = EcsOpArray, 
+            .count = type->size,
+            .data.element_ops = element_cache->ops
+        };
+    }
 
     return ops;
 }
@@ -143,7 +187,7 @@ ecs_vector_t* serialize_vector(
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
     *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpVector, 
+        .kind = EcsOpVector, 
         .data.element_ops = element_cache->ops
     };
 
@@ -176,14 +220,14 @@ ecs_vector_t* serialize_map(
     ecs_meta_cache_op_t *key_op = ecs_vector_first(key_cache->ops);
 
     /* Key types have to be primitive, enum or bitmask */
-    ecs_assert(key_op->kind == EcsMetaOpPrimitive ||
-                key_op->kind == EcsMetaOpEnum ||
-                key_op->kind == EcsMetaOpBitmask,
+    ecs_assert(key_op->kind == EcsOpPrimitive ||
+                key_op->kind == EcsOpEnum ||
+                key_op->kind == EcsOpBitmask,
                     ECS_INTERNAL_ERROR, NULL);
 
     ecs_meta_cache_op_t *op = ecs_vector_add(&ops, &cache_op_param);
     *op = (ecs_meta_cache_op_t){
-        .kind = EcsMetaOpVector, 
+        .kind = EcsOpVector, 
         .data.map = {
             .key_op = key_op,
             .value_ops = value_cache->ops
@@ -192,7 +236,6 @@ ecs_vector_t* serialize_map(
 
     return ops;
 }
-
 
 static
 ecs_vector_t* serialize_type(
@@ -238,6 +281,22 @@ void serialize_component(
     ecs_entity_t component,
     EcsComponentsMetaHandles *handles)
 {
+    EcsComponentsMeta_ImportHandles(*handles);
+
     ecs_vector_t *ops = ecs_vector_new(&cache_op_param, 1);
     ops = serialize_type(world, component, ops, handles);
+
+    ecs_set(world, component, EcsMetaCache, {
+        .ops = ops
+    });
+}
+
+void InitCache(ecs_rows_t *rows) {
+    ECS_IMPORT_COLUMN(rows, EcsComponentsMeta, 2);
+
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        serialize_component(
+            rows->world, rows->entities[i], &ecs_module(EcsComponentsMeta));
+    }
 }
