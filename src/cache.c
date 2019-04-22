@@ -7,7 +7,7 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t component,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles);
+    FlecsComponentsMeta *handles);
 
 static
 bool is_complex(ecs_meta_cache_op_kind_t kind) {
@@ -45,9 +45,9 @@ ecs_vector_t* serialize_primitive(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaPrimitive *type = ecs_get_ptr(world, entity, EcsMetaPrimitive);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -68,9 +68,9 @@ ecs_vector_t* serialize_enum(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaEnum *type = ecs_get_ptr(world, entity, EcsMetaEnum);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -91,9 +91,9 @@ ecs_vector_t* serialize_bitmask(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaBitmask *type = ecs_get_ptr(world, entity, EcsMetaBitmask);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -114,9 +114,9 @@ ecs_vector_t* serialize_struct(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaStruct *type = ecs_get_ptr(world, entity, EcsMetaStruct);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -151,9 +151,9 @@ ecs_vector_t* serialize_array(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaArray *type = ecs_get_ptr(world, entity, EcsMetaArray);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -192,9 +192,9 @@ ecs_vector_t* serialize_vector(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaVector *type = ecs_get_ptr(world, entity, EcsMetaVector);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -218,9 +218,9 @@ ecs_vector_t* serialize_map(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaMap *type = ecs_get_ptr(world, entity, EcsMetaMap);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -260,9 +260,9 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t component,
     ecs_vector_t *ops,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     EcsMetaType *type = ecs_get_ptr(world, component, EcsMetaType);
 
@@ -297,9 +297,9 @@ static
 void serialize_component(
     ecs_world_t *world, 
     ecs_entity_t component,
-    EcsComponentsMetaHandles *handles)
+    FlecsComponentsMeta *handles)
 {
-    EcsComponentsMeta_ImportHandles(*handles);
+    FlecsComponentsMetaImportHandles(*handles);
 
     ecs_vector_t *ops = ecs_vector_new(&cache_op_param, 1);
     ops = serialize_type(world, component, ops, handles);
@@ -309,15 +309,29 @@ void serialize_component(
     });
 }
 
+/* -- Systems -- */
+
 void InitCache(ecs_rows_t *rows) {
-    ECS_IMPORT_COLUMN(rows, EcsComponentsMeta, 2);
+    ECS_IMPORT_COLUMN(rows, FlecsComponentsMeta, 2);
 
     int i;
     for (i = 0; i < rows->count; i ++) {
         serialize_component(
-            rows->world, rows->entities[i], &ecs_module(EcsComponentsMeta));
+            rows->world, rows->entities[i], &ecs_module(FlecsComponentsMeta));
     }
 }
+
+void DeinitCache(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsMetaCache, cache, 1);
+
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_vector_free(cache[i].ops);
+    }
+}
+
+
+/* -- Public API -- */
 
 void* ecs_meta_get_ptr(
     void *base, 

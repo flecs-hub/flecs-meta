@@ -8,9 +8,9 @@ ecs_vector_params_t EcsMetaMemberParam = {.element_size = sizeof(EcsMetaMember)}
 static
 void load_reflection(
     ecs_world_t *world,
-    EcsComponentsMetaHandles handles) 
+    FlecsComponentsMeta handles) 
 {
-    EcsComponentsMeta_ImportHandles(handles);
+    FlecsComponentsMetaImportHandles(handles);
 
     /* Primitive types */
     ECS_PRIMITIVE(world, bool, EcsBool);
@@ -188,12 +188,41 @@ void InitMap(ecs_rows_t *rows) {
     init_type(rows, ecs_type(EcsMetaType), EcsMap);
 }
 
-void EcsComponentsMeta(
+static
+void DeinitEnum(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsMetaEnum, meta_enum, 1);
+    
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_vector_free(meta_enum[i].constants);
+    }
+}
+
+static
+void DeinitBitmask(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsMetaBitmask, meta_bitmask, 1);
+    
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_vector_free(meta_bitmask[i].constants);
+    }
+}
+
+static
+void DeinitStruct(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsMetaStruct, meta_struct, 1);
+
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_vector_free(meta_struct[i].members);
+    }
+}
+
+void FlecsComponentsMetaImport(
     ecs_world_t *world,
-    int flags,
-    void *handles_out)
+    int flags)
 {
-    EcsComponentsMetaHandles *handles = handles_out;
+    ECS_MODULE(world, FlecsComponentsMeta);
 
     ECS_COMPONENT(world, EcsMetaType);
     ECS_COMPONENT(world, EcsMetaPrimitive);
@@ -257,7 +286,12 @@ void EcsComponentsMeta(
     ECS_SYSTEM(world, InitVector, EcsOnAdd, EcsMetaVector, ID.EcsMetaType);
     ECS_SYSTEM(world, InitMap, EcsOnAdd, EcsMetaMap, ID.EcsMetaType);
 
-    ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $EcsComponentsMeta);
+    ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $FlecsComponentsMeta);
+    ECS_SYSTEM(world, DeinitCache, EcsOnRemove, EcsMetaCache);
+
+    ECS_SYSTEM(world, DeinitEnum, EcsOnRemove, EcsMetaEnum);
+    ECS_SYSTEM(world, DeinitBitmask, EcsOnRemove, EcsMetaBitmask);
+    ECS_SYSTEM(world, DeinitStruct, EcsOnRemove, EcsMetaStruct);
 
     load_reflection(world, *handles);
 }

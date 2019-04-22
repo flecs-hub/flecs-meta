@@ -104,7 +104,7 @@ typedef struct EcsMetaMap {
 
 #include "cache.h"
 
-typedef struct EcsComponentsMetaHandles {
+typedef struct FlecsComponentsMeta {
     /* Meta components */
     ECS_DECLARE_COMPONENT(EcsMetaType);
     ECS_DECLARE_COMPONENT(EcsMetaPrimitive);
@@ -135,14 +135,13 @@ typedef struct EcsComponentsMetaHandles {
     ECS_DECLARE_COMPONENT(double);
     ECS_DECLARE_COMPONENT(ecs_string_t);
     ECS_DECLARE_COMPONENT(ecs_entity_t);    
-} EcsComponentsMetaHandles;
+} FlecsComponentsMeta;
 
-void EcsComponentsMeta(
+void FlecsComponentsMetaImport(
     ecs_world_t *world,
-    int flags,
-    void *handles_out);
+    int flags);
 
-#define EcsComponentsMeta_ImportHandles(handles)\
+#define FlecsComponentsMetaImportHandles(handles)\
     ECS_IMPORT_COMPONENT(handles, EcsMetaType);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaPrimitive);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaEnum);\
