@@ -109,6 +109,10 @@ void ecs_meta_bitmask_to_string(
     ecs_meta_cache_op_t *op,
     ut_strbuf *buf);
 
+ecs_vector_t* ecs_meta_get_vector(
+    void *base,
+    ecs_meta_cache_op_t *op);
+
 #ifdef __cplusplus
 }
 #endif

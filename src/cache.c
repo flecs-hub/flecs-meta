@@ -368,6 +368,7 @@ int64_t ecs_meta_get_int(
         break;
     default:
         ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        result = 0;
     }
 
     return result;
@@ -397,6 +398,7 @@ uint64_t ecs_meta_get_uint(
         break;
     default:
         ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        result = 0;
     }
 
     return result; 
@@ -436,6 +438,7 @@ double ecs_meta_get_float(
         break;
     default:
         ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        result = 0;
     }
 
     return result;   
@@ -513,4 +516,12 @@ void ecs_meta_bitmask_to_string(
 
         ecs_assert(found != 0, ECS_INVALID_PARAMETERS, NULL);
     }
+}
+
+ecs_vector_t* ecs_meta_get_vector(
+    void *base,
+    ecs_meta_cache_op_t *op)
+{
+    ecs_assert(op->kind == EcsOpVector, ECS_INVALID_PARAMETERS, NULL);
+    return *(ecs_vector_t**)ecs_meta_get_ptr(base, op);    
 }
