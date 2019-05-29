@@ -1,4 +1,4 @@
-#include <include/meta.h>
+#include <flecs_components_meta.h>
 
 ecs_vector_params_t cache_op_param = {.element_size = sizeof(ecs_meta_cache_op_t)};
 

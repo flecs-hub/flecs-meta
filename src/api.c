@@ -1,5 +1,5 @@
 
-#include <include/meta.h>
+#include <flecs_components_meta.h>
 
 void ecs_enum_push_constant(
     ecs_world_t *world,

@@ -1,4 +1,4 @@
-#include <include/meta.h>
+#include <flecs_components_meta.h>
 #include "systems.h"
 
 ecs_vector_params_t EcsMetaEnumConstantParam = {.element_size = sizeof(EcsMetaEnumConstant)};

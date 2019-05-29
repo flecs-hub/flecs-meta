@@ -6,8 +6,8 @@ extern "C" {
 #endif
 
 /* This generated file contains includes for project dependencies */
-#include "bake_config.h"
-#include "api.h"
+#include <flecs-components-meta/bake_config.h>
+#include <flecs-components-meta/api.h>
 
 typedef const char* ecs_string_t;
 
@@ -102,7 +102,7 @@ typedef struct EcsMetaMap {
     uint32_t max_size;
 } EcsMetaMap;
 
-#include "cache.h"
+#include <flecs-components-meta/cache.h>
 
 typedef struct FlecsComponentsMeta {
     /* Meta components */
