@@ -286,7 +286,7 @@ void FlecsComponentsMetaImport(
     ECS_SYSTEM(world, InitVector, EcsOnAdd, EcsMetaVector, .EcsMetaType);
     ECS_SYSTEM(world, InitMap, EcsOnAdd, EcsMetaMap, .EcsMetaType);
 
-    ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $FlecsComponentsMeta);
+    ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $.FlecsComponentsMeta);
     ECS_SYSTEM(world, DeinitCache, EcsOnRemove, EcsMetaCache);
 
     ECS_SYSTEM(world, DeinitEnum, EcsOnRemove, EcsMetaEnum);
