@@ -278,13 +278,13 @@ void FlecsComponentsMetaImport(
     ECS_SET_COMPONENT(handles, ecs_string_t);
     ECS_SET_COMPONENT(handles, ecs_entity_t);
 
-    ECS_SYSTEM(world, InitPrimitive, EcsOnAdd, EcsMetaPrimitive, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitEnum, EcsOnAdd, EcsMetaEnum, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitBitmask, EcsOnAdd, EcsMetaBitmask, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitStruct, EcsOnAdd, EcsMetaStruct, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitArray, EcsOnAdd, EcsMetaArray, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitVector, EcsOnAdd, EcsMetaVector, ID.EcsMetaType);
-    ECS_SYSTEM(world, InitMap, EcsOnAdd, EcsMetaMap, ID.EcsMetaType);
+    ECS_SYSTEM(world, InitPrimitive, EcsOnAdd, EcsMetaPrimitive, .EcsMetaType);
+    ECS_SYSTEM(world, InitEnum, EcsOnAdd, EcsMetaEnum, .EcsMetaType);
+    ECS_SYSTEM(world, InitBitmask, EcsOnAdd, EcsMetaBitmask, .EcsMetaType);
+    ECS_SYSTEM(world, InitStruct, EcsOnAdd, EcsMetaStruct, .EcsMetaType);
+    ECS_SYSTEM(world, InitArray, EcsOnAdd, EcsMetaArray, .EcsMetaType);
+    ECS_SYSTEM(world, InitVector, EcsOnAdd, EcsMetaVector, .EcsMetaType);
+    ECS_SYSTEM(world, InitMap, EcsOnAdd, EcsMetaMap, .EcsMetaType);
 
     ECS_SYSTEM(world, InitCache, EcsOnAdd, EcsMetaDefined, $FlecsComponentsMeta);
     ECS_SYSTEM(world, DeinitCache, EcsOnRemove, EcsMetaCache);
