@@ -344,8 +344,8 @@ bool ecs_meta_get_bool(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
-    ecs_assert(op->data.primitive_kind == EcsBool, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(op->data.primitive_kind == EcsBool, ECS_INVALID_PARAMETER, NULL);
     return *(bool*)ecs_meta_get_ptr(base, op);
 }
 
@@ -353,8 +353,8 @@ char ecs_meta_get_char(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
-    ecs_assert(op->data.primitive_kind == EcsChar, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(op->data.primitive_kind == EcsChar, ECS_INVALID_PARAMETER, NULL);
     return *(char*)ecs_meta_get_ptr(base, op);    
 }
 
@@ -362,7 +362,7 @@ int64_t ecs_meta_get_int(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
 
     int64_t result;
     void *value = ecs_meta_get_ptr(base, op);
@@ -381,7 +381,7 @@ int64_t ecs_meta_get_int(
         result = *(int64_t*)value;
         break;
     default:
-        ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        ecs_abort(ECS_INVALID_PARAMETER, NULL);
         result = 0;
     }
 
@@ -392,7 +392,7 @@ uint64_t ecs_meta_get_uint(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
     
     uint64_t result;
     void *value = ecs_meta_get_ptr(base, op);
@@ -411,7 +411,7 @@ uint64_t ecs_meta_get_uint(
         result = *(uint64_t*)value;
         break;
     default:
-        ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        ecs_abort(ECS_INVALID_PARAMETER, NULL);
         result = 0;
     }
 
@@ -422,7 +422,7 @@ int32_t ecs_meta_get_enum(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpEnum, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpEnum, ECS_INVALID_PARAMETER, NULL);
     return *(int32_t*)ecs_meta_get_ptr(base, op);
 }
 
@@ -430,7 +430,7 @@ uint64_t ecs_meta_get_bitmask(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpBitmask, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpBitmask, ECS_INVALID_PARAMETER, NULL);
     return *(uint64_t*)ecs_meta_get_ptr(base, op);
 }
 
@@ -438,7 +438,7 @@ double ecs_meta_get_float(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
     
     uint64_t result;
     void *value = ecs_meta_get_ptr(base, op);
@@ -451,7 +451,7 @@ double ecs_meta_get_float(
         result = *(double*)value;
         break;
     default:
-        ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+        ecs_abort(ECS_INVALID_PARAMETER, NULL);
         result = 0;
     }
 
@@ -462,8 +462,8 @@ uintptr_t ecs_meta_get_word(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
-    ecs_assert(op->data.primitive_kind == EcsWord, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(op->data.primitive_kind == EcsWord, ECS_INVALID_PARAMETER, NULL);
     return *(uintptr_t*)ecs_meta_get_ptr(base, op); 
 }
 
@@ -471,8 +471,8 @@ char* ecs_meta_get_string(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
-    ecs_assert(op->data.primitive_kind == EcsString, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(op->data.primitive_kind == EcsString, ECS_INVALID_PARAMETER, NULL);
     return *(char**)ecs_meta_get_ptr(base, op);    
 }
 
@@ -480,8 +480,8 @@ ecs_entity_t ecs_meta_get_entity(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETERS, NULL);
-    ecs_assert(op->data.primitive_kind == EcsEntity, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpPrimitive, ECS_INVALID_PARAMETER, NULL);
+    ecs_assert(op->data.primitive_kind == EcsEntity, ECS_INVALID_PARAMETER, NULL);
     return *(ecs_entity_t*)ecs_meta_get_ptr(base, op);      
 }
 
@@ -489,7 +489,7 @@ const char* ecs_meta_enum_to_string(
     int32_t value,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpEnum, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpEnum, ECS_INVALID_PARAMETER, NULL);
     EcsMetaEnumConstant *constants = ecs_vector_first(op->data.enum_constants);
     uint32_t count = ecs_vector_count(op->data.enum_constants);
 
@@ -500,7 +500,7 @@ const char* ecs_meta_enum_to_string(
         }
     }
 
-    ecs_abort(ECS_INVALID_PARAMETERS, NULL);
+    ecs_abort(ECS_INVALID_PARAMETER, NULL);
 
     return NULL;
 }
@@ -510,7 +510,7 @@ void ecs_meta_bitmask_to_string(
     ecs_meta_cache_op_t *op,
     ut_strbuf *buf)
 {
-    ecs_assert(op->kind == EcsOpBitmask, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpBitmask, ECS_INVALID_PARAMETER, NULL);
     EcsMetaBitmaskConstant *constants = ecs_vector_first(op->data.bitmask_constants);
     uint32_t count = ecs_vector_count(op->data.bitmask_constants);
 
@@ -528,7 +528,7 @@ void ecs_meta_bitmask_to_string(
             }
         }
 
-        ecs_assert(found != 0, ECS_INVALID_PARAMETERS, NULL);
+        ecs_assert(found != 0, ECS_INVALID_PARAMETER, NULL);
     }
 }
 
@@ -536,6 +536,6 @@ ecs_vector_t* ecs_meta_get_vector(
     void *base,
     ecs_meta_cache_op_t *op)
 {
-    ecs_assert(op->kind == EcsOpVector, ECS_INVALID_PARAMETERS, NULL);
+    ecs_assert(op->kind == EcsOpVector, ECS_INVALID_PARAMETER, NULL);
     return *(ecs_vector_t**)ecs_meta_get_ptr(base, op);    
 }
