@@ -137,7 +137,7 @@ void load_reflection(
 }
 
 static
-void init_type(ecs_rows_t *rows, ecs_type_t ecs_type(EcsMetaType), EcsMetaTypeKind kind) {
+void init_type(ecs_rows_t *rows, ecs_entity_t ecs_entity(EcsMetaType), EcsMetaTypeKind kind) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_set(rows->world, rows->entities[i], EcsMetaType, {
@@ -149,43 +149,43 @@ void init_type(ecs_rows_t *rows, ecs_type_t ecs_type(EcsMetaType), EcsMetaTypeKi
 static
 void InitPrimitive(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsPrimitive);
+    init_type(rows, ecs_entity(EcsMetaType), EcsPrimitive);
 }
 
 static
 void InitEnum(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsEnum);
+    init_type(rows, ecs_entity(EcsMetaType), EcsEnum);
 }
 
 static
 void InitBitmask(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsBitmask);
+    init_type(rows, ecs_entity(EcsMetaType), EcsBitmask);
 }
 
 static
 void InitStruct(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsStruct);
+    init_type(rows, ecs_entity(EcsMetaType), EcsStruct);
 }
 
 static
 void InitArray(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsArray);
+    init_type(rows, ecs_entity(EcsMetaType), EcsArray);
 }
 
 static
 void InitVector(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsVector);
+    init_type(rows, ecs_entity(EcsMetaType), EcsVector);
 }
 
 static
 void InitMap(ecs_rows_t *rows) {
     ECS_COLUMN_COMPONENT(rows, EcsMetaType, 2);
-    init_type(rows, ecs_type(EcsMetaType), EcsMap);
+    init_type(rows, ecs_entity(EcsMetaType), EcsMap);
 }
 
 static
