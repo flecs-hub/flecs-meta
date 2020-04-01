@@ -88,10 +88,12 @@ ECS_STRUCT( EcsStruct, {
 
 ECS_STRUCT( EcsArray, {
     ecs_entity_t element_type;
+    int32_t count;
 });
 
 ECS_STRUCT( EcsVector, {
     ecs_entity_t element_type;
+    int32_t count;
 });
 
 

@@ -1,124 +1,11 @@
 #include <flecs_components_meta.h>
 #include "parser.h"
 
-// static
-// EcsType* find_type_entity(
-//     ecs_world_t *world,
-//     const char *name,
-//     ecs_entity_t *e_out)
-// {
-//     ecs_entity_t ecs_entity(EcsTypeDescription) = ecs_lookup(world, "EcsTyEcsTypeDescriptionpe");
-//     ecs_assert(ecs_entity(EcsTypeDescription) != 0, ECS_INTERNAL_ERROR, NULL);
-
-//     ecs_entity_t e = ecs_lookup(world, name);
-//     if (!e) {
-//         e = ecs_set(world, 0, EcsId, {name});
-//     }
-
-//     bool is_added = false;
-//     EcsTypeDescription *type = ecs_get_mutable(world, e, EcsTypeDescription, &is_added);
-//     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
-
-//     return type;
-// }
-
-// ecs_entity_t _ecs_meta_primitive(
-//     ecs_world_t *world,
-//     const char *name,
-//     size_t size,
-//     ecs_primitive_kind_t kind)
-// {
-//     ecs_entity_t e;
-//     EcsType *type = find_type_entity(world, name, &e);
-
-//     type->kind = EcsPrimitive;
-    
-//     ecs_type_op_t *op = ecs_vector_add(&type->ops, ecs_type_op_t);
-//     op->kind = EcsOpPrimitive;
-//     op->size = size;
-//     op->offset = 0;
-//     op->count = 0;
-//     op->name = NULL;
-//     op->is.primitive = kind;
-
-//     return e;
-// }
-
-// ecs_entity_t _ecs_meta_enum(
-//     ecs_world_t *world, 
-//     const char *name, 
-//     size_t size, 
-//     const char *descriptor)
-// {
-//     ecs_assert(descriptor != NULL, ECS_INVALID_PARAMETER, NULL);
-
-//     ecs_entity_t e;
-//     EcsTypeDescription *type = find_type_entity(world, name, &e);
-
-//     type->kind = EcsEnum;
-
-//     const char *ptr = descriptor;
-
-//     ecs_meta_parse_ctx_t ctx = {
-//         .name = name,
-//         .decl = descriptor
-//     };
-
-//     ecs_def_token_t token;
-//     while ((ptr = ecs_meta_parse_struct(ptr, &token, &ctx))) {
-//         ecs_entity_t type = ecs_lookup(world, token.type);
-//         if (!type) {
-//             ecs_parser_error(ctx.name, ctx.decl, ptr - ctx.decl - 1, 
-//                 "unknown type '%s'", token.type);
-//         }
-
-//         ecs_assert(type != 0, ECS_INVALID_PARAMETER, "type not found");
-//     }
-
-//     return e;
-// }
-
-// ecs_entity_t _ecs_meta_struct(
-//     ecs_world_t *world, 
-//     const char *name, 
-//     size_t size, 
-//     const char *descriptor)
-// {
-//     ecs_assert(descriptor != NULL, ECS_INVALID_PARAMETER, NULL);
-
-//     ecs_entity_t e;
-//     EcsTypeDescription *type = find_type_entity(world, name, &e);
-
-//     type->kind = EcsStruct;
-
-//     const char *ptr = descriptor;
-
-//     ecs_meta_parse_ctx_t ctx = {
-//         .name = name,
-//         .decl = descriptor
-//     };
-
-//     ecs_def_token_t token;
-//     while ((ptr = ecs_meta_parse_struct(ptr, &token, &ctx))) {
-//         const char *typename = token.type;
-
-//         if (token.is_ptr && !strcmp(typename, "char")) {
-//             typename = "ecs_string_t";
-//         }
-
-//         ecs_entity_t type = ecs_lookup(world, typename);
-//         if (!type) {
-//             ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
-//                 "unknown type '%s'", typename);
-//         }
-
-//         ecs_assert(type != 0, ECS_INVALID_PARAMETER, "type not found");
-//     }
-
-//     return 0;
-// }
-
-void ecs_set_primitive(ecs_world_t *world, ecs_entity_t e, EcsType *type) {
+void ecs_set_primitive(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -169,7 +56,58 @@ void ecs_set_primitive(ecs_world_t *world, ecs_entity_t e, EcsType *type) {
     }
 }
 
-void ecs_set_struct(ecs_world_t *world, ecs_entity_t e, EcsType *type) {
+void ecs_set_constants(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    const char *component, 
+    EcsType *type) 
+{
+    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    const char *ptr = type->descriptor;
+    const char *name = ecs_get_id(world, e);
+
+    ecs_meta_parse_ctx_t ctx = {
+        .name = name,
+        .decl = ptr
+    };
+
+    ecs_vector_t *constants = NULL;
+    ecs_def_token_t token;
+
+    while ((ptr = ecs_meta_parse_constants(ptr, &token, &ctx))) {
+        char **name = ecs_vector_add(&constants, char*);
+        *name = ecs_os_strdup(token.name);
+    }
+
+    ecs_entity_t comp = ecs_lookup(world, component);
+    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
+    _ecs_set_ptr(world, e, comp, 0, &(EcsEnum){constants});
+}
+
+void ecs_set_bitmask(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
+    ecs_set_constants(world, e, "EcsBitmask", type);
+}
+
+void ecs_set_enum(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
+    ecs_set_constants(world, e, "EcsEnum", type);
+}
+
+void ecs_set_struct(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -205,8 +143,74 @@ void ecs_set_struct(ecs_world_t *world, ecs_entity_t e, EcsType *type) {
 
     ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup(world, "EcsStruct");
     ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
-
     ecs_set(world, e, EcsStruct, {members});
+}
+
+void ecs_set_array(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
+    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    const char *ptr = type->descriptor;
+    const char *name = ecs_get_id(world, e);
+
+    ecs_meta_parse_ctx_t ctx = {
+        .name = name,
+        .decl = ptr
+    };
+
+    ecs_def_token_t token;
+    ecs_meta_parse_collection(ptr, &token, &ctx);
+
+    if (!token.count) {
+        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
+            "invalid array size");
+    }
+
+    ecs_entity_t el_type = ecs_lookup(world, token.type);
+    if (!el_type) {
+        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
+            "unknown element type '%s'", token.type);
+    }
+
+    ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
+    ecs_assert(ecs_entity(EcsArray) != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_set(world, e, EcsArray, {el_type, token.count});
+}
+
+void ecs_set_vector(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
+    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    const char *ptr = type->descriptor;
+    const char *name = ecs_get_id(world, e);
+
+    ecs_meta_parse_ctx_t ctx = {
+        .name = name,
+        .decl = ptr
+    };
+
+    ecs_def_token_t token;
+    ecs_meta_parse_collection(ptr, &token, &ctx);
+
+    ecs_entity_t el_type = ecs_lookup(world, token.type);
+    if (!el_type) {
+        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
+            "unknown element type '%s'", token.type);
+    }
+
+    ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
+    ecs_assert(ecs_entity(EcsVector) != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_set(world, e, EcsVector, {el_type, token.count});
 }
 
 void EcsMetaTypeSet(ecs_rows_t *rows) {
@@ -225,13 +229,16 @@ void EcsMetaTypeSet(ecs_rows_t *rows) {
             ecs_set_primitive(rows->world, rows->entities[i], type);
             break;
         case EcsBitmaskType:
+            ecs_set_bitmask(rows->world, rows->entities[i], type);
             break;
         case EcsEnumType:
+            ecs_set_enum(rows->world, rows->entities[i], type);
             break;
         case EcsStructType:
             ecs_set_struct(rows->world, rows->entities[i], type);
             break;
         case EcsArrayType:
+            ecs_set_array(rows->world, rows->entities[i], type);
             break;
         case EcsVectorType:
             break;

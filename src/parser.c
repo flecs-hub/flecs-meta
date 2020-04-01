@@ -40,15 +40,27 @@ const char* skip_scope(const char *ptr, ecs_meta_parse_ctx_t *ctx) {
 }
 
 static
-const char* parse_token(const char *ptr, char *buff, ecs_meta_parse_ctx_t *ctx) {
+const char* parse_token(
+    const char *ptr, 
+    char *buff, 
+    bool is_identifier, 
+    ecs_meta_parse_ctx_t *ctx) 
+{
     char *bptr = buff, ch;
 
     /* Ignore whitespaces */
     ptr = skip_ws(ptr);
 
-    if (!isalpha(*ptr)) {
-        ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
-            "invalid identifier (starts with '%c')", *ptr);
+    if (is_identifier) {
+        if (!isalpha(*ptr)) {
+            ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
+                "invalid identifier (starts with '%c')", *ptr);
+        }
+    } else {
+        if (!isdigit(*ptr)) {
+            ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
+                "invalid number (starts with '%c')", *ptr); 
+        }
     }
 
     while ((ch = *ptr) && !isspace(ch) && ch != ';' && ch != ',') {
@@ -73,6 +85,25 @@ const char* parse_token(const char *ptr, char *buff, ecs_meta_parse_ctx_t *ctx) 
     return ptr;
 }
 
+static
+const char* parse_identifier(
+    const char *ptr, 
+    char *buff, 
+    ecs_meta_parse_ctx_t *ctx) 
+{
+    return parse_token(ptr, buff, true, ctx);
+}
+
+static
+const char* parse_number(
+    const char *ptr, 
+    char *buff, 
+    ecs_meta_parse_ctx_t *ctx) 
+{
+    return parse_token(ptr, buff, true, ctx); 
+}
+
+static
 const char * ecs_meta_open_scope(
     const char *ptr,
     ecs_meta_parse_ctx_t *ctx)    
@@ -111,11 +142,11 @@ const char * ecs_meta_open_scope(
     return ptr;
 }
 
-const char* ecs_meta_parse_enum(
+const char* ecs_meta_parse_constants(
     const char *ptr,
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx)
-{
+{    
     ptr = ecs_meta_open_scope(ptr, ctx);
     if (!ptr) {
         return NULL;
@@ -124,13 +155,16 @@ const char* ecs_meta_parse_enum(
     char token[ECS_META_IDENTIFIER_LENGTH];
 
     /* Parse token, constant identifier */
-    ptr = parse_token(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, ctx);
+    ptr = skip_ws(ptr);
 
     /* Expect a , or '}' */
-    if (*ptr != ',' && ptr != '}') {
+    if (*ptr != ',' && *ptr != '}') {
         ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
             "missing , after enum constant");
     }
+
+    strcpy(token_out->name, token);
 
     if (*ptr == ',') {
         return ptr + 1;
@@ -154,7 +188,7 @@ const char* ecs_meta_parse_struct(
     char token[ECS_META_IDENTIFIER_LENGTH];
 
     /* Parse token, expect type identifier or ECS_PROPERTY */
-    ptr = parse_token(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, ctx);
 
     if (strcmp(token, "ECS_PROPERTY")) {
         /* If the first token is not ECS_PROPERTY, don't care about what
@@ -163,14 +197,14 @@ const char* ecs_meta_parse_struct(
     }
 
     /* ECS_PROPERTY is found, next token is the type */
-    ptr = parse_token(ptr + 1, token, ctx);
+    ptr = parse_identifier(ptr + 1, token, ctx);
 
     /* If token is const, set const flag and continue parsing type */
     if (!strcmp(token, "const")) {
         token_out->is_const = true;
 
         /* Parse type after const */
-        ptr = parse_token(ptr + 1, token, ctx);
+        ptr = parse_identifier(ptr + 1, token, ctx);
     }
 
     strcpy(token_out->type, token);
@@ -183,7 +217,7 @@ const char* ecs_meta_parse_struct(
     }
 
     /* Next token is the identifier */
-    ptr = parse_token(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, ctx);
     strcpy(token_out->name, token);
 
     /* Expect a ; */
@@ -193,4 +227,47 @@ const char* ecs_meta_parse_struct(
     }
 
     return ptr + 1;
+}
+
+void ecs_meta_parse_collection(
+    const char *ptr,
+    ecs_def_token_t *token_out,
+    ecs_meta_parse_ctx_t *ctx)
+{
+    ptr = skip_ws(ptr);
+    if (*ptr != '<') {
+        ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
+            "expected '<' at start of collection definition");
+    }
+
+    ptr ++;
+
+    ptr = skip_ws(ptr);
+
+    char token[ECS_META_IDENTIFIER_LENGTH];
+
+    /* Parse token, expect type identifier */
+    ptr = parse_identifier(ptr, token, ctx);
+    strcpy(token_out->name, token);
+
+    ptr = skip_ws(ptr);
+
+    if (*ptr == ',') {
+        ptr ++;
+
+        ptr = parse_number(ptr, token, ctx);
+        int32_t count = atoi(token);
+        if (!count) {
+            ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
+                "invalid size specifier for collection");
+        } else {
+            token_out->count = count;
+            ptr = skip_ws(ptr);
+        }
+    }
+
+    if (*ptr != '>') {
+        ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
+            "expected '>' at end of collection definition");
+    }
 }

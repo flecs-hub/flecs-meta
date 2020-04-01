@@ -15,9 +15,10 @@ typedef struct ecs_def_token_t {
     char name[ECS_META_IDENTIFIER_LENGTH];
     bool is_const;
     bool is_ptr;
+    int32_t count;
 } ecs_def_token_t;
 
-const char* ecs_meta_parse_enum(
+const char* ecs_meta_parse_constants(
     const char *ptr,
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx);
@@ -27,10 +28,9 @@ const char* ecs_meta_parse_struct(
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx);
 
-void ecs_meta_parse_err(
-    const char *decl,
+void ecs_meta_parse_collection(
     const char *ptr,
-    const char *fmt,
-    ...);
+    ecs_def_token_t *token_out,
+    ecs_meta_parse_ctx_t *ctx);
 
 #endif
