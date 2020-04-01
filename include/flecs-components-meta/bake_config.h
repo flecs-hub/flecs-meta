@@ -19,9 +19,6 @@
 
 /* Headers of public dependencies */
 #include <flecs.h>
-#ifdef __BAKE__
-#include <bake_util.h>
-#endif
 
 /* Headers of private dependencies */
 #ifdef FLECS_COMPONENTS_META_IMPL

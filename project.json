@@ -3,10 +3,9 @@
     "type": "package",
     "value": {
         "author": "Sander Mertens",
-        "description": "Reflection components for Flecs components",
+        "description": "Flecs module package",
         "use": [
-            "flecs",
-            "bake.util"
+            "flecs"
         ]
     }
 }

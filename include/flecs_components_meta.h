@@ -1,35 +1,52 @@
 #ifndef FLECS_COMPONENTS_META_H
 #define FLECS_COMPONENTS_META_H
 
+/* This generated file contains includes for project dependencies */
+#include "flecs-components-meta/bake_config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* This generated file contains includes for project dependencies */
-#include <flecs-components-meta/bake_config.h>
-#include <flecs-components-meta/api.h>
+////////////////////////////////////////////////////////////////////////////////
+//// Macro's that capture type definitions
+////////////////////////////////////////////////////////////////////////////////
 
-typedef const char* ecs_string_t;
+#define ECS_STRUCT(name, ...)\
+typedef struct name __VA_ARGS__ name;\
+static EcsType __##name##__ = {EcsStructType, #__VA_ARGS__};
 
-extern ecs_vector_params_t EcsMetaEnumConstantParam;
-extern ecs_vector_params_t EcsMetaBitmaskConstantParam;
-extern ecs_vector_params_t EcsMetaMemberParam;
+#define ECS_ENUM(name, ...)\
+typedef enum name __VA_ARGS__ name;\
+static EcsType __##name##__ = {EcsEnumType, #__VA_ARGS__};
 
-typedef enum EcsMetaTypeKind {
-    EcsPrimitive,
-    EcsBitmask,
-    EcsEnum,
-    EcsStruct,
-    EcsArray,
-    EcsVector,
-    EcsMap
-} EcsMetaTypeKind;
+// For the ecs_type_kind_t enumeration, which is defined before EcsType
+#define ECS_ENUM_BOOTSTRAP(name, ...)\
+typedef enum name __VA_ARGS__ name;\
+static const char * __##name##__ = #__VA_ARGS__;
 
-typedef struct EcsMetaType {
-    EcsMetaTypeKind kind;
-} EcsMetaType;
+#define ECS_PROPERTY
 
-typedef enum EcsMetaPrimitiveKind {
+
+////////////////////////////////////////////////////////////////////////////////
+//// Meta description
+////////////////////////////////////////////////////////////////////////////////
+
+ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
+    EcsPrimitiveType,
+    EcsBitmaskType,
+    EcsEnumType,
+    EcsStructType,
+    EcsArrayType,
+    EcsVectorType
+});
+
+ECS_STRUCT( EcsType, {
+    ecs_type_kind_t kind;
+    const char *descriptor;
+});
+
+ECS_ENUM( ecs_primitive_kind_t, {
     EcsBool,
     EcsChar,
     EcsByte,
@@ -46,95 +63,88 @@ typedef enum EcsMetaPrimitiveKind {
     EcsWord,
     EcsString,
     EcsEntity
-} EcsMetaPrimitiveKind;
+});
 
-typedef struct EcsMetaPrimitive {
-    EcsMetaPrimitiveKind kind;
-} EcsMetaPrimitive;
+ECS_STRUCT( EcsPrimitive, {
+    ecs_primitive_kind_t kind;
+});
 
-typedef struct EcsMetaEnumConstant {
-    const char *name;
-    int32_t value;
-} EcsMetaEnumConstant;
+ECS_STRUCT( EcsBitmask, {
+    ecs_vector_t *constants;
+});
 
-typedef ecs_vector_t* EcsMetaEnumConstantVector;
+ECS_STRUCT( EcsEnum, {
+    ecs_vector_t *constants;
+});
 
-typedef struct EcsMetaEnum {
-    EcsMetaEnumConstantVector constants;
-} EcsMetaEnum;
-
-typedef struct EcsMetaBitmaskConstant {
-    const char *name;
-    uint64_t value;
-} EcsMetaBitmaskConstant;
-
-typedef ecs_vector_t* EcsMetaBitmaskConstantVector;
-
-typedef struct EcsMetaBitmask {
-    EcsMetaBitmaskConstantVector constants;
-} EcsMetaBitmask;
-
-typedef struct EcsMetaMember {
+ECS_STRUCT( EcsMember, {
     const char *name;
     ecs_entity_t type;
+});
+
+ECS_STRUCT( EcsStruct, {
+    ecs_vector_t *members;
+});
+
+ECS_STRUCT( EcsArray, {
+    ecs_entity_t element_type;
+});
+
+ECS_STRUCT( EcsVector, {
+    ecs_entity_t element_type;
+});
+
+
+////////////////////////////////////////////////////////////////////////////////
+//// Type serializer
+////////////////////////////////////////////////////////////////////////////////
+
+typedef enum ecs_type_op_kind_t {
+    EcsOpNothing,
+    EcsOpPrimitive,
+    EcsOpEnum,
+    EcsOpBitmask,
+    EcsOpPush,
+    EcsOpPop,
+    EcsOpArray,
+    EcsOpVector
+} ecs_type_op_kind_t;
+
+typedef ecs_vector_t ecs_type_op_vector_t;
+typedef ecs_vector_t ecs_constant_vector_t;
+
+typedef struct ecs_type_op_t {
+    ecs_type_op_kind_t kind;
     uint32_t offset;
-} EcsMetaMember;
-
-typedef ecs_vector_t* EcsMetaMemberVector;
-
-typedef struct EcsMetaStruct {
-    EcsMetaMemberVector members;
-} EcsMetaStruct;
-
-typedef struct EcsMetaArray {
-    ecs_entity_t element_type;
     uint16_t size;
-} EcsMetaArray;
+    uint16_t count;
+    const char *name;
 
-typedef struct EcsMetaVector {
-    ecs_entity_t element_type;
-    uint32_t max_size;
-} EcsMetaVector;
+    union {
+        ecs_vector_t *collection;
+        ecs_primitive_kind_t primitive;
+        ecs_vector_t *constant;
+    } is;
+} ecs_type_op_t;
 
-typedef struct EcsMetaMap {
-    ecs_entity_t key_type;
-    ecs_entity_t value_type;
-    uint32_t max_size;
-} EcsMetaMap;
+ECS_STRUCT( EcsTypeSerializer, {
+    ecs_vector_t *ops;
+});
 
-#include <flecs-components-meta/cache.h>
+
+////////////////////////////////////////////////////////////////////////////////
+//// Module implementation
+////////////////////////////////////////////////////////////////////////////////
 
 typedef struct FlecsComponentsMeta {
-    /* Meta components */
-    ECS_DECLARE_COMPONENT(EcsMetaType);
-    ECS_DECLARE_COMPONENT(EcsMetaPrimitive);
-    ECS_DECLARE_COMPONENT(EcsMetaEnum);
-    ECS_DECLARE_COMPONENT(EcsMetaBitmask);
-    ECS_DECLARE_COMPONENT(EcsMetaStruct);
-    ECS_DECLARE_COMPONENT(EcsMetaArray);
-    ECS_DECLARE_COMPONENT(EcsMetaVector);
-    ECS_DECLARE_COMPONENT(EcsMetaMap);
-    
-    /* Meta framework components */
-    ECS_DECLARE_ENTITY(EcsMetaDefined);
-    ECS_DECLARE_COMPONENT(EcsMetaCache);
-
-    /* Components for primitive types */
-    ECS_DECLARE_COMPONENT(bool);
-    ECS_DECLARE_COMPONENT(char);
-    ECS_DECLARE_COMPONENT(uint8_t);
-    ECS_DECLARE_COMPONENT(uint16_t);
-    ECS_DECLARE_COMPONENT(uint32_t);
-    ECS_DECLARE_COMPONENT(uint64_t);
-    ECS_DECLARE_COMPONENT(int8_t);
-    ECS_DECLARE_COMPONENT(int16_t);
-    ECS_DECLARE_COMPONENT(int32_t);
-    ECS_DECLARE_COMPONENT(int64_t);
-    ECS_DECLARE_COMPONENT(intptr_t);
-    ECS_DECLARE_COMPONENT(float);
-    ECS_DECLARE_COMPONENT(double);
-    ECS_DECLARE_COMPONENT(ecs_string_t);
-    ECS_DECLARE_COMPONENT(ecs_entity_t);    
+    ECS_DECLARE_COMPONENT(EcsPrimitive);
+    ECS_DECLARE_COMPONENT(EcsEnum);
+    ECS_DECLARE_COMPONENT(EcsBitmask);
+    ECS_DECLARE_COMPONENT(EcsStruct);
+    ECS_DECLARE_COMPONENT(EcsArray);
+    ECS_DECLARE_COMPONENT(EcsVector);
+    ECS_DECLARE_COMPONENT(EcsType);
+    ECS_DECLARE_COMPONENT(EcsTypeSerializer);
 } FlecsComponentsMeta;
 
 void FlecsComponentsMetaImport(
@@ -142,31 +152,78 @@ void FlecsComponentsMetaImport(
     int flags);
 
 #define FlecsComponentsMetaImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaType);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaPrimitive);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaEnum);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaBitmask);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaStruct);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaArray);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaVector);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaMap);\
-    ECS_IMPORT_ENTITY(handles, EcsMetaDefined);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaCache);\
-    ECS_IMPORT_COMPONENT(handles, bool);\
-    ECS_IMPORT_COMPONENT(handles, char);\
-    ECS_IMPORT_COMPONENT(handles, uint8_t);\
-    ECS_IMPORT_COMPONENT(handles, uint16_t);\
-    ECS_IMPORT_COMPONENT(handles, uint32_t);\
-    ECS_IMPORT_COMPONENT(handles, uint64_t);\
-    ECS_IMPORT_COMPONENT(handles, int8_t);\
-    ECS_IMPORT_COMPONENT(handles, int16_t);\
-    ECS_IMPORT_COMPONENT(handles, int32_t);\
-    ECS_IMPORT_COMPONENT(handles, int64_t);\
-    ECS_IMPORT_COMPONENT(handles, intptr_t);\
-    ECS_IMPORT_COMPONENT(handles, float);\
-    ECS_IMPORT_COMPONENT(handles, double);\
-    ECS_IMPORT_COMPONENT(handles, ecs_string_t);\
-    ECS_IMPORT_COMPONENT(handles, ecs_entity_t);
+    ECS_IMPORT_COMPONENT(handles, EcsType);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//// C++ Module implementation
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+#ifndef FLECS_NO_CPP
+
+namespace flecs {
+namespace components {
+
+class meta {
+public:
+    meta(flecs::world& world, int flags) {
+        FlecsComponentsMetaImport(world.c_ptr(), flags);
+
+        flecs::module<flecs::components::meta>(world, "FlecsComponentsMeta");
+
+        flecs::component<EcsPrimitive>(world, "EcsPrimitive");
+        flecs::component<EcsEnum>(world, "EcsEnum");
+        flecs::component<EcsBitmask>(world, "EcsBitmask");
+        flecs::component<EcsStruct>(world, "EcsStruct");
+        flecs::component<EcsArray>(world, "EcsArray");
+        flecs::component<EcsVector>(world, "EcsVector");
+        flecs::component<EcsType>(world, "EcsType");
+        flecs::component<EcsTypeSerializer>(world, "EcsTypeSerializer");
+    }
+};
+
+} 
+}
+
+#endif
+#endif
+
+
+////////////////////////////////////////////////////////////////////////////////
+//// API
+////////////////////////////////////////////////////////////////////////////////
+
+FLECS_COMPONENTS_META_EXPORT
+ecs_entity_t _ecs_meta_primitive(
+    ecs_world_t *world,
+    const char *name,
+    size_t size,
+    ecs_primitive_kind_t kind);
+
+#define ecs_meta_primitive(world, name, kind)\
+    _ecs_meta_primitive(world, #name, sizeof(name), kind)
+
+FLECS_COMPONENTS_META_EXPORT
+ecs_entity_t _ecs_meta_enum(
+    ecs_world_t *world,
+    const char *name,
+    size_t size,
+    const char *descriptor);
+
+#define ecs_meta_enum(world, name)\
+    _ecs_meta_enum(world, #name, sizeof(name), name##_enum_)
+
+FLECS_COMPONENTS_META_EXPORT
+ecs_entity_t _ecs_meta_struct(
+    ecs_world_t *world, 
+    const char *name, 
+    size_t size, 
+    const char *descriptor);
+
+#define ecs_meta_struct(world, name)\
+    _ecs_meta_struct(world, #name, sizeof(name), name##_struct_)
+
 
 #ifdef __cplusplus
 }
