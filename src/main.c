@@ -202,6 +202,11 @@ void ecs_set_struct(ecs_world_t *world, ecs_entity_t e, EcsType *type) {
         m->name = ecs_os_strdup(token.name);
         m->type = type;
     }
+
+    ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup(world, "EcsStruct");
+    ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_set(world, e, EcsStruct, {members});
 }
 
 void EcsMetaTypeSet(ecs_rows_t *rows) {

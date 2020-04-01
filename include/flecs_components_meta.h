@@ -147,6 +147,7 @@ typedef struct FlecsComponentsMeta {
     ECS_DECLARE_COMPONENT(EcsTypeSerializer);
 } FlecsComponentsMeta;
 
+FLECS_COMPONENTS_META_EXPORT
 void FlecsComponentsMetaImport(
     ecs_world_t *world,
     int flags);
@@ -188,42 +189,6 @@ public:
 
 #endif
 #endif
-
-
-////////////////////////////////////////////////////////////////////////////////
-//// API
-////////////////////////////////////////////////////////////////////////////////
-
-FLECS_COMPONENTS_META_EXPORT
-ecs_entity_t _ecs_meta_primitive(
-    ecs_world_t *world,
-    const char *name,
-    size_t size,
-    ecs_primitive_kind_t kind);
-
-#define ecs_meta_primitive(world, name, kind)\
-    _ecs_meta_primitive(world, #name, sizeof(name), kind)
-
-FLECS_COMPONENTS_META_EXPORT
-ecs_entity_t _ecs_meta_enum(
-    ecs_world_t *world,
-    const char *name,
-    size_t size,
-    const char *descriptor);
-
-#define ecs_meta_enum(world, name)\
-    _ecs_meta_enum(world, #name, sizeof(name), name##_enum_)
-
-FLECS_COMPONENTS_META_EXPORT
-ecs_entity_t _ecs_meta_struct(
-    ecs_world_t *world, 
-    const char *name, 
-    size_t size, 
-    const char *descriptor);
-
-#define ecs_meta_struct(world, name)\
-    _ecs_meta_struct(world, #name, sizeof(name), name##_struct_)
-
 
 #ifdef __cplusplus
 }
