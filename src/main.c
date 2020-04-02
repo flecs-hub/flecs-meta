@@ -1,6 +1,8 @@
 #include <flecs_components_meta.h>
 #include "parser.h"
+#include "serializer.h"
 
+static
 void ecs_set_primitive(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -18,6 +20,9 @@ void ecs_set_primitive(
     if (!strcmp(descr, "bool")) {
         ecs_set(world, e, EcsPrimitive, {EcsBool});
     } else
+    if (!strcmp(descr, "char")) {
+        ecs_set(world, e, EcsPrimitive, {EcsChar});
+    } else    
     if (!strcmp(descr, "u8")) {
         ecs_set(world, e, EcsPrimitive, {EcsU8});
     } else
@@ -53,9 +58,13 @@ void ecs_set_primitive(
     } else
     if (!strcmp(descr, "string")) {
         ecs_set(world, e, EcsPrimitive, {EcsString});
+    } else
+    if (!strcmp(descr, "entity")) {
+        ecs_set(world, e, EcsPrimitive, {EcsEntity});
     }
 }
 
+static
 void ecs_set_constants(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -87,6 +96,7 @@ void ecs_set_constants(
     _ecs_set_ptr(world, e, comp, 0, &(EcsEnum){constants});
 }
 
+static
 void ecs_set_bitmask(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -95,6 +105,7 @@ void ecs_set_bitmask(
     ecs_set_constants(world, e, "EcsBitmask", type);
 }
 
+static
 void ecs_set_enum(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -103,6 +114,7 @@ void ecs_set_enum(
     ecs_set_constants(world, e, "EcsEnum", type);
 }
 
+static
 void ecs_set_struct(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -146,6 +158,7 @@ void ecs_set_struct(
     ecs_set(world, e, EcsStruct, {members});
 }
 
+static
 void ecs_set_array(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -182,6 +195,7 @@ void ecs_set_array(
     ecs_set(world, e, EcsArray, {el_type, token.count});
 }
 
+static
 void ecs_set_vector(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -213,7 +227,8 @@ void ecs_set_vector(
     ecs_set(world, e, EcsVector, {el_type, token.count});
 }
 
-void EcsMetaTypeSet(ecs_rows_t *rows) {
+static
+void EcsSetType(ecs_rows_t *rows) {
     ECS_COLUMN(rows, EcsType, type, 1);
 
     int i;
@@ -241,9 +256,9 @@ void EcsMetaTypeSet(ecs_rows_t *rows) {
             ecs_set_array(rows->world, rows->entities[i], type);
             break;
         case EcsVectorType:
+            ecs_set_vector(rows->world, rows->entities[i], type);
             break;
         }
-
     }
 }
 
@@ -262,7 +277,14 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT(world, EcsType);
     ECS_COMPONENT(world, EcsTypeSerializer);
 
-    ECS_SYSTEM(world, EcsMetaTypeSet, EcsOnSet, EcsType);
+    ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsType);
+
+    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, EcsPrimitive, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, EcsEnum, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, EcsBitmask, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, EcsStruct, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, EcsArray, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, EcsVector, $.FlecsComponentsMeta);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
@@ -344,6 +366,11 @@ void FlecsComponentsMetaImport(
         EcsType, {EcsPrimitiveType}), 
         EcsPrimitive, {EcsString});
 
+    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
+        EcsId, {"ecs_entity_t"}),
+        EcsType, {EcsPrimitiveType}), 
+        EcsPrimitive, {EcsEntity});
+
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"ecs_primitive_kind_t"}),
@@ -351,7 +378,12 @@ void FlecsComponentsMetaImport(
 
     ecs_set(world, ecs_set(world, 0,
         EcsId, {"ecs_type_kind_t"}),
-        EcsType, {EcsEnumType, __ecs_type_kind_t__});
+        EcsType, {
+            EcsEnumType, 
+            sizeof(ecs_type_kind_t), 
+            ECS_ALIGNOF(ecs_type_kind_t), 
+            __ecs_type_kind_t__
+        });
 
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsPrimitive"}),

@@ -150,7 +150,10 @@ const char* ecs_meta_parse_constants(
     ptr = ecs_meta_open_scope(ptr, ctx);
     if (!ptr) {
         return NULL;
-    }   
+    }
+
+    token_out->is_ptr = false;
+    token_out->is_const = false;
 
     char token[ECS_META_IDENTIFIER_LENGTH];
 
@@ -183,6 +186,7 @@ const char* ecs_meta_parse_struct(
         return NULL;
     }
 
+    token_out->is_ptr = false;
     token_out->is_const = false;
 
     char token[ECS_META_IDENTIFIER_LENGTH];

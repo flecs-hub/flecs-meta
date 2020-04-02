@@ -8,17 +8,26 @@
 extern "C" {
 #endif
 
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Macro's that capture type definitions
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __cplusplus
+#define ECS_ALIGNOF(T) alignof(T)
+#else
+#define ECS_ALIGNOF(T) ((size_t)&((struct { char c; T d; } *)0)->d)
+#endif
+
+#define ECS_ALIGN(size, alignment) (((((size) - 1) / (alignment)) + 1) * (alignment))
+
 #define ECS_STRUCT(name, ...)\
 typedef struct name __VA_ARGS__ name;\
-static EcsType __##name##__ = {EcsStructType, #__VA_ARGS__};
+static EcsType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
 
 #define ECS_ENUM(name, ...)\
 typedef enum name __VA_ARGS__ name;\
-static EcsType __##name##__ = {EcsEnumType, #__VA_ARGS__};
+static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
 
 // For the ecs_type_kind_t enumeration, which is defined before EcsType
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
@@ -43,6 +52,8 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
 
 ECS_STRUCT( EcsType, {
     ecs_type_kind_t kind;
+    size_t size;
+    int8_t alignment;
     const char *descriptor;
 });
 
@@ -117,10 +128,12 @@ typedef ecs_vector_t ecs_constant_vector_t;
 
 typedef struct ecs_type_op_t {
     ecs_type_op_kind_t kind;
-    uint32_t offset;
     uint16_t size;
     uint16_t count;
     const char *name;
+
+    uint32_t offset;
+    uint8_t alignment;
 
     union {
         ecs_vector_t *collection;
@@ -155,7 +168,14 @@ void FlecsComponentsMetaImport(
     int flags);
 
 #define FlecsComponentsMetaImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, EcsType);
+    ECS_IMPORT_COMPONENT(handles, EcsPrimitive);\
+    ECS_IMPORT_COMPONENT(handles, EcsEnum);\
+    ECS_IMPORT_COMPONENT(handles, EcsBitmask);\
+    ECS_IMPORT_COMPONENT(handles, EcsStruct);\
+    ECS_IMPORT_COMPONENT(handles, EcsArray);\
+    ECS_IMPORT_COMPONENT(handles, EcsVector);\
+    ECS_IMPORT_COMPONENT(handles, EcsType);\
+    ECS_IMPORT_COMPONENT(handles, EcsTypeSerializer);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,19 +190,28 @@ namespace components {
 
 class meta {
 public:
+    using Primitive = EcsPrimitive;
+    using Enum = EcsEnum;
+    using Bitmask = EcsBitmask;
+    using Struct = EcsStruct;
+    using Array = EcsArray;
+    using Vector = EcsVector;
+    using Type = EcsType;
+    using TypeSerializer = EcsTypeSerializer;
+
     meta(flecs::world& world, int flags) {
         FlecsComponentsMetaImport(world.c_ptr(), flags);
 
-        flecs::module<flecs::components::meta>(world, "FlecsComponentsMeta");
+        flecs::module<flecs::components::meta>(world, "flecs::components::meta");
 
-        flecs::component<EcsPrimitive>(world, "EcsPrimitive");
-        flecs::component<EcsEnum>(world, "EcsEnum");
-        flecs::component<EcsBitmask>(world, "EcsBitmask");
-        flecs::component<EcsStruct>(world, "EcsStruct");
-        flecs::component<EcsArray>(world, "EcsArray");
-        flecs::component<EcsVector>(world, "EcsVector");
-        flecs::component<EcsType>(world, "EcsType");
-        flecs::component<EcsTypeSerializer>(world, "EcsTypeSerializer");
+        flecs::component<Primitive>(world, "EcsPrimitive");
+        flecs::component<Enum>(world, "EcsEnum");
+        flecs::component<Bitmask>(world, "EcsBitmask");
+        flecs::component<Struct>(world, "EcsStruct");
+        flecs::component<Array>(world, "EcsArray");
+        flecs::component<Vector>(world, "EcsVector");
+        flecs::component<Type>(world, "EcsType");
+        flecs::component<TypeSerializer>(world, "EcsTypeSerializer");
     }
 };
 
