@@ -12,6 +12,7 @@ typedef struct ecs_meta_parse_ctx_t {
 
 typedef struct ecs_def_token_t {
     char type[ECS_META_IDENTIFIER_LENGTH];
+    char params[ECS_META_IDENTIFIER_LENGTH];
     char name[ECS_META_IDENTIFIER_LENGTH];
     bool is_const;
     bool is_ptr;
@@ -28,7 +29,7 @@ const char* ecs_meta_parse_struct(
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx);
 
-void ecs_meta_parse_collection(
+void ecs_meta_parse_params(
     const char *ptr,
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx);

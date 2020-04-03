@@ -22,18 +22,22 @@ const char* skip_scope(const char *ptr, ecs_meta_parse_ctx_t *ctx) {
         } else if (ch == '<') {
             stack[sp++] = ch;
         } else if (ch == '>') {
-            if (stack[sp--] != '<') {
+            if (stack[--sp] != '<') {
                 ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
                     "mismatching < > in type definition");
             }
         } else if (ch == ')') {
-            if (stack[sp--] != '(') {
+            if (stack[--sp] != '(') {
                 ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
                     "mismatching ( ) in type definition");                
             }            
         }
 
         ptr ++;
+
+        if (!sp) {
+            break;
+        }
     }
 
     return ptr;
@@ -42,7 +46,8 @@ const char* skip_scope(const char *ptr, ecs_meta_parse_ctx_t *ctx) {
 static
 const char* parse_token(
     const char *ptr, 
-    char *buff, 
+    char *buff,
+    char *params,
     bool is_identifier, 
     ecs_meta_parse_ctx_t *ctx) 
 {
@@ -63,23 +68,29 @@ const char* parse_token(
         }
     }
 
-    while ((ch = *ptr) && !isspace(ch) && ch != ';' && ch != ',') {
+    while ((ch = *ptr) && !isspace(ch) && ch != ';' && ch != ',' && ch != ')') {
         /* Type definitions can contain macro's or templates */
         if (ch == '(' || ch == '<') {
-            ptr = skip_scope(ptr, ctx);
+            if (!params) {
+                ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
+                    "unexpected %c", *ptr);
+            }
+
+            const char *end = skip_scope(ptr, ctx);
+            strncpy(params, ptr, end - ptr);
+            ptr = end;
         } else {
             *bptr = ch;
             bptr ++;
+            ptr ++;
         }
-
-        ptr ++;
     }
 
     *bptr = '\0';
 
     if (!ch) {
         ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
-            "unexpected end of type definition");        
+            "unexpected end of token");        
     }
 
     return ptr;
@@ -89,9 +100,10 @@ static
 const char* parse_identifier(
     const char *ptr, 
     char *buff, 
+    char *params,
     ecs_meta_parse_ctx_t *ctx) 
 {
-    return parse_token(ptr, buff, true, ctx);
+    return parse_token(ptr, buff, params, true, ctx);
 }
 
 static
@@ -100,7 +112,7 @@ const char* parse_number(
     char *buff, 
     ecs_meta_parse_ctx_t *ctx) 
 {
-    return parse_token(ptr, buff, true, ctx); 
+    return parse_token(ptr, buff, NULL, true, ctx); 
 }
 
 static
@@ -158,7 +170,7 @@ const char* ecs_meta_parse_constants(
     char token[ECS_META_IDENTIFIER_LENGTH];
 
     /* Parse token, constant identifier */
-    ptr = parse_identifier(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, NULL, ctx);
     ptr = skip_ws(ptr);
 
     /* Expect a , or '}' */
@@ -190,28 +202,26 @@ const char* ecs_meta_parse_struct(
     token_out->is_const = false;
 
     char token[ECS_META_IDENTIFIER_LENGTH];
+    char params[ECS_META_IDENTIFIER_LENGTH];
 
     /* Parse token, expect type identifier or ECS_PROPERTY */
-    ptr = parse_identifier(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, params, ctx);
 
-    if (strcmp(token, "ECS_PROPERTY")) {
-        /* If the first token is not ECS_PROPERTY, don't care about what
-         * comes next as we won't need to / be able to parse it */
+    if (!strcmp(token, "ECS_NON_SERIALIZABLE")) {
+        /* Members from this point are not stored in metadata */
         return NULL;
     }
-
-    /* ECS_PROPERTY is found, next token is the type */
-    ptr = parse_identifier(ptr + 1, token, ctx);
 
     /* If token is const, set const flag and continue parsing type */
     if (!strcmp(token, "const")) {
         token_out->is_const = true;
 
         /* Parse type after const */
-        ptr = parse_identifier(ptr + 1, token, ctx);
+        ptr = parse_identifier(ptr + 1, token, params, ctx);
     }
 
     strcpy(token_out->type, token);
+    strcpy(token_out->params, params);
 
     /* Check if type is a pointer */
     ptr = skip_ws(ptr);
@@ -221,7 +231,7 @@ const char* ecs_meta_parse_struct(
     }
 
     /* Next token is the identifier */
-    ptr = parse_identifier(ptr, token, ctx);
+    ptr = parse_identifier(ptr, token, NULL, ctx);
     strcpy(token_out->name, token);
 
     /* Expect a ; */
@@ -233,15 +243,15 @@ const char* ecs_meta_parse_struct(
     return ptr + 1;
 }
 
-void ecs_meta_parse_collection(
+void ecs_meta_parse_params(
     const char *ptr,
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx)
 {
     ptr = skip_ws(ptr);
-    if (*ptr != '<') {
+    if (*ptr != '(') {
         ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
-            "expected '<' at start of collection definition");
+            "expected '(' at start of collection definition");
     }
 
     ptr ++;
@@ -251,8 +261,8 @@ void ecs_meta_parse_collection(
     char token[ECS_META_IDENTIFIER_LENGTH];
 
     /* Parse token, expect type identifier */
-    ptr = parse_identifier(ptr, token, ctx);
-    strcpy(token_out->name, token);
+    ptr = parse_identifier(ptr, token, NULL, ctx);
+    strcpy(token_out->type, token);
 
     ptr = skip_ws(ptr);
 
@@ -270,8 +280,8 @@ void ecs_meta_parse_collection(
         }
     }
 
-    if (*ptr != '>') {
+    if (*ptr != ')') {
         ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,
-            "expected '>' at end of collection definition");
+            "expected ')' at end of collection definition");
     }
 }

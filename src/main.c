@@ -115,6 +115,53 @@ void ecs_set_enum(
 }
 
 static
+ecs_entity_t ecs_meta_lookup_type(
+    ecs_world_t *world,
+    ecs_def_token_t *token,
+    const char *ptr,
+    ecs_meta_parse_ctx_t *ctx)
+{
+    const char *name = ctx->name;
+    const char *typename = token->type;
+    ecs_entity_t type = 0;
+
+    if (!strcmp(typename, "ecs_vector")) {
+        ecs_meta_parse_ctx_t param_ctx = {
+            .name = name,
+            .decl = token->params
+        };
+
+        ecs_def_token_t params_token;
+        ecs_meta_parse_params(token->params, &params_token, &param_ctx);
+
+        ecs_entity_t element_type = ecs_meta_lookup_type(
+            world, &params_token, ptr, &param_ctx);
+            
+        if (!element_type) {
+            ecs_parser_error(name, ctx->decl, ptr - ctx->decl - 1,
+                "unknown element type '%s'", params_token.type);
+        }
+
+        ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
+        type = ecs_set(world, 0, EcsVector, {
+            element_type
+        });
+    } else {
+        if (token->is_ptr && !strcmp(typename, "char")) {
+            typename = "string";
+        }
+
+        type = ecs_lookup(world, typename);
+        if (!type) {
+            ecs_parser_error(name, ctx->decl, ptr - ctx->decl - 1, 
+                "unknown type '%s'", typename);
+        }
+    }
+
+    return type;
+}
+
+static
 void ecs_set_struct(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -136,17 +183,7 @@ void ecs_set_struct(
     ecs_def_token_t token;
 
     while ((ptr = ecs_meta_parse_struct(ptr, &token, &ctx))) {
-        const char *typename = token.type;
-
-        if (token.is_ptr && !strcmp(typename, "char")) {
-            typename = "string";
-        }
-
-        ecs_entity_t type = ecs_lookup(world, typename);
-        if (!type) {
-            ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
-                "unknown type '%s'", typename);
-        }
+        ecs_entity_t type = ecs_meta_lookup_type(world, &token, ptr, &ctx);
 
         EcsMember *m = ecs_vector_add(&members, EcsMember);
         m->name = ecs_os_strdup(token.name);
@@ -177,7 +214,7 @@ void ecs_set_array(
     };
 
     ecs_def_token_t token;
-    ecs_meta_parse_collection(ptr, &token, &ctx);
+    ecs_meta_parse_params(ptr, &token, &ctx);
 
     if (!token.count) {
         ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
@@ -214,7 +251,7 @@ void ecs_set_vector(
     };
 
     ecs_def_token_t token;
-    ecs_meta_parse_collection(ptr, &token, &ctx);
+    ecs_meta_parse_params(ptr, &token, &ctx);
 
     ecs_entity_t el_type = ecs_lookup(world, token.type);
     if (!el_type) {

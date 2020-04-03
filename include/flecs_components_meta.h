@@ -34,8 +34,9 @@ static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), #__
 typedef enum name __VA_ARGS__ name;\
 static const char * __##name##__ = #__VA_ARGS__;
 
-#define ECS_PROPERTY
+#define ECS_NON_SERIALIZABLE
 
+#define ecs_vector(T) ecs_vector_t*
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Meta description
@@ -81,11 +82,11 @@ ECS_STRUCT( EcsPrimitive, {
 });
 
 ECS_STRUCT( EcsBitmask, {
-    ecs_vector_t *constants;
+    ecs_vector(string) constants;
 });
 
 ECS_STRUCT( EcsEnum, {
-    ecs_vector_t *constants;
+    ecs_vector(string) constants;
 });
 
 ECS_STRUCT( EcsMember, {
@@ -94,7 +95,7 @@ ECS_STRUCT( EcsMember, {
 });
 
 ECS_STRUCT( EcsStruct, {
-    ecs_vector_t *members;
+    ecs_vector(EcsMember) members;
 });
 
 ECS_STRUCT( EcsArray, {

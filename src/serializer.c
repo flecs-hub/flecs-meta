@@ -250,7 +250,7 @@ ecs_vector_t* serialize_vector(
 
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpArray, 
+        .kind = EcsOpVector, 
         .count = type->count,
         .size = element_type->size * type->count,
         .is.collection = element_cache->ops
