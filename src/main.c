@@ -195,6 +195,7 @@ void ecs_set_struct(
 
     while ((ptr = ecs_meta_parse_struct(ptr, &token, &ctx))) {
         ecs_entity_t type = ecs_meta_lookup_type(world, &token, ptr, &ctx);
+        ecs_assert(type != 0, ECS_INTERNAL_ERROR, NULL);
 
         EcsMember *m = ecs_vector_add(&members, EcsMember);
         m->name = ecs_os_strdup(token.name);

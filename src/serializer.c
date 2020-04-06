@@ -204,13 +204,33 @@ ecs_vector_t* serialize_struct(
     int32_t i, count = ecs_vector_count(type->members);
 
     for (i = 0; i < count; i ++) {
+        /* Add type operations of member to struct ops */
+        int32_t prev_count = ecs_vector_count(ops);
         ops = serialize_type(world, members[i].type, ops, module);
+        int32_t count = ecs_vector_count(ops);
 
-        ecs_type_op_t *op = ecs_vector_last(ops, ecs_type_op_t);
+        /* At least one op should be added */
+        ecs_assert(prev_count != count, ECS_INTERNAL_ERROR, NULL);
+        
+        ecs_type_op_t *op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
 
-        size_t member_size = op->size;
-        uint8_t member_alignment = op->alignment;
+        /* If only one operation was added, we can use the size and alignment of
+         * this operation. Otherwise we have to get it from the type itself */
+        size_t member_size;
+        uint8_t member_alignment;
+
+        if (count - prev_count == 1) {
+            member_size = op->size;
+            member_alignment = op->alignment;
+        } else {
+            EcsType *type = ecs_get_ptr(world, members[i].type, EcsType);
+            member_size = type->size;
+            member_alignment = type->alignment;
+        }
+
+        ecs_assert(member_size != 0, ECS_INTERNAL_ERROR, op->name);
+        ecs_assert(member_alignment != 0, ECS_INTERNAL_ERROR, op->name);
 
         size = ECS_ALIGN(size, member_alignment);
         op->offset = size;
