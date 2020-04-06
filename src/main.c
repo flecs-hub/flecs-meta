@@ -199,7 +199,23 @@ void ecs_set_struct(
 
         EcsMember *m = ecs_vector_add(&members, EcsMember);
         m->name = ecs_os_strdup(token.name);
-        m->type = type;
+
+        if (token.count == 1) {
+            m->type = type;
+        } else {
+            /* If count is not 1, insert array type. First lookup EcsType of the
+             * element type to get the size and alignment. Then create a new
+             * entity for the array type, and assign it to the member type. */
+            ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
+            ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
+            EcsType *type_ptr = ecs_get_ptr(world, type, EcsType);
+
+            ecs_entity_t array_type = ecs_set(world, ecs_set(world, 0, 
+                EcsType, {EcsArrayType, type_ptr->size, type_ptr->alignment}),
+                EcsArray, {type, token.count});
+            
+            m->type = array_type;
+        }
     }
 
     ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup(world, "EcsStruct");

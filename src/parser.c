@@ -137,7 +137,6 @@ const char * ecs_meta_open_scope(
         }
 
         ptr ++;
-
         ptr = skip_ws(ptr);
     }
 
@@ -206,6 +205,7 @@ const char* ecs_meta_parse_struct(
 
     token_out->is_ptr = false;
     token_out->is_const = false;
+    token_out->count = 1;
 
     char token[ECS_META_IDENTIFIER_LENGTH];
     char params[ECS_META_IDENTIFIER_LENGTH];
@@ -239,6 +239,42 @@ const char* ecs_meta_parse_struct(
     /* Next token is the identifier */
     ptr = parse_identifier(ptr, token, NULL, ctx);
     strcpy(token_out->name, token);
+
+    /* Skip whitespace between member and [ or ; */
+    ptr = skip_ws(ptr);
+
+    /* Check if this is an array */
+    char *array_start = strchr(token_out->name, '[');
+    if (!array_start) {
+        /* If the [ was separated by a space, it will not be parsed as part of
+         * the name */
+        if (*ptr == '[') {
+            array_start = ptr;
+        }
+    }
+
+    if (array_start) {
+        /* Check if the [ matches with a ] */
+        char *array_end = strchr(array_start, ']');
+        if (!array_end) {
+            ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
+                "missing ']'");
+                
+        } else if (array_end - array_start == 0) {
+            ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl, 
+                "dynamic size arrays are not supported");
+        }
+
+        token_out->count = atoi(array_start + 1);
+
+        if (array_start == ptr) {
+            /* If [ was found after name, continue parsing after ] */
+            ptr = array_end + 1;
+        } else {
+            /* If [ was fonud in name, replace it with 0 terminator */
+            array_start[0] = '\0';
+        }
+    }
 
     /* Expect a ; */
     if (*ptr != ';') {

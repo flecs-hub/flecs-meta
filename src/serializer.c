@@ -9,28 +9,6 @@ ecs_vector_t* serialize_type(
     FlecsComponentsMeta *module);
 
 static
-bool is_complex(ecs_type_op_kind_t kind) {
-    if (kind == EcsOpPrimitive || 
-        kind == EcsOpEnum ||
-        kind == EcsOpBitmask)
-    {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-static
-bool is_inline(ecs_type_op_kind_t kind) {
-    if (!is_complex(kind) || kind == EcsOpPush)
-    {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-static
 size_t ecs_get_primitive_size(
     ecs_primitive_kind_t kind) 
 {
@@ -280,46 +258,25 @@ ecs_vector_t* serialize_array(
     ecs_type_op_t *elem_op = ecs_vector_first(element_cache->ops);
 
     /* If element is inlined, don't add indirection to other cache */
-    if (ecs_vector_count(element_cache->ops) == 1 && is_inline(elem_op->kind))
-    {
-        /* Serialize element op inline, and set count on first inserted op */
-        uint32_t el_start = ecs_vector_count(ops);
-        serialize_type(world, type->element_type, ops, handles);
+    EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
+    ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-        ecs_type_op_t *start = ecs_vector_get(ops, ecs_type_op_t, el_start);
-        ecs_assert(start != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
+    *op = (ecs_type_op_t){
+        .kind = EcsOpArray, 
+        .count = type->count,
+        .size = element_type->size * type->count,
+        .alignment = element_type->alignment,
+        .is.collection = element_cache->ops
+    };
 
-        start->count = type->count;
-        start->size *= type->count;
-
-        if (op_header) {
-            *op_header = (ecs_type_op_t) {
-                .kind = EcsOpHeader,
-                .size = start->size,
-                .alignment = start->alignment
-            };            
-        }
-    } else {
-        EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
-        ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
-
-        ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
-        *op = (ecs_type_op_t){
-            .kind = EcsOpArray, 
-            .count = type->count,
-            .size = element_type->size * type->count,
-            .alignment = element_type->alignment,
-            .is.collection = element_cache->ops
-        };
-
-        if (op_header) {
-            *op_header = (ecs_type_op_t) {
-                .kind = EcsOpHeader,
-                .size = op->size,
-                .alignment = op->alignment
-            };            
-        }        
-    }
+    if (op_header) {
+        *op_header = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = op->size,
+            .alignment = op->alignment
+        };            
+    }        
 
     return ops;
 }
