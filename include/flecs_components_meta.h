@@ -13,6 +13,8 @@ extern "C" {
 //// Macro's that capture type definitions
 ////////////////////////////////////////////////////////////////////////////////
 
+#define ECS_UNUSED __attribute__((unused))
+
 #ifdef __cplusplus
 #define ECS_ALIGNOF(T) alignof(T)
 #else
@@ -23,15 +25,18 @@ extern "C" {
 
 #define ECS_STRUCT(name, ...)\
 typedef struct name __VA_ARGS__ name;\
-static EcsType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};\
 
 #define ECS_ENUM(name, ...)\
 typedef enum name __VA_ARGS__ name;\
+ECS_UNUSED \
 static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
 
 // For the ecs_type_kind_t enumeration, which is defined before EcsType
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
+ECS_UNUSED \
 static const char * __##name##__ = #__VA_ARGS__;
 
 #define ECS_NON_SERIALIZABLE

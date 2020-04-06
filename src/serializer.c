@@ -255,8 +255,6 @@ ecs_vector_t* serialize_array(
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
     }
 
-    ecs_type_op_t *elem_op = ecs_vector_first(element_cache->ops);
-
     /* If element is inlined, don't add indirection to other cache */
     EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
     ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -265,7 +263,7 @@ ecs_vector_t* serialize_array(
     *op = (ecs_type_op_t){
         .kind = EcsOpArray, 
         .count = type->count,
-        .size = element_type->size * type->count,
+        .size = element_type->size,
         .alignment = element_type->alignment,
         .is.collection = element_cache->ops
     };
