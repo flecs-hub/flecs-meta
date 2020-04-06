@@ -53,6 +53,10 @@ const char* parse_token(
 {
     char *bptr = buff, ch;
 
+    if (params) {
+        params[0] = '\0';
+    }
+
     /* Ignore whitespaces */
     ptr = skip_ws(ptr);
 
@@ -78,6 +82,8 @@ const char* parse_token(
 
             const char *end = skip_scope(ptr, ctx);
             strncpy(params, ptr, end - ptr);
+            params[end - ptr] = '\0';
+
             ptr = end;
         } else {
             *bptr = ch;
@@ -248,6 +254,9 @@ void ecs_meta_parse_params(
     ecs_def_token_t *token_out,
     ecs_meta_parse_ctx_t *ctx)
 {
+    token_out->is_ptr = false;
+    token_out->is_const = false;
+
     ptr = skip_ws(ptr);
     if (*ptr != '(') {
         ecs_parser_error(ctx->name, ctx->decl, ptr - ctx->decl,

@@ -53,8 +53,11 @@ void ecs_set_primitive(
     if (!strcmp(descr, "f64")) {
         ecs_set(world, e, EcsPrimitive, {EcsF64});
     } else
+    if (!strcmp(descr, "iptr")) {
+        ecs_set(world, e, EcsPrimitive, {EcsIPtr});
+    } else    
     if (!strcmp(descr, "uptr")) {
-        ecs_set(world, e, EcsPrimitive, {EcsWord});
+        ecs_set(world, e, EcsPrimitive, {EcsUPtr});
     } else
     if (!strcmp(descr, "string")) {
         ecs_set(world, e, EcsPrimitive, {EcsString});
@@ -121,6 +124,11 @@ ecs_entity_t ecs_meta_lookup_type(
     const char *ptr,
     ecs_meta_parse_ctx_t *ctx)
 {
+    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(token != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ctx != NULL, ECS_INTERNAL_ERROR, NULL);
+
     const char *name = ctx->name;
     const char *typename = token->type;
     ecs_entity_t type = 0;
@@ -135,17 +143,20 @@ ecs_entity_t ecs_meta_lookup_type(
         ecs_meta_parse_params(token->params, &params_token, &param_ctx);
 
         ecs_entity_t element_type = ecs_meta_lookup_type(
-            world, &params_token, ptr, &param_ctx);
+            world, &params_token, token->params, &param_ctx);
             
         if (!element_type) {
             ecs_parser_error(name, ctx->decl, ptr - ctx->decl - 1,
                 "unknown element type '%s'", params_token.type);
         }
-
+        
+        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
         ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
-        type = ecs_set(world, 0, EcsVector, {
-            element_type
-        });
+
+        type = ecs_set(world, ecs_set(world, 0, 
+            EcsType, {EcsVectorType}),
+            EcsVector, { element_type });
+
     } else {
         if (token->is_ptr && !strcmp(typename, "char")) {
             typename = "string";
@@ -268,32 +279,54 @@ static
 void EcsSetType(ecs_rows_t *rows) {
     ECS_COLUMN(rows, EcsType, type, 1);
 
+    ecs_world_t *world = rows->world;
+
     int i;
     for(i = 0; i < rows->count; i ++) {
+        ecs_entity_t e = rows->entities[i];
+
         /* If type does not contain a descriptor, application will have to
          * manually initialize type specific data */
         if (!type[i].descriptor) {
+
+            /* For some types we can set the size and alignment automatically */
+            if (!type[i].size || !type[i].alignment) {
+                switch(type[i].kind) {
+                case EcsBitmaskType:
+                case EcsEnumType:
+                    type[i].size = sizeof(int32_t);
+                    type[i].alignment = ECS_ALIGNOF(int32_t);
+                    break;
+                case EcsVectorType:
+                    type[i].size = sizeof(ecs_vector_t*);
+                    type[i].alignment = ECS_ALIGNOF(ecs_vector_t*);
+                    break;
+                default:
+                    break;
+                }
+            }
+
             continue;
         }
 
         switch(type[i].kind) {
         case EcsPrimitiveType:
-            ecs_set_primitive(rows->world, rows->entities[i], type);
+            ecs_set_primitive(world, e, type);
             break;
         case EcsBitmaskType:
-            ecs_set_bitmask(rows->world, rows->entities[i], type);
+            ecs_set_bitmask(world, e, type);
             break;
         case EcsEnumType:
-            ecs_set_enum(rows->world, rows->entities[i], type);
+            ecs_set_enum(world, e, type);
             break;
         case EcsStructType:
-            ecs_set_struct(rows->world, rows->entities[i], type);
+            ecs_set_struct(world, e, type);
             break;
         case EcsArrayType:
-            ecs_set_array(rows->world, rows->entities[i], type);
+            ecs_set_array(world, e, type);
             break;
         case EcsVectorType:
-            ecs_set_vector(rows->world, rows->entities[i], type);
+            ecs_set_vector(world, e, type);
             break;
         }
     }
@@ -386,7 +419,17 @@ void FlecsComponentsMetaImport(
     ecs_set(world, ecs_set(world, ecs_set(world, 0, 
         EcsId, {"intptr_t"}),
         EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsWord});
+        EcsPrimitive, {EcsIPtr});
+
+    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
+        EcsId, {"uintptr_t"}),
+        EcsType, {EcsPrimitiveType}), 
+        EcsPrimitive, {EcsUPtr});
+
+    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
+        EcsId, {"size_t"}),
+        EcsType, {EcsPrimitiveType}), 
+        EcsPrimitive, {EcsUPtr});
 
     ecs_set(world, ecs_set(world, ecs_set(world, 0, 
         EcsId, {"float"}),
@@ -435,6 +478,10 @@ void FlecsComponentsMetaImport(
         EcsType, &__EcsEnum__);
 
     ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"EcsMember"}),
+        EcsType, &__EcsMember__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsStruct"}),
         EcsType, &__EcsStruct__);
 
@@ -449,6 +496,14 @@ void FlecsComponentsMetaImport(
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsType"}),
         EcsType, &__EcsType__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"ecs_type_op_kind_t"}),
+        EcsType, &__ecs_type_op_kind_t__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"ecs_type_op_t"}),
+        EcsType, &__ecs_type_op_t__);
 
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsTypeSerializer"}),

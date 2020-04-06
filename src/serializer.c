@@ -48,7 +48,8 @@ size_t ecs_get_primitive_size(
     case EcsI64: return sizeof(int64_t);
     case EcsF32: return sizeof(float);
     case EcsF64: return sizeof(double);
-    case EcsWord: return sizeof(intptr_t);
+    case EcsIPtr: return sizeof(intptr_t);
+    case EcsUPtr: return sizeof(uintptr_t);
     case EcsString: return sizeof(char*);
     case EcsEntity: return sizeof(ecs_entity_t);
     default:
@@ -74,7 +75,8 @@ size_t ecs_get_primitive_alignment(
     case EcsI64: return ECS_ALIGNOF(int64_t);
     case EcsF32: return ECS_ALIGNOF(float);
     case EcsF64: return ECS_ALIGNOF(double);
-    case EcsWord: return ECS_ALIGNOF(intptr_t);
+    case EcsIPtr: return ECS_ALIGNOF(intptr_t);
+    case EcsUPtr: return ECS_ALIGNOF(uintptr_t);
     case EcsString: return ECS_ALIGNOF(char*);
     case EcsEntity: return ECS_ALIGNOF(ecs_entity_t);
     default:
@@ -90,7 +92,17 @@ ecs_vector_t* serialize_primitive(
     ecs_vector_t *ops,
     FlecsComponentsMeta *module)
 {
-    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
+    ecs_type_op_t *op;
+    if (!ops) {
+        op = ecs_vector_add(&ops, ecs_type_op_t);
+        *op = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = ecs_get_primitive_size(type->kind),
+            .alignment = ecs_get_primitive_alignment(type->kind)
+        };
+    }
+
+    op = ecs_vector_add(&ops, ecs_type_op_t);
 
     *op = (ecs_type_op_t) {
         .kind = EcsOpPrimitive,
@@ -111,7 +123,17 @@ ecs_vector_t* serialize_enum(
     ecs_vector_t *ops,
     FlecsComponentsMeta *module)
 {    
-    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
+    ecs_type_op_t *op;
+    if (!ops) {
+        op = ecs_vector_add(&ops, ecs_type_op_t);
+        *op = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = sizeof(int32_t),
+            .alignment = ECS_ALIGNOF(int32_t)
+        };
+    }
+
+    op = ecs_vector_add(&ops, ecs_type_op_t);
 
     *op = (ecs_type_op_t) {
         .kind = EcsOpEnum,
@@ -132,7 +154,17 @@ ecs_vector_t* serialize_bitmask(
     ecs_vector_t *ops,
     FlecsComponentsMeta *module)
 {    
-    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
+    ecs_type_op_t *op;
+    if (!ops) {
+        op = ecs_vector_add(&ops, ecs_type_op_t);
+        *op = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = sizeof(int32_t),
+            .alignment = ECS_ALIGNOF(int32_t)
+        };
+    }
+
+    op = ecs_vector_add(&ops, ecs_type_op_t);
 
     *op = (ecs_type_op_t) {
         .kind = EcsOpEnum,
@@ -155,13 +187,18 @@ ecs_vector_t* serialize_struct(
 {
     FlecsComponentsMetaImportHandles(*module);
 
-    ecs_type_op_t *
-    op = ecs_vector_add(&ops, ecs_type_op_t);
+    ecs_type_op_t *op_header = NULL;
+    if (!ops) {
+        op_header = ecs_vector_add(&ops, ecs_type_op_t);
+    }
+
+    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t) {
         .kind = EcsOpPush,
     };
 
     size_t size = 0;
+    size_t alignment = 0;
 
     EcsMember *members = ecs_vector_first(type->members);
     int32_t i, count = ecs_vector_count(type->members);
@@ -179,12 +216,25 @@ ecs_vector_t* serialize_struct(
         op->offset = size;
 
         size += member_size;      
+
+        if (member_alignment > alignment) {
+            alignment = member_alignment;
+        }
     }
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t) {
         .kind = EcsOpPop,
     };
+
+    if (op_header) {
+        op_header = ecs_vector_first(ops); /* Might have reallocd */
+        *op_header = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = size,
+            .alignment = alignment
+        };
+    }
 
     return ops;
 }
@@ -202,6 +252,11 @@ ecs_vector_t* serialize_array(
     EcsTypeSerializer *element_cache = ecs_get_ptr(world, type->element_type, EcsTypeSerializer);
     ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
 
+    ecs_type_op_t *op_header = NULL;
+    if (!ops) {
+        op_header = ecs_vector_add(&ops, ecs_type_op_t);
+    }
+
     ecs_type_op_t *elem_op = ecs_vector_first(element_cache->ops);
 
     /* If element is inlined, don't add indirection to other cache */
@@ -216,6 +271,14 @@ ecs_vector_t* serialize_array(
 
         start->count = type->count;
         start->size *= type->count;
+
+        if (op_header) {
+            *op_header = (ecs_type_op_t) {
+                .kind = EcsOpHeader,
+                .size = start->size,
+                .alignment = start->alignment
+            };            
+        }
     } else {
         EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
         ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -225,8 +288,17 @@ ecs_vector_t* serialize_array(
             .kind = EcsOpArray, 
             .count = type->count,
             .size = element_type->size * type->count,
+            .alignment = element_type->alignment,
             .is.collection = element_cache->ops
         };
+
+        if (op_header) {
+            *op_header = (ecs_type_op_t) {
+                .kind = EcsOpHeader,
+                .size = op->size,
+                .alignment = op->alignment
+            };            
+        }        
     }
 
     return ops;
@@ -242,17 +314,28 @@ ecs_vector_t* serialize_vector(
 {
     FlecsComponentsMetaImportHandles(*handles);
 
+    ecs_type_op_t *op = NULL;
+    if (!ops) {
+        op = ecs_vector_add(&ops, ecs_type_op_t);
+        *op = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = sizeof(ecs_vector_t*),
+            .alignment = ECS_ALIGNOF(ecs_vector_t*)
+        };         
+    }
+
     EcsTypeSerializer *element_cache = ecs_get_ptr(world, type->element_type, EcsTypeSerializer);
     ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
 
     EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
     ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
+    op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
         .kind = EcsOpVector, 
         .count = type->count,
-        .size = element_type->size * type->count,
+        .size = sizeof(ecs_vector_t*),
+        .alignment = ECS_ALIGNOF(ecs_vector_t*),
         .is.collection = element_cache->ops
     };
 

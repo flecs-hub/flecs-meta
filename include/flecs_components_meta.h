@@ -72,7 +72,8 @@ ECS_ENUM( ecs_primitive_kind_t, {
     EcsI64,
     EcsF32,
     EcsF64,
-    EcsWord,
+    EcsUPtr,
+    EcsIPtr,
     EcsString,
     EcsEntity
 });
@@ -113,8 +114,8 @@ ECS_STRUCT( EcsVector, {
 //// Type serializer
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum ecs_type_op_kind_t {
-    EcsOpNothing,
+ECS_ENUM( ecs_type_op_kind_t, {
+    EcsOpHeader,
     EcsOpPrimitive,
     EcsOpEnum,
     EcsOpBitmask,
@@ -122,12 +123,12 @@ typedef enum ecs_type_op_kind_t {
     EcsOpPop,
     EcsOpArray,
     EcsOpVector
-} ecs_type_op_kind_t;
+});
 
 typedef ecs_vector_t ecs_type_op_vector_t;
 typedef ecs_vector_t ecs_constant_vector_t;
 
-typedef struct ecs_type_op_t {
+ECS_STRUCT( ecs_type_op_t, {
     ecs_type_op_kind_t kind;
     uint16_t size;
     uint16_t count;
@@ -136,15 +137,17 @@ typedef struct ecs_type_op_t {
     uint32_t offset;
     uint8_t alignment;
 
+ECS_NON_SERIALIZABLE
+
     union {
-        ecs_vector_t *collection;
+        ecs_vector(ecs_type_op_t) collection;
         ecs_primitive_kind_t primitive;
         ecs_vector_t *constant;
     } is;
-} ecs_type_op_t;
+});
 
 ECS_STRUCT( EcsTypeSerializer, {
-    ecs_vector_t *ops;
+    ecs_vector(ecs_type_op_t) ops;
 });
 
 
