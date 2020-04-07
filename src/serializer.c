@@ -477,7 +477,8 @@ void EcsSetEnum(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_enum(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
@@ -492,7 +493,7 @@ void EcsSetBitmask(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_bitmask(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
@@ -507,7 +508,7 @@ void EcsSetStruct(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_struct(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
@@ -522,7 +523,7 @@ void EcsSetArray(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_array(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
@@ -537,7 +538,7 @@ void EcsSetVector(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_vector(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
@@ -552,7 +553,7 @@ void EcsSetMap(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
-        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+        ecs_set(rows->world, e, EcsTypeSerializer, { 
             serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }

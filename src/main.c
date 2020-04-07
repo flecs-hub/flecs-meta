@@ -72,7 +72,8 @@ static
 void ecs_set_constants(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    const char *component, 
+    ecs_entity_t comp,
+    bool is_bitmask,
     EcsType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -94,6 +95,9 @@ void ecs_set_constants(
     while ((ptr = ecs_meta_parse_constant(ptr, &token, &ctx))) {
         if (token.is_value_set) {
             last_value = token.value;
+        } else if (is_bitmask) {
+            ecs_meta_error(&ctx, ptr, 
+                "bitmask requires explicit value assignment");
         }
 
         char *name = ecs_os_strdup(token.name);
@@ -102,9 +106,9 @@ void ecs_set_constants(
         last_value ++;
     }
 
-    ecs_entity_t comp = ecs_lookup(world, component);
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
-    _ecs_set_ptr(world, e, comp, 0, &(EcsEnum){constants});
+    _ecs_set_ptr(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
+        .constants = constants
+    });
 }
 
 static
@@ -113,7 +117,9 @@ void ecs_set_bitmask(
     ecs_entity_t e, 
     EcsType *type) 
 {
-    ecs_set_constants(world, e, "EcsBitmask", type);
+    ecs_entity_t comp = ecs_lookup(world, "EcsBitnask");
+    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_set_constants(world, e, comp, true, type);
 }
 
 static
@@ -122,7 +128,9 @@ void ecs_set_enum(
     ecs_entity_t e, 
     EcsType *type) 
 {
-    ecs_set_constants(world, e, "EcsEnum", type);
+    ecs_entity_t comp = ecs_lookup(world, "EcsEnum");
+    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);    
+    ecs_set_constants(world, e, comp, false, type);
 }
 
 static
@@ -265,6 +273,10 @@ void EcsSetType(ecs_rows_t *rows) {
                     type[i].size = sizeof(ecs_vector_t*);
                     type[i].alignment = ECS_ALIGNOF(ecs_vector_t*);
                     break;
+                case EcsMapType:
+                    type[i].size = sizeof(ecs_map_t*);
+                    type[i].alignment = ECS_ALIGNOF(ecs_map_t*);
+                    break;                    
                 default:
                     break;
                 }
