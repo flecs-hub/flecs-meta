@@ -145,7 +145,7 @@ ecs_vector_t* serialize_bitmask(
     op = ecs_vector_add(&ops, ecs_type_op_t);
 
     *op = (ecs_type_op_t) {
-        .kind = EcsOpEnum,
+        .kind = EcsOpBitmask,
         .size = sizeof(int32_t),
         .alignment = ECS_ALIGNOF(int32_t),
         .count = 1,

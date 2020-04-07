@@ -169,7 +169,7 @@ const char* ecs_meta_parse_constant(
     /* Explicit value assignment */
     if (*ptr == '=') {
         int64_t value = 0;
-        ptr = parse_digit(ptr, &value, ctx);
+        ptr = parse_digit(ptr + 1, &value, ctx);
         token->value = value;
         token->is_value_set = true;
     }

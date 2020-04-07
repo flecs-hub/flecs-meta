@@ -117,7 +117,7 @@ void ecs_set_bitmask(
     ecs_entity_t e, 
     EcsType *type) 
 {
-    ecs_entity_t comp = ecs_lookup(world, "EcsBitnask");
+    ecs_entity_t comp = ecs_lookup(world, "EcsBitmask");
     ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set_constants(world, e, comp, true, type);
 }

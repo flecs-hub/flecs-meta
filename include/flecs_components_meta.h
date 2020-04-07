@@ -33,6 +33,11 @@ typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
 static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
 
+#define ECS_BITMASK(name, ...)\
+typedef enum name __VA_ARGS__ name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
+
 // For the ecs_type_kind_t enumeration, which is defined before EcsType
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
