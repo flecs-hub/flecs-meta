@@ -21,4 +21,7 @@ void EcsSetArray(
 void EcsSetVector(
     ecs_rows_t *rows);
 
+void EcsSetMap(
+    ecs_rows_t *rows);
+
 #endif

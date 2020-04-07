@@ -189,7 +189,8 @@ ecs_vector_t* serialize_struct(
 
         /* At least one op should be added */
         ecs_assert(prev_count != count, ECS_INTERNAL_ERROR, NULL);
-        
+        ecs_assert(ops != NULL, ECS_INTERNAL_ERROR, NULL);
+
         ecs_type_op_t *op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
 
@@ -269,6 +270,7 @@ ecs_vector_t* serialize_array(
     };
 
     if (op_header) {
+        op_header = ecs_vector_first(ops);
         *op_header = (ecs_type_op_t) {
             .kind = EcsOpHeader,
             .size = op->size,
@@ -302,16 +304,87 @@ ecs_vector_t* serialize_vector(
     EcsTypeSerializer *element_cache = ecs_get_ptr(world, type->element_type, EcsTypeSerializer);
     ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
-    ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
-
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
         .kind = EcsOpVector, 
-        .count = type->count,
+        .count = 1,
         .size = sizeof(ecs_vector_t*),
         .alignment = ECS_ALIGNOF(ecs_vector_t*),
         .is.collection = element_cache->ops
+    };
+
+    return ops;
+}
+
+static
+ecs_vector_t* serialize_map(
+    ecs_world_t *world,
+    ecs_entity_t entity,
+    EcsMap *type,
+    ecs_vector_t *ops,
+    FlecsComponentsMeta *handles)
+{
+    FlecsComponentsMetaImportHandles(*handles);
+
+    ecs_type_op_t *op = NULL;
+    if (!ops) {
+        op = ecs_vector_add(&ops, ecs_type_op_t);
+        *op = (ecs_type_op_t) {
+            .kind = EcsOpHeader,
+            .size = sizeof(ecs_map_t*),
+            .alignment = ECS_ALIGNOF(ecs_map_t*)
+        };         
+    }
+
+    EcsTypeSerializer *key_cache = ecs_get_ptr(world, type->key_type, EcsTypeSerializer);
+    ecs_assert(key_cache != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(key_cache->ops != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(ecs_vector_count(key_cache->ops) != 0, ECS_INTERNAL_ERROR, NULL);
+
+    /* Make sure first op is the header */
+    ecs_type_op_t *key_op = ecs_vector_first(key_cache->ops);
+    ecs_assert(key_op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+
+    if (ecs_vector_count(key_cache->ops) != 2) {
+        EcsType *ptr = ecs_get_ptr(world, entity, EcsType);
+        ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
+
+        ecs_meta_parse_ctx_t ctx = {
+            .name = ecs_get_id(world, entity),
+            .decl = ptr->descriptor
+        };
+
+        ecs_meta_error( &ctx, ctx.decl, 
+            "invalid key type '%s' for map", ecs_get_id(world, type->key_type));
+    }
+
+    key_op = ecs_vector_get(key_cache->ops, ecs_type_op_t, 1);
+    ecs_assert(key_op != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    if (key_op->count != 1) {
+        EcsType *ptr = ecs_get_ptr(world, entity, EcsType);
+        ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
+
+        ecs_meta_parse_ctx_t ctx = {
+            .name = ecs_get_id(world, entity),
+            .decl = ptr->descriptor
+        };        
+        ecs_meta_error( &ctx, ctx.decl, "array type invalid for key type");
+    }
+
+    EcsTypeSerializer *element_cache = ecs_get_ptr(world, type->element_type, EcsTypeSerializer);
+    ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    op = ecs_vector_add(&ops, ecs_type_op_t);
+    *op = (ecs_type_op_t){
+        .kind = EcsOpMap, 
+        .count = 1,
+        .size = sizeof(ecs_map_t*),
+        .alignment = ECS_ALIGNOF(ecs_map_t*),
+        .is.map = {
+            .key_op = key_op,
+            element_cache->ops
+        }
     };
 
     return ops;
@@ -365,6 +438,12 @@ ecs_vector_t* serialize_type(
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_vector(world, entity, t, ops, module);
     }    
+
+    case EcsMapType: {
+        EcsMap *t = ecs_get_ptr(world, entity, EcsMap);
+        ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
+        return serialize_map(world, entity, t, ops, module);
+    }
 
     default:
         break;
@@ -460,6 +539,21 @@ void EcsSetVector(ecs_rows_t *rows) {
         ecs_entity_t e = rows->entities[i];
         ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
             serialize_vector(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
+        });
+    }
+}
+
+void EcsSetMap(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsMap, type, 1);
+    ECS_IMPORT_COLUMN(rows, FlecsComponentsMeta, 2);
+
+    ecs_world_t *world = rows->world;
+
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        ecs_entity_t e = rows->entities[i];
+        ecs_set(rows->world, rows->entities[i], EcsTypeSerializer, { 
+            serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
 }

@@ -1,6 +1,7 @@
 #include <flecs_components_meta.h>
 #include "parser.h"
 #include "serializer.h"
+#include "type.h"
 
 static
 void ecs_set_primitive(
@@ -86,12 +87,19 @@ void ecs_set_constants(
         .decl = ptr
     };
 
-    ecs_vector_t *constants = NULL;
-    ecs_def_token_t token;
+    ecs_map_t *constants = ecs_map_new(char*, 1);
+    ecs_meta_constant_t token;
+    int32_t last_value = 0;
 
-    while ((ptr = ecs_meta_parse_constants(ptr, &token, &ctx))) {
-        char **name = ecs_vector_add(&constants, char*);
-        *name = ecs_os_strdup(token.name);
+    while ((ptr = ecs_meta_parse_constant(ptr, &token, &ctx))) {
+        if (token.is_value_set) {
+            last_value = token.value;
+        }
+
+        char *name = ecs_os_strdup(token.name);
+        ecs_map_set(constants, last_value, &name);
+
+        last_value ++;
     }
 
     ecs_entity_t comp = ecs_lookup(world, component);
@@ -118,61 +126,6 @@ void ecs_set_enum(
 }
 
 static
-ecs_entity_t ecs_meta_lookup_type(
-    ecs_world_t *world,
-    ecs_def_token_t *token,
-    const char *ptr,
-    ecs_meta_parse_ctx_t *ctx)
-{
-    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_assert(token != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_assert(ptr != NULL, ECS_INTERNAL_ERROR, NULL);
-    ecs_assert(ctx != NULL, ECS_INTERNAL_ERROR, NULL);
-
-    const char *name = ctx->name;
-    const char *typename = token->type;
-    ecs_entity_t type = 0;
-
-    if (!strcmp(typename, "ecs_vector")) {
-        ecs_meta_parse_ctx_t param_ctx = {
-            .name = name,
-            .decl = token->params
-        };
-
-        ecs_def_token_t params_token;
-        ecs_meta_parse_params(token->params, &params_token, &param_ctx);
-
-        ecs_entity_t element_type = ecs_meta_lookup_type(
-            world, &params_token, token->params, &param_ctx);
-            
-        if (!element_type) {
-            ecs_parser_error(name, ctx->decl, ptr - ctx->decl - 1,
-                "unknown element type '%s'", params_token.type);
-        }
-        
-        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-        ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
-
-        type = ecs_set(world, ecs_set(world, 0, 
-            EcsType, {EcsVectorType}),
-            EcsVector, { element_type });
-
-    } else {
-        if (token->is_ptr && !strcmp(typename, "char")) {
-            typename = "string";
-        }
-
-        type = ecs_lookup(world, typename);
-        if (!type) {
-            ecs_parser_error(name, ctx->decl, ptr - ctx->decl - 1, 
-                "unknown type '%s'", typename);
-        }
-    }
-
-    return type;
-}
-
-static
 void ecs_set_struct(
     ecs_world_t *world, 
     ecs_entity_t e, 
@@ -191,10 +144,10 @@ void ecs_set_struct(
     };
 
     ecs_vector_t *members = NULL;
-    ecs_def_token_t token;
+    ecs_meta_member_t token;
 
-    while ((ptr = ecs_meta_parse_struct(ptr, &token, &ctx))) {
-        ecs_entity_t type = ecs_meta_lookup_type(world, &token, ptr, &ctx);
+    while ((ptr = ecs_meta_parse_member(ptr, &token, &ctx))) {
+        ecs_entity_t type = ecs_meta_lookup(world, &token.type, ptr, 1, &ctx);
         ecs_assert(type != 0, ECS_INTERNAL_ERROR, NULL);
 
         EcsMember *m = ecs_vector_add(&members, EcsMember);
@@ -241,23 +194,7 @@ void ecs_set_array(
         .decl = ptr
     };
 
-    ecs_def_token_t token;
-    ecs_meta_parse_params(ptr, &token, &ctx);
-
-    if (!token.count) {
-        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
-            "invalid array size");
-    }
-
-    ecs_entity_t el_type = ecs_lookup(world, token.type);
-    if (!el_type) {
-        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
-            "unknown element type '%s'", token.type);
-    }
-
-    ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
-    ecs_assert(ecs_entity(EcsArray) != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set(world, e, EcsArray, {el_type, token.count});
+    ecs_meta_lookup_array(world, e, type->descriptor, &ctx);
 }
 
 static
@@ -278,18 +215,28 @@ void ecs_set_vector(
         .decl = ptr
     };
 
-    ecs_def_token_t token;
-    ecs_meta_parse_params(ptr, &token, &ctx);
+    ecs_meta_lookup_vector(world, e, type->descriptor, &ctx);
+}
 
-    ecs_entity_t el_type = ecs_lookup(world, token.type);
-    if (!el_type) {
-        ecs_parser_error(name, ctx.decl, ptr - ctx.decl - 1, 
-            "unknown element type '%s'", token.type);
-    }
+static
+void ecs_set_map(
+    ecs_world_t *world, 
+    ecs_entity_t e, 
+    EcsType *type) 
+{
+    ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
-    ecs_assert(ecs_entity(EcsVector) != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set(world, e, EcsVector, {el_type, token.count});
+    const char *ptr = type->descriptor;
+    const char *name = ecs_get_id(world, e);
+
+    ecs_meta_parse_ctx_t ctx = {
+        .name = name,
+        .decl = ptr
+    };
+
+    ecs_meta_lookup_map(world, e, type->descriptor, &ctx);
 }
 
 static
@@ -345,6 +292,9 @@ void EcsSetType(ecs_rows_t *rows) {
         case EcsVectorType:
             ecs_set_vector(world, e, type);
             break;
+        case EcsMapType:
+            ecs_set_map(world, e, type);
+            break;
         }
     }
 }
@@ -361,6 +311,7 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT(world, EcsStruct);
     ECS_COMPONENT(world, EcsArray);
     ECS_COMPONENT(world, EcsVector);
+    ECS_COMPONENT(world, EcsMap);
     ECS_COMPONENT(world, EcsType);
     ECS_COMPONENT(world, EcsTypeSerializer);
 
@@ -372,6 +323,7 @@ void FlecsComponentsMetaImport(
     ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, EcsStruct, $.FlecsComponentsMeta);
     ECS_SYSTEM(world, EcsSetArray, EcsOnSet, EcsArray, $.FlecsComponentsMeta);
     ECS_SYSTEM(world, EcsSetVector, EcsOnSet, EcsVector, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, EcsMap, $.FlecsComponentsMeta);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
@@ -379,6 +331,7 @@ void FlecsComponentsMetaImport(
     ECS_EXPORT_COMPONENT(EcsStruct);
     ECS_EXPORT_COMPONENT(EcsArray);
     ECS_EXPORT_COMPONENT(EcsVector);
+    ECS_EXPORT_COMPONENT(EcsMap);
     ECS_EXPORT_COMPONENT(EcsType);
     ECS_EXPORT_COMPONENT(EcsTypeSerializer);
 
@@ -459,7 +412,7 @@ void FlecsComponentsMetaImport(
         EcsPrimitive, {EcsF64});   
 
     ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"string"}),
+        EcsId, {"ecs_string_t"}),
         EcsType, {EcsPrimitiveType}), 
         EcsPrimitive, {EcsString});
 
@@ -487,6 +440,18 @@ void FlecsComponentsMetaImport(
         EcsType, &__EcsPrimitive__);
 
     ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"EcsArray"}),
+        EcsType, &__EcsArray__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"EcsVector"}),
+        EcsType, &__EcsVector__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
+        EcsId, {"EcsMap"}),
+        EcsType, &__EcsMap__);
+
+    ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsBitmask"}),
         EcsType, &__EcsBitmask__);
 
@@ -501,14 +466,6 @@ void FlecsComponentsMetaImport(
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsStruct"}),
         EcsType, &__EcsStruct__);
-
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"EcsArray"}),
-        EcsType, &__EcsArray__);
-
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"EcsVector"}),
-        EcsType, &__EcsVector__);
 
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsType"}),

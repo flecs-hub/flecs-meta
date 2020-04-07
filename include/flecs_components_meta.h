@@ -42,10 +42,14 @@ static const char * __##name##__ = #__VA_ARGS__;
 #define ECS_NON_SERIALIZABLE
 
 #define ecs_vector(T) ecs_vector_t*
+#define ecs_map(K, T) ecs_map_t*
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Meta description
 ////////////////////////////////////////////////////////////////////////////////
+
+/* Explicit string type */
+typedef char* ecs_string_t;
 
 ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
     EcsPrimitiveType,
@@ -53,7 +57,8 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
     EcsEnumType,
     EcsStructType,
     EcsArrayType,
-    EcsVectorType
+    EcsVectorType,
+    EcsMapType
 });
 
 ECS_STRUCT( EcsType, {
@@ -88,11 +93,11 @@ ECS_STRUCT( EcsPrimitive, {
 });
 
 ECS_STRUCT( EcsBitmask, {
-    ecs_vector(string) constants;
+    ecs_map(int32_t, ecs_string_t) constants;
 });
 
 ECS_STRUCT( EcsEnum, {
-    ecs_vector(string) constants;
+    ecs_map(int32_t, ecs_string_t) constants;
 });
 
 ECS_STRUCT( EcsMember, {
@@ -111,7 +116,11 @@ ECS_STRUCT( EcsArray, {
 
 ECS_STRUCT( EcsVector, {
     ecs_entity_t element_type;
-    int32_t count;
+});
+
+ECS_STRUCT( EcsMap, {
+    ecs_entity_t key_type;
+    ecs_entity_t element_type;
 });
 
 
@@ -127,7 +136,8 @@ ECS_ENUM( ecs_type_op_kind_t, {
     EcsOpPush,
     EcsOpPop,
     EcsOpArray,
-    EcsOpVector
+    EcsOpVector,
+    EcsOpMap
 });
 
 typedef ecs_vector_t ecs_type_op_vector_t;
@@ -147,7 +157,11 @@ ECS_NON_SERIALIZABLE
     union {
         ecs_vector(ecs_type_op_t) collection;
         ecs_primitive_kind_t primitive;
-        ecs_vector_t *constant;
+        ecs_map(int32_t, ecs_string_t) constant;
+        struct {
+            struct ecs_type_op_t *key_op;
+            ecs_vector(ecs_type_op_t) element_ops;
+        } map;
     } is;
 });
 
@@ -167,6 +181,7 @@ typedef struct FlecsComponentsMeta {
     ECS_DECLARE_COMPONENT(EcsStruct);
     ECS_DECLARE_COMPONENT(EcsArray);
     ECS_DECLARE_COMPONENT(EcsVector);
+    ECS_DECLARE_COMPONENT(EcsMap);
     ECS_DECLARE_COMPONENT(EcsType);
     ECS_DECLARE_COMPONENT(EcsTypeSerializer);
 } FlecsComponentsMeta;
@@ -183,6 +198,7 @@ void FlecsComponentsMetaImport(
     ECS_IMPORT_COMPONENT(handles, EcsStruct);\
     ECS_IMPORT_COMPONENT(handles, EcsArray);\
     ECS_IMPORT_COMPONENT(handles, EcsVector);\
+    ECS_IMPORT_COMPONENT(handles, EcsMap);\
     ECS_IMPORT_COMPONENT(handles, EcsType);\
     ECS_IMPORT_COMPONENT(handles, EcsTypeSerializer);
 
