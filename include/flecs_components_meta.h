@@ -273,10 +273,16 @@ extern "C" {
 
 /** Convert value to a string. */
 FLECS_COMPONENTS_META_EXPORT
-char* ecs_ptr_to_string(
+char* ecs_pretty_print_ptr(
     ecs_world_t *world, 
     ecs_entity_t type, 
     void* ptr);
+
+/** Convert value to a string. */
+FLECS_COMPONENTS_META_EXPORT
+char* ecs_pretty_print_entity(
+    ecs_world_t *world, 
+    ecs_entity_t entity);
 
 FLECS_COMPONENTS_META_EXPORT
 void FlecsComponentsMetaImport(
@@ -361,13 +367,6 @@ public:
 // Template that injects metadata into ECS
 template <typename T>
 flecs::entity meta(flecs::world& world) {
-    flecs::entity e(world, flecs::__meta__<T>::name());
-    e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
-    return e;
-}
-
-template <typename T>
-flecs::entity meta_component(flecs::world& world) {
     flecs::entity e = flecs::component<T>(world, flecs::__meta__<T>::name());
     e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
     return e;
@@ -382,9 +381,17 @@ flecs::entity meta_component(flecs::world& world) {
 namespace flecs {
 
 template <typename T>
-std::string to_string(flecs::world& world, T& data) {
+std::string pretty_print(flecs::world& world, T& data) {
     entity_t type = component_base<T>::s_entity;
-    char *str = ecs_ptr_to_string(world.c_ptr(), type, &data);
+    char *str = ecs_pretty_print_ptr(world.c_ptr(), type, &data);
+    std::string result = std::string(str);
+    free(str);
+    return result;
+}
+
+template <>
+std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
+    char *str = ecs_pretty_print_entity(world.c_ptr(), entity.id());
     std::string result = std::string(str);
     free(str);
     return result;

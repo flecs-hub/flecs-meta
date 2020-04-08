@@ -142,7 +142,7 @@ void str_ser_elements(
     int i;
     for (i = 0; i < elem_count; i ++) {
         if (i) {
-            ecs_strbuf_appendstrn(str, ",", 1);
+            ecs_strbuf_appendstr(str, ", ");
         }
         
         str_ser_type(elem_ops, ptr, str);
@@ -198,7 +198,7 @@ void str_ser_map(
 
     while ((ptr = _ecs_map_next(&it, 0, &key))) {
         if (count) {
-            ecs_strbuf_appendstrn(str, ",", 1);
+            ecs_strbuf_appendstr(str, ", ");
         }
 
         str_ser_type_op(op->is.map.key_op, (void*)&key, str);
@@ -258,7 +258,7 @@ void str_ser_type(ecs_vector_t *ser, void *base, ecs_strbuf_t *str) {
         ecs_type_op_t *op = &ops[i];
 
         if (sp && elem_count[sp] && op->kind != EcsOpPop) {
-            ecs_strbuf_appendstrn(str, ",", 1);
+            ecs_strbuf_appendstr(str, ", ");
         }
 
         elem_count[sp] ++;
@@ -286,7 +286,7 @@ void str_ser_type(ecs_vector_t *ser, void *base, ecs_strbuf_t *str) {
     }
 }
 
-char* ecs_ptr_to_string(
+char* ecs_pretty_print_ptr(
     ecs_world_t *world, 
     ecs_entity_t type, 
     void* ptr)
@@ -298,4 +298,39 @@ char* ecs_ptr_to_string(
     ecs_strbuf_t str = ECS_STRBUF_INIT;
     str_ser_type(ser->ops, ptr, &str);
     return ecs_strbuf_get(&str);
+}
+
+char* ecs_pretty_print_entity(
+    ecs_world_t *world, 
+    ecs_entity_t entity)
+{
+    ecs_type_t type = ecs_get_type(world, entity);
+    ecs_entity_t *ids = (ecs_entity_t*)ecs_vector_first(type);
+    int32_t count = ecs_vector_count(type);
+    
+    ecs_entity_t EEcsTypeSerializer = ecs_lookup(world, "EcsTypeSerializer");
+    ecs_strbuf_t str = ECS_STRBUF_INIT;
+
+    const char *name = ecs_get_id(world, entity);
+    if (name) {
+        ecs_strbuf_append(&str, "%s: ", name);
+    }
+
+    ecs_strbuf_appendstr(&str, "{\n");
+
+    int i, comps_serialized = 0;
+    for (i = 0; i < count; i ++) {
+        EcsTypeSerializer *ser = ecs_get_ptr(world, ids[i], EcsTypeSerializer);
+        if (ser) {
+            void *ptr = _ecs_get_ptr(world, entity, ids[i]);
+            ecs_strbuf_append(&str, "    %s: ", ecs_get_id(world, ids[i]));
+            str_ser_type(ser->ops, ptr, &str);
+            ecs_strbuf_appendstr(&str, "\n");
+            comps_serialized ++;
+        }
+    }
+
+    ecs_strbuf_appendstr(&str, "}");
+
+    return ecs_strbuf_get(&str);  
 }
