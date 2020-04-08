@@ -84,7 +84,7 @@ ECS_STRUCT(Point, {
     float x;
     float y;
     Color color;
-})
+});
 ```
 
 Use it like this:
@@ -120,7 +120,7 @@ ECS_BITMASK(Toppings, {
 ECS_STRUCT(Sandwich, {
     const char *name;
     Toppings toppings;
-})
+});
 ```
 
 Use it like this:
