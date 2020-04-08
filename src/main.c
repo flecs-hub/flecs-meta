@@ -320,6 +320,7 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT(world, EcsPrimitive);
     ECS_COMPONENT(world, EcsEnum);
     ECS_COMPONENT(world, EcsBitmask);
+    ECS_COMPONENT(world, EcsMember);
     ECS_COMPONENT(world, EcsStruct);
     ECS_COMPONENT(world, EcsArray);
     ECS_COMPONENT(world, EcsVector);
@@ -447,39 +448,39 @@ void FlecsComponentsMetaImport(
             __ecs_type_kind_t__
         });
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsPrimitive),
         EcsId, {"EcsPrimitive"}),
         EcsType, &__EcsPrimitive__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsArray),
         EcsId, {"EcsArray"}),
         EcsType, &__EcsArray__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsVector),
         EcsId, {"EcsVector"}),
         EcsType, &__EcsVector__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsMap),
         EcsId, {"EcsMap"}),
         EcsType, &__EcsMap__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsBitmask),
         EcsId, {"EcsBitmask"}),
         EcsType, &__EcsBitmask__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsEnum),
         EcsId, {"EcsEnum"}),
         EcsType, &__EcsEnum__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsMember),
         EcsId, {"EcsMember"}),
         EcsType, &__EcsMember__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsStruct),
         EcsId, {"EcsStruct"}),
         EcsType, &__EcsStruct__);
 
-    ecs_set_ptr(world, ecs_set(world, 0,
+    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsType),
         EcsId, {"EcsType"}),
         EcsType, &__EcsType__);
 
