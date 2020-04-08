@@ -4,15 +4,11 @@
 /* This generated file contains includes for project dependencies */
 #include "flecs-components-meta/bake_config.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //// Macro's that capture type definitions
 ////////////////////////////////////////////////////////////////////////////////
 
+// Utility macro's
 #define ECS_UNUSED __attribute__((unused))
 
 #ifdef __cplusplus
@@ -23,31 +19,82 @@ extern "C" {
 
 #define ECS_ALIGN(size, alignment) (((((size) - 1) / (alignment)) + 1) * (alignment))
 
-#define ECS_STRUCT(name, ...)\
-typedef struct name __VA_ARGS__ name;\
-ECS_UNUSED \
-static EcsType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};\
-
-#define ECS_ENUM(name, ...)\
-typedef enum name __VA_ARGS__ name;\
-ECS_UNUSED \
-static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
-
-#define ECS_BITMASK(name, ...)\
-typedef enum name __VA_ARGS__ name;\
-ECS_UNUSED \
-static EcsType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), #__VA_ARGS__};
-
-// For the ecs_type_kind_t enumeration, which is defined before EcsType
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
 static const char * __##name##__ = #__VA_ARGS__;
 
-#define ECS_NON_SERIALIZABLE
+#define ECS_STRUCT_IMPL(name, descriptor, ...)\
+typedef struct name __VA_ARGS__ name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor};\
 
+#define ECS_ENUM_IMPL(name, descriptor, ...)\
+typedef enum name __VA_ARGS__ name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor};
+
+#define ECS_BITMASK_IMPL(name, descriptor, ...)\
+typedef enum name __VA_ARGS__ name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor};
+
+#define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+
+#ifdef __cplusplus
+
+#define ECS_META_CPP(T, kind, descr);\
+namespace flecs {\
+template<>\
+class __meta__ <T> {\
+public:\
+    static const char* name() {\
+        return #T;\
+    }\
+    static EcsType descriptor() {\
+        return (EcsType){kind, sizeof(T), ECS_ALIGNOF(T), descr};\
+    }\
+};\
+}
+
+#define ECS_STRUCT(T, ...)\
+ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+ECS_META_CPP(T, EcsStructType, #__VA_ARGS__);
+
+#define ECS_ENUM(T, ...)\
+ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+ECS_META_CPP(T, EcsEnumType, #__VA_ARGS__);
+
+#define ECS_BITMASK(T, ...)\
+ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+ECS_META_CPP(T, EcsBitmaskType, #__VA_ARGS__);
+
+#else
+
+#define ECS_STRUCT(name, ...) ECS_STRUCT_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_ENUM(name, ...) ECS_ENUM_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_BITMASK(name, ...) ECS_BITMASK_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
+
+#endif
+
+
+// Collection macro's (to be used in types that support reflection)
 #define ecs_vector(T) ecs_vector_t*
 #define ecs_map(K, T) ecs_map_t*
+
+// Macro to indicate that members after this should not be parsed
+#define ECS_NON_SERIALIZABLE
+
+// Macro to insert reflection data into ECS
+#define ECS_META(world, T)\
+    ecs_entity_t __R##T##__ = ecs_lookup(world, #T);\
+    __R##T##__ = ecs_set(world,__R##T##__, EcsTypeSerializer, {__##T##__});
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Meta description
@@ -66,14 +113,14 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
     EcsMapType
 });
 
-ECS_STRUCT( EcsType, {
+ECS_STRUCT_C( EcsType, {
     ecs_type_kind_t kind;
     size_t size;
     int8_t alignment;
     const char *descriptor;
 });
 
-ECS_ENUM( ecs_primitive_kind_t, {
+ECS_ENUM_C( ecs_primitive_kind_t, {
     EcsBool,
     EcsChar,
     EcsByte,
@@ -93,37 +140,37 @@ ECS_ENUM( ecs_primitive_kind_t, {
     EcsEntity
 });
 
-ECS_STRUCT( EcsPrimitive, {
+ECS_STRUCT_C( EcsPrimitive, {
     ecs_primitive_kind_t kind;
 });
 
-ECS_STRUCT( EcsBitmask, {
+ECS_STRUCT_C( EcsBitmask, {
     ecs_map(int32_t, ecs_string_t) constants;
 });
 
-ECS_STRUCT( EcsEnum, {
+ECS_STRUCT_C( EcsEnum, {
     ecs_map(int32_t, ecs_string_t) constants;
 });
 
-ECS_STRUCT( EcsMember, {
+ECS_STRUCT_C( EcsMember, {
     const char *name;
     ecs_entity_t type;
 });
 
-ECS_STRUCT( EcsStruct, {
+ECS_STRUCT_C( EcsStruct, {
     ecs_vector(EcsMember) members;
 });
 
-ECS_STRUCT( EcsArray, {
+ECS_STRUCT_C( EcsArray, {
     ecs_entity_t element_type;
     int32_t count;
 });
 
-ECS_STRUCT( EcsVector, {
+ECS_STRUCT_C( EcsVector, {
     ecs_entity_t element_type;
 });
 
-ECS_STRUCT( EcsMap, {
+ECS_STRUCT_C( EcsMap, {
     ecs_entity_t key_type;
     ecs_entity_t element_type;
 });
@@ -133,7 +180,7 @@ ECS_STRUCT( EcsMap, {
 //// Type serializer
 ////////////////////////////////////////////////////////////////////////////////
 
-ECS_ENUM( ecs_type_op_kind_t, {
+ECS_ENUM_C( ecs_type_op_kind_t, {
     EcsOpHeader,
     EcsOpPrimitive,
     EcsOpEnum,
@@ -148,7 +195,7 @@ ECS_ENUM( ecs_type_op_kind_t, {
 typedef ecs_vector_t ecs_type_op_vector_t;
 typedef ecs_vector_t ecs_constant_vector_t;
 
-ECS_STRUCT( ecs_type_op_t, {
+ECS_STRUCT_C( ecs_type_op_t, {
     ecs_type_op_kind_t kind;
     uint16_t size;
     uint16_t count;
@@ -170,7 +217,7 @@ ECS_NON_SERIALIZABLE
     } is;
 });
 
-ECS_STRUCT( EcsTypeSerializer, {
+ECS_STRUCT_C( EcsTypeSerializer, {
     ecs_vector(ecs_type_op_t) ops;
 });
 
@@ -207,6 +254,9 @@ void FlecsComponentsMetaImport(
     ECS_IMPORT_COMPONENT(handles, EcsType);\
     ECS_IMPORT_COMPONENT(handles, EcsTypeSerializer);
 
+#ifdef __cplusplus
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //// C++ Module implementation
@@ -244,15 +294,28 @@ public:
         flecs::component<TypeSerializer>(world, "EcsTypeSerializer");
     }
 };
-
-} 
 }
 
-#endif
-#endif
+template <typename T>
+class __meta__ { };
 
-#ifdef __cplusplus
+// Template that injects metadata into ECS
+template <typename T>
+void meta(flecs::world& world) {
+    flecs::entity e(world, component_base<T>::s_entity);
+    e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
 }
+
+template <typename T>
+void meta_component(flecs::world& world) {
+    flecs::entity e = flecs::component<T>(world, flecs::__meta__<T>::name());
+    e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
+}
+
+}
+
+
+#endif
 #endif
 
 #endif
