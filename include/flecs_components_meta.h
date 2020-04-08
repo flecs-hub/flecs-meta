@@ -302,7 +302,7 @@ class __meta__ { };
 // Template that injects metadata into ECS
 template <typename T>
 void meta(flecs::world& world) {
-    flecs::entity e(world, component_base<T>::s_entity);
+    flecs::entity e(world, flecs::__meta__<T>::name());
     e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
 }
 
