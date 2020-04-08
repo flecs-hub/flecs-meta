@@ -5,8 +5,7 @@
         "author": "Sander Mertens",
         "description": "Flecs module package",
         "use": [
-            "flecs",
-            "flecs.util"
+            "flecs"
         ]
     }
 }

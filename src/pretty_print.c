@@ -202,7 +202,7 @@ void str_ser_map(
         }
 
         str_ser_type_op(op->is.map.key_op, (void*)&key, str);
-        ecs_strbuf_appendstrn(str, " = ", 1);
+        ecs_strbuf_appendstr(str, " = ");
         str_ser_type(op->is.map.element_ops, ptr, str);
         count ++;
 
