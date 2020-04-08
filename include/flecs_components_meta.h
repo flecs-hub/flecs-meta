@@ -42,6 +42,8 @@ static EcsType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), 
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 
+#ifdef __cplusplus
+
 // Unspecialized class (see below)
 namespace flecs {
 template <typename T>
@@ -62,6 +64,8 @@ public:\
     }\
 };\
 }
+
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,15 +97,15 @@ public:\
 // C
 
 // Define a struct
-#define ECS_STRUCT(name, ...)
+#define ECS_STRUCT(name, ...)\
     ECS_STRUCT_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
 // Define an enumeration
-#define ECS_ENUM(name, ...)
+#define ECS_ENUM(name, ...)\
     ECS_ENUM_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
 // Define a bitmask
-#define ECS_BITMASK(name, ...)
+#define ECS_BITMASK(name, ...)\
     ECS_BITMASK_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
 #endif
@@ -267,6 +271,13 @@ typedef struct FlecsComponentsMeta {
 extern "C" {
 #endif
 
+/** Convert value to a string. */
+FLECS_COMPONENTS_META_EXPORT
+char* ecs_ptr_to_string(
+    ecs_world_t *world, 
+    ecs_entity_t type, 
+    void* ptr);
+
 FLECS_COMPONENTS_META_EXPORT
 void FlecsComponentsMetaImport(
     ecs_world_t *world,
@@ -339,27 +350,47 @@ public:
     __R##T##__ = ecs_set(world,__R##T##__, EcsTypeSerializer, {__##T##__});
 
 
+#ifdef __cplusplus
+#ifndef FLECS_NO_CPP
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Functions for inserting metadata in C++ applications
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __cplusplus
-#ifndef FLECS_NO_CPP
-
 // Template that injects metadata into ECS
 template <typename T>
-void meta(flecs::world& world) {
+flecs::entity meta(flecs::world& world) {
     flecs::entity e(world, flecs::__meta__<T>::name());
     e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
+    return e;
 }
 
 template <typename T>
-void meta_component(flecs::world& world) {
+flecs::entity meta_component(flecs::world& world) {
     flecs::entity e = flecs::component<T>(world, flecs::__meta__<T>::name());
     e.set<EcsType>({ flecs::__meta__<T>::descriptor() });
+    return e;
 }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//// Serialize values to string
+////////////////////////////////////////////////////////////////////////////////
+
+namespace flecs {
+
+template <typename T>
+std::string to_string(flecs::world& world, T& data) {
+    entity_t type = component_base<T>::s_entity;
+    char *str = ecs_ptr_to_string(world.c_ptr(), type, &data);
+    std::string result = std::string(str);
+    free(str);
+    return result;
+}
+
+}
 
 #endif
 #endif
