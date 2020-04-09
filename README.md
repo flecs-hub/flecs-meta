@@ -166,37 +166,33 @@ Output:
 ```
 
 ### Vectors
-Vectors are supported through the built-in Flecs vector type. This is a C data structure for which eventually a C++ wrapper will become availble.
+Vectors are supported through the built-in Flecs vector type.
 
 ```c++
-ECS_STRUCT(Vec2D, {
+ECS_STRUCT(Vert2D, {
     float x;
     float y;
 });
 
 ECS_STRUCT(Mesh, {
-    ecs_vector(Vec2D) vertices;
+    flecs::vector<Vert2D> vertices;
 });
 ```
 
 Use it like this:
 
 ```c++
-flecs::meta<Vec2D>(world);
+flecs::meta<Vert2D>(world);
 flecs::meta<Mesh>(world);
 
-ecs_vector_T *vertices = ecs_vector_new(Vec2D, 2);
-Vec2D *v = ecs_vector_add(&vertices, Vec2D);
-v->x = 10;
-v->y = 20;
+Mesh m = {
+    {
+        {10, 20},
+        {30, 40}
+    }
+};
 
-v = ecs_vector_add(&vertices, Vec2D);
-v->x = 30;
-v->y = 40;
-
-Mesh m = {vertices};
-
-std::cout << flecs::pretty_print(world, v) << std::endl;
+std::cout << flecs::pretty_print(world, m) << std::endl;
 ```
 
 Output:
@@ -206,11 +202,11 @@ Output:
 ```
 
 ### Maps
-Maps use the built-in Flecs hashmap implementation. This is a C data structure for which eventually a C++ wrapper will become available. The map type can be a bit harder to populate, as its key is hardcoded as a 64bit integer. It is possible to use strings as map keys, but they will have to be casted to the map keytype.
+Maps use the built-in Flecs hashmap implementation.
 
 ```c++
 ECS_STRUCT(Menu, {
-    ecs_map(ecs_string_t, int32_t) items;
+    flecs::map<flecs::string, int32_t> items;
 });
 ```
 
@@ -219,14 +215,13 @@ Use it like this:
 ```c++
 flecs::meta<Menu>(world);
 
-ecs_map_t *map = ecs_map_new(int32_t, 2);
-int cost = 3;
-ecs_map_set(m, (intptr_t)"BLT", &cost);
-cost = 2;
-ecs_map_set(m, (intptr_t)"Bacon and cheese", &cost);
+/* Create an instance of the Menu type */
+Menu m = { {
+    {"BLT", 3},
+    {"Bacon and cheese", 2}
+} };
 
-Menu m = {map};
-
+/* Pretty print the value */
 std::cout << flecs::pretty_print(world, m) << std::endl;
 ```
 
