@@ -12,9 +12,6 @@ int main(int argc, char *argv[]) {
 
     /* Create new entity for our type. This type will describe Position. */
     ecs_entity_t position_type = ecs_set(world, 0, EcsId, {"Position"});
-    
-    /* Let the framework know this is a struct type */
-    ecs_set(world, position_type, EcsType, {EcsStructType});
 
     /* Add an EcsStruct component to the type that holds our members */
     EcsStruct *type = ecs_get_mutable(world, position_type, EcsStruct, NULL);

@@ -13,7 +13,6 @@ int main(int argc, char *argv[]) {
     flecs::import<flecs::components::meta>(world);
 
     auto position_type = flecs::entity(world, "Position")
-        .set<flecs::components::meta::Type>({ EcsStructType })
         .set<flecs::components::meta::Struct>({
             {
                 {"x", world.lookup("float").id()},
