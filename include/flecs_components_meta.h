@@ -130,7 +130,26 @@ public:\
 ////////////////////////////////////////////////////////////////////////////////
 
 /* Explicit string type */
-typedef char* ecs_string_t;
+typedef const char* ecs_string_t;
+
+/* Explicit byte type */
+typedef uint8_t ecs_byte_t;
+
+#ifdef __cplusplus
+
+namespace flecs {
+    using string = ecs_string_t;
+    using byte = ecs_byte_t;
+
+    // Define a bitmask
+    // In C++ trying to assign multiple flags to a variable of an enum type will
+    // result in a compiler error. Use this macro so that the serializer knows 
+    // this value is a bitmask, while also keeping the compiler happy.
+    template<typename T>
+    using bitmask = int32_t;
+}
+
+#endif
 
 ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
     EcsPrimitiveType,
@@ -173,22 +192,48 @@ ECS_STRUCT( EcsPrimitive, {
     ecs_primitive_kind_t kind;
 });
 
+// Define EcsBitmask for both C and C++. Both representations are equivalent in
+// memory, but allow for a nicer type-safe API in C++
+#if defined(__cplusplus) && !defined(FLECS_NO_CPP)
+ECS_STRUCT( EcsBitmask, {
+    flecs::map<int32_t, flecs::string> constants;
+});
+#else
 ECS_STRUCT( EcsBitmask, {
     ecs_map(int32_t, ecs_string_t) constants;
 });
+#endif
 
+// Define EcsEnum for both C and C++. Both representations are equivalent in
+// memory, but allow for a nicer type-safe API in C++
+#if defined(__cplusplus) && !defined(FLECS_NO_CPP)
+ECS_STRUCT( EcsEnum, {
+    flecs::map<int32_t, flecs::string> constants;
+});
+#else
 ECS_STRUCT( EcsEnum, {
     ecs_map(int32_t, ecs_string_t) constants;
 });
+#endif
 
 ECS_STRUCT( EcsMember, {
     const char *name;
     ecs_entity_t type;
 });
 
+// Define EcsStruct for both C and C++. Both representations are equivalent in
+// memory, but allow for a nicer type-safe API in C++
+#if defined(__cplusplus) && !defined(FLECS_NO_CPP)
+ECS_STRUCT( EcsStruct, {
+    flecs::vector<EcsMember> members;
+    bool is_partial;
+});
+#else
 ECS_STRUCT( EcsStruct, {
     ecs_vector(EcsMember) members;
+    bool is_partial;
 });
+#endif
 
 ECS_STRUCT( EcsArray, {
     ecs_entity_t element_type;
@@ -326,6 +371,16 @@ public:
     using Type = EcsType;
     using TypeSerializer = EcsTypeSerializer;
 
+    enum TypeKind {
+        PrimitiveType = EcsPrimitiveType,
+        BitmaskType = EcsBitmaskType,
+        EnumType = EcsEnumType,
+        StructType = EcsStructType,
+        ArrayType = EcsArrayType,
+        VectorType = EcsVectorType,
+        MapType = EcsMapType        
+    };
+
     meta(flecs::world& world, int flags) {
         FlecsComponentsMetaImport(world.c_ptr(), flags);
 
@@ -352,8 +407,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 
 #define ECS_META(world, T)\
-    ecs_entity_t __R##T##__ = ecs_lookup(world, #T);\
-    __R##T##__ = ecs_set(world,__R##T##__, EcsTypeSerializer, {__##T##__});
+    ECS_COMPONENT(world, T);\
+    ecs_set_ptr(world, ecs_entity(T), EcsType, &__##T##__)
 
 
 #ifdef __cplusplus
@@ -381,12 +436,22 @@ flecs::entity meta(flecs::world& world) {
 namespace flecs {
 
 template <typename T>
-std::string pretty_print(flecs::world& world, T& data) {
-    entity_t type = component_base<T>::s_entity;
+std::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
     char *str = ecs_pretty_print_ptr(world.c_ptr(), type, &data);
     std::string result = std::string(str);
     free(str);
     return result;
+}
+
+template <typename T>
+std::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
+    return pretty_print(world, type.id(), data);
+}
+
+template <typename T>
+std::string pretty_print(flecs::world& world, T& data) {
+    entity_t type = component_base<T>::s_entity;
+    return flecs::pretty_print(world, type, data);
 }
 
 template <>

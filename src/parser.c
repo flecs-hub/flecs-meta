@@ -53,12 +53,20 @@ const char* parse_digit(
         ecs_meta_error(ctx, ptr, "expected number, got %c", *ptr);
     }
 
-    *value_out = atoi(ptr);
+    *value_out = strtol(ptr, NULL, 0);
+
+    if (ptr[0] == '-') {
+        ptr ++;
+    } else 
+    if (ptr[0] == '0' && ptr[1] == 'x') {
+        ptr += 2;
+    }
+
     while (isdigit(*ptr)) {
         ptr ++;
     }
 
-    return ptr;
+    return skip_ws(ptr);
 }
 
 static
@@ -86,7 +94,7 @@ const char* parse_identifier(
             "invalid identifier (starts with '%c')", *ptr);
     }
 
-    while ((ch = *ptr) && !isspace(ch) && ch != ';' && ch != ',' && ch != ')') {
+    while ((ch = *ptr) && !isspace(ch) && ch != ';' && ch != ',' && ch != ')' && ch != '>') {
         /* Type definitions can contain macro's or templates */
         if (ch == '(' || ch == '<') {
             if (!params) {
@@ -234,11 +242,13 @@ const char* ecs_meta_parse_member(
     }
 
     token->count = 1;
+    token->is_partial = false;
 
     /* Parse member type */
     ptr = ecs_meta_parse_type(ptr, &token->type, ctx);
     if (!ptr) {
         /* If NULL is returned, parsing should stop */
+        token->is_partial = true;
         return NULL;
     }
 
@@ -296,7 +306,7 @@ void ecs_meta_parse_params(
     token->is_fixed_size = false;
 
     ptr = skip_ws(ptr);
-    if (*ptr != '(') {
+    if (*ptr != '(' && *ptr != '<') {
         ecs_meta_error(ctx, ptr, 
             "expected '(' at start of collection definition");
     }
@@ -328,7 +338,7 @@ void ecs_meta_parse_params(
         }
     }
 
-    if (*ptr != ')') {
+    if (*ptr != ')' && *ptr != '>') {
         ecs_meta_error(ctx, ptr, 
             "expected ')' at end of collection definition");
     }

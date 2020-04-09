@@ -145,6 +145,7 @@ void ecs_set_struct(
 
     const char *ptr = type->descriptor;
     const char *name = ecs_get_id(world, e);
+    bool is_partial = false;
 
     ecs_meta_parse_ctx_t ctx = {
         .name = name,
@@ -155,33 +156,17 @@ void ecs_set_struct(
     ecs_meta_member_t token;
 
     while ((ptr = ecs_meta_parse_member(ptr, &token, &ctx))) {
-        ecs_entity_t type = ecs_meta_lookup(world, &token.type, ptr, 1, &ctx);
-        ecs_assert(type != 0, ECS_INTERNAL_ERROR, NULL);
-
         EcsMember *m = ecs_vector_add(&members, EcsMember);
         m->name = ecs_os_strdup(token.name);
-
-        if (token.count == 1) {
-            m->type = type;
-        } else {
-            /* If count is not 1, insert array type. First lookup EcsType of the
-             * element type to get the size and alignment. Then create a new
-             * entity for the array type, and assign it to the member type. */
-            ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-            ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
-            EcsType *type_ptr = ecs_get_ptr(world, type, EcsType);
-
-            ecs_entity_t array_type = ecs_set(world, ecs_set(world, 0, 
-                EcsType, {EcsArrayType, type_ptr->size, type_ptr->alignment}),
-                EcsArray, {type, token.count});
-            
-            m->type = array_type;
-        }
+        m->type = ecs_meta_lookup(world, &token.type, ptr, token.count, &ctx);
+        ecs_assert(type != 0, ECS_INTERNAL_ERROR, NULL);
     }
+
+    is_partial = token.is_partial;
 
     ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup(world, "EcsStruct");
     ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set(world, e, EcsStruct, {members});
+    ecs_set(world, e, EcsStruct, {members, is_partial});
 }
 
 static
@@ -330,6 +315,8 @@ void FlecsComponentsMetaImport(
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsType);
 
+    ECS_SYSTEM(world, EcsAddStruct, EcsOnAdd, EcsStruct);
+
     ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, EcsPrimitive, $.FlecsComponentsMeta);
     ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, EcsEnum, $.FlecsComponentsMeta);
     ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, EcsBitmask, $.FlecsComponentsMeta);
@@ -358,6 +345,11 @@ void FlecsComponentsMetaImport(
         EcsId, {"char"}),
         EcsType, {EcsPrimitiveType}), 
         EcsPrimitive, {EcsChar});
+
+    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
+        EcsId, {"ecs_byte_t"}),
+        EcsType, {EcsPrimitiveType}), 
+        EcsPrimitive, {EcsByte});
 
     ecs_set(world, ecs_set(world, ecs_set(world, 0, 
         EcsId, {"uint8_t"}),

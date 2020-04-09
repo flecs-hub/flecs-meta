@@ -200,7 +200,7 @@ ecs_vector_t* serialize_struct(
         uint8_t member_alignment;
 
         if (count - prev_count == 1) {
-            member_size = op->size;
+            member_size = op->size * op->count;
             member_alignment = op->alignment;
         } else {
             EcsType *type = ecs_get_ptr(world, members[i].type, EcsType);
@@ -220,6 +220,57 @@ ecs_vector_t* serialize_struct(
             alignment = member_alignment;
         }
     }
+
+    /* Align struct size to struct alignment */
+    size = ECS_ALIGN(size, alignment);
+
+    /* Size and alignment are ordinarily determined by ECS_STRUCT and should be
+     * the same as the values computed here. However, there are two exceptions.
+     * The first exception is when an application defines a type by populating
+     * the EcsStruct component directly and does not provide size and alignment
+     * values for EcsType. The second scenario is when the type definition 
+     * contains an ECS_NON_SERIALIZABLE, in which case the type may contain
+     * members that are not described.
+     *
+     * In the first case the computed values should be set in EcsType. In the
+     * second case the values from EcsType should be assigned to the type
+     * operation. */
+    bool is_added;
+    EcsType *base_type = ecs_get_mutable(world, entity, EcsType, &is_added);
+    ecs_assert(base_type != NULL, ECS_INTERNAL_ERROR, NULL);
+    if (!is_added) {
+        if (!type->is_partial) {
+            /* EcsType existed already, and this is not a partial type. This
+             * means that computed size and alignment should match exactly. */
+            if (base_type->size) {
+                ecs_assert(base_type->size == size, ECS_INTERNAL_ERROR, NULL);
+            }
+
+            if (base_type->alignment) {
+                ecs_assert(
+                    base_type->alignment == alignment, ECS_INTERNAL_ERROR, NULL);
+            }
+        } else {
+            /* EcsType exists, and this is a partial type. In this case the
+             * computed values only apply to the members described in EcsStruct
+             * but not to the type as a whole. Use the values from EcsType. Note
+             * that it is not allowed to have a partial type for which no size
+             * and alignment are specified in EcsType. */
+            ecs_assert(base_type->size != 0, ECS_INVALID_PARAMETER, NULL);
+            ecs_assert(base_type->alignment != 0, ECS_INVALID_PARAMETER, NULL);
+
+            size = base_type->size;
+            alignment = base_type->alignment;
+        }
+    } else {
+        /* If EcsType was not set yet, initialize descriptor to NULL since it
+         * it won't be used here */
+        base_type->descriptor = NULL;
+    }
+
+    base_type->kind = EcsStructType;
+    base_type->size = size;
+    base_type->alignment = alignment;
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t) {
@@ -461,6 +512,17 @@ void EcsSetPrimitive(ecs_rows_t *rows) {
     int i;
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
+
+        /* Size and alignment for primitive types can only be set after we know
+         * what kind of primitive type it is. Set values in case they haven't
+         * been set already */
+        bool is_added;
+        EcsType *base_type = ecs_get_mutable(world, e, EcsType, &is_added);
+        ecs_assert(base_type != NULL, ECS_INTERNAL_ERROR, NULL);
+        
+        base_type->size = ecs_get_primitive_size(type[i].kind);
+        base_type->alignment = ecs_get_primitive_alignment(type[i].kind);
+
         ecs_set(world, e, EcsTypeSerializer, {
             serialize_primitive(
                 world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
@@ -557,4 +619,14 @@ void EcsSetMap(ecs_rows_t *rows) {
             serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
         });
     }
+}
+
+void EcsAddStruct(ecs_rows_t *rows) {
+    ECS_COLUMN(rows, EcsStruct, type, 1);
+
+    int i;
+    for (i = 0; i < rows->count; i ++) {
+        type[i].members = NULL;
+        type[i].is_partial = false;
+    }   
 }

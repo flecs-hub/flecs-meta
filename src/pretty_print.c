@@ -32,12 +32,12 @@ void str_ser_primitive(
         ecs_strbuf_appendstr(str, bool_str[(int)*(bool*)base]);
         break;
     case EcsChar:
-        ecs_strbuf_appendstrn(str, "\"", 1);
+        ecs_strbuf_appendstrn(str, "'", 1);
         ecs_strbuf_appendstrn(str, (char*)base, 1);
-        ecs_strbuf_appendstrn(str, "\"", 1);
+        ecs_strbuf_appendstrn(str, "'", 1);
         break;
     case EcsByte:
-        ecs_strbuf_append(str, "%u", *(uint8_t*)base);
+        ecs_strbuf_append(str, "0x%x", *(uint8_t*)base);
         break;
     case EcsU8:
         ecs_strbuf_append(str, "%u", *(uint8_t*)base);
@@ -86,9 +86,16 @@ void str_ser_primitive(
         }
         break;
     }
-    case EcsEntity:
-        ecs_strbuf_appendstr(str, ecs_get_id(world, *(ecs_entity_t*)base));
+    case EcsEntity: {
+        ecs_entity_t e = *(ecs_entity_t*)base;
+        const char *name = ecs_get_id(world, e);
+        if (name) {
+            ecs_strbuf_appendstr(str, name);
+        } else {
+            ecs_strbuf_append(str, "%u", e);
+        }
         break;
+    }
     }
 }
 

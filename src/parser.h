@@ -26,6 +26,7 @@ typedef struct ecs_meta_member_t {
     ecs_meta_type_t type;
     ecs_meta_token_t name;
     int32_t count;
+    bool is_partial;
 } ecs_meta_member_t;
 
 typedef struct ecs_meta_constant_t {

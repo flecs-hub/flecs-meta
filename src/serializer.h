@@ -3,6 +3,9 @@
 
 #include "flecs_components_meta.h"
 
+void EcsAddStruct(
+    ecs_rows_t *rows);
+
 void EcsSetPrimitive(
     ecs_rows_t *rows);
 
