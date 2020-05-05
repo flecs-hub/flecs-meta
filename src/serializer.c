@@ -6,6 +6,7 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
+    int32_t offset,
     FlecsComponentsMeta *module);
 
 static
@@ -161,6 +162,7 @@ ecs_vector_t* serialize_struct(
     ecs_entity_t entity,
     EcsStruct *type,
     ecs_vector_t *ops,
+    int32_t offset,
     FlecsComponentsMeta *module)
 {
     FlecsComponentsMetaImportHandles(*module);
@@ -184,7 +186,7 @@ ecs_vector_t* serialize_struct(
     for (i = 0; i < count; i ++) {
         /* Add type operations of member to struct ops */
         int32_t prev_count = ecs_vector_count(ops);
-        ops = serialize_type(world, members[i].type, ops, module);
+        ops = serialize_type(world, members[i].type, ops, offset + size, module);
         int32_t count = ecs_vector_count(ops);
 
         /* At least one op should be added */
@@ -212,7 +214,7 @@ ecs_vector_t* serialize_struct(
         ecs_assert(member_alignment != 0, ECS_INTERNAL_ERROR, op->name);
 
         size = ECS_ALIGN(size, member_alignment);
-        op->offset = size;
+        op->offset = offset + size;
 
         size += member_size;      
 
@@ -446,6 +448,7 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
+    int32_t offset,
     FlecsComponentsMeta *module)
 {
     FlecsComponentsMetaImportHandles(*module);
@@ -475,7 +478,7 @@ ecs_vector_t* serialize_type(
     case EcsStructType: {
         EcsStruct *t = ecs_get_ptr(world, entity, EcsStruct);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_struct(world, entity, t, ops, module);
+        return serialize_struct(world, entity, t, ops, offset, module);
     }    
 
     case EcsArrayType: {
@@ -571,7 +574,7 @@ void EcsSetStruct(ecs_rows_t *rows) {
     for (i = 0; i < rows->count; i ++) {
         ecs_entity_t e = rows->entities[i];
         ecs_set(rows->world, e, EcsTypeSerializer, { 
-            serialize_struct(world, e, &type[i], NULL, &ecs_module(FlecsComponentsMeta))
+            serialize_struct(world, e, &type[i], NULL, 0, &ecs_module(FlecsComponentsMeta))
         });
     }
 }

@@ -282,9 +282,7 @@ void str_ser_type(
         ecs_type_op_t *op = &ops[i];
 
         if (op->name) {
-            if (op->kind != EcsOpHeader &&
-                op->kind != EcsOpPush &&
-                op->kind != EcsOpPop)
+            if (op->kind != EcsOpHeader)
             {
                 ecs_strbuf_list_next(str);
             }
