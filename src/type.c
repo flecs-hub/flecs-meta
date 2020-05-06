@@ -182,6 +182,9 @@ ecs_entity_t ecs_meta_lookup(
     } else if (!strcmp(typename, "flecs::bitmask")) {
         type = ecs_meta_lookup_bitmask(world, 0, token->params, ctx);
 
+    } else if (!strcmp(typename, "flecs::byte")) {
+        type = ecs_lookup(world, "ecs_byte_t");
+
     } else {
         if (token->is_ptr && !strcmp(typename, "char")) {
             typename = "ecs_string_t";
