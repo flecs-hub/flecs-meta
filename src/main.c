@@ -487,4 +487,9 @@ void FlecsComponentsMetaImport(
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsId, {"EcsTypeSerializer"}),
         EcsType, &__EcsTypeSerializer__);
+
+    /* -- Initialize metadata for public Flecs core components -- */
+    ecs_set(world, ecs_set(world, ecs_entity(EcsId),
+        EcsType, {EcsPrimitiveType}), 
+        EcsPrimitive, {EcsString});
 }
