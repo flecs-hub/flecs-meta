@@ -492,4 +492,11 @@ void FlecsComponentsMetaImport(
     ecs_set(world, ecs_set(world, ecs_entity(EcsId),
         EcsType, {EcsPrimitiveType}), 
         EcsPrimitive, {EcsString});
+
+    ecs_set(world, ecs_entity(EcsComponent), EcsType, {
+        .kind = EcsStructType, 
+        .size = sizeof(EcsComponent),
+        .alignment = ECS_ALIGNOF(EcsComponent),
+        .descriptor = "{size_t size;}"
+    });
 }
