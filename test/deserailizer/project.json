@@ -1,0 +1,23 @@
+{
+    "id": "test",
+    "type": "application",
+    "value": {
+        "author": "Sander Mertens",
+        "description": "Test project for flecs.components.meta",
+        "public": false,
+        "coverage": false,
+        "use": [
+            "flecs",
+            "flecs.components.meta"
+        ]
+    },
+    "test": {
+        "testsuites": [{
+            "id": "Struct",
+            "testcases": [
+                "struct",
+                "nested_struct"
+            ]
+        }]
+    }
+}

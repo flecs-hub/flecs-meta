@@ -376,6 +376,93 @@ size_t ecs_stresc(
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//// Deserialization utilities
+////////////////////////////////////////////////////////////////////////////////
+
+#define ECS_META_MAX_SCOPE_DEPTH (32) /* >32 levels of nesting is not sane */
+
+typedef struct ecs_meta_scope_t {
+    ecs_entity_t type;
+    ecs_vector_t *ops;
+    int32_t cur;
+    void *base;
+} ecs_meta_scope_t;
+
+typedef struct ecs_meta_iter_t {
+    ecs_world_t *world;
+    ecs_meta_scope_t scope[ECS_META_MAX_SCOPE_DEPTH];
+    int32_t depth;
+} ecs_meta_iter_t;
+
+FLECS_COMPONENTS_META_EXPORT
+ecs_meta_iter_t ecs_meta_iter(
+    ecs_world_t *world,
+    ecs_entity_t type, 
+    void *base);
+
+FLECS_COMPONENTS_META_EXPORT
+void* ecs_meta_get_ptr(
+    ecs_meta_iter_t *iter);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_next(
+    ecs_meta_iter_t *iter);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_move_cursor(
+    ecs_meta_iter_t *iter,
+    int32_t cursor);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_move_cursor_name(
+    ecs_meta_iter_t *iter,
+    const char *name);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_push(
+    ecs_meta_iter_t *iter);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_pop(
+    ecs_meta_iter_t *iter);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_bool(
+    ecs_meta_iter_t *iter,
+    bool value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_char(
+    ecs_meta_iter_t *iter,
+    char value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_int(
+    ecs_meta_iter_t *iter,
+    int64_t value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_uint(
+    ecs_meta_iter_t *iter,
+    uint64_t value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_float(
+    ecs_meta_iter_t *iter,
+    double value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_string(
+    ecs_meta_iter_t *iter,
+    const char *value);
+
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_entity(
+    ecs_meta_iter_t *iter,
+    ecs_entity_t value);
+
+
+////////////////////////////////////////////////////////////////////////////////
 //// Module implementation
 ////////////////////////////////////////////////////////////////////////////////
 
