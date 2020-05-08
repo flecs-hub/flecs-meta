@@ -1,0 +1,109 @@
+{
+    "id": "test",
+    "type": "application",
+    "value": {
+        "author": "Sander Mertens",
+        "description": "Test project for flecs.components.meta",
+        "public": false,
+        "coverage": false,
+        "use": [
+            "flecs",
+            "flecs.components.meta"
+        ]
+    },
+    "test": {
+        "testsuites": [{
+            "id": "Primitive",
+            "testcases": [
+                "bool",
+                "byte",
+                "char",
+                "i8",
+                "i16",
+                "i32",
+                "i64",
+                "iptr",
+                "u8",
+                "u16",
+                "u32",
+                "u64",
+                "uptr",
+                "float",
+                "double",
+                "string",
+                "entity"
+            ]
+        }, {
+            "id": "Struct",
+            "testcases": [
+                "struct",
+                "nested_struct",
+                "struct_bool_i32",
+                "struct_i32_bool"
+            ]
+        }, {
+            "id": "Enum",
+            "testcases": [
+                "enum",
+                "enum_explicit_values",
+                "enum_invalid_value"
+            ]
+        }, {
+            "id": "Bitmask",
+            "testcases": [
+                "bitmask_1",
+                "bitmask_2",
+                "bitmask_3",
+                "bitmask_0_value"
+            ]
+        }, {
+            "id": "Array",
+            "testcases": [
+                "array_bool",
+                "array_int",
+                "array_string",
+                "array_entity",
+                "struct_array_int",
+                "array_struct",
+                "array_nested_struct",
+                "array_array_int",
+                "array_array_string",
+                "array_array_struct",
+                "array_array_nested_struct"
+            ]
+        }, {
+            "id": "Vector",
+            "testcases": [
+                "vector_bool",
+                "vector_int",
+                "vector_string",
+                "vector_entity",
+                "vector_struct",
+                "vector_nested_struct",
+                "vector_vector_int",
+                "vector_vector_struct",
+                "vector_vector_nested_struct",
+                "vector_empty",
+                "vector_vector_empty",
+                "vector_null",
+                "vector_vector_null"
+            ]
+        }, {
+            "id": "Map",
+            "testcases": [
+                "map_bool_bool",
+                "map_int_bool",
+                "map_string_bool",
+                "map_enum_bool",
+                "map_bitmask_bool",
+                "map_int_int",
+                "map_int_string",
+                "map_int_struct",
+                "map_int_nested_struct",
+                "map_int_array_int",
+                "map_int_vector_int",
+                "map_int_map_int_bool"
+            ]
+        }]
+    }
+}

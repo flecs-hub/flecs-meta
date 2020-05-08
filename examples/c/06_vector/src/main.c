@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     v->y = 60;        
 
     /* Pretty print the value */
-    char *str = ecs_pretty_print_ptr(world, ecs_entity(Mesh), &m);
+    char *str = ecs_ptr_to_str(world, ecs_entity(Mesh), &m);
     printf("%s\n", str);
     free(str);
 

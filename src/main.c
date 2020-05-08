@@ -296,6 +296,16 @@ void EcsSetType(ecs_rows_t *rows) {
     }
 }
 
+/* Utility macro to insert meta data for type with meta descriptor */
+#define ECS_COMPONENT_TYPE(world, type)\
+    ecs_set_ptr(world, ecs_entity(type), EcsType, &__##type##__)
+
+/* Utility macro to insert metadata for primitive type */
+#define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
+    ECS_COMPONENT(world, type);\
+    ecs_set(world, ecs_entity(type), EcsType, {EcsPrimitiveType});\
+    ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
+
 void FlecsComponentsMetaImport(
     ecs_world_t *world,
     int flags)
@@ -311,6 +321,8 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT(world, EcsVector);
     ECS_COMPONENT(world, EcsMap);
     ECS_COMPONENT(world, EcsType);
+    ECS_COMPONENT(world, ecs_type_op_kind_t);
+    ECS_COMPONENT(world, ecs_type_op_t);
     ECS_COMPONENT(world, EcsTypeSerializer);
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsType);
@@ -333,98 +345,27 @@ void FlecsComponentsMetaImport(
     ECS_EXPORT_COMPONENT(EcsVector);
     ECS_EXPORT_COMPONENT(EcsMap);
     ECS_EXPORT_COMPONENT(EcsType);
-    ECS_EXPORT_COMPONENT(EcsTypeSerializer);
+    ECS_EXPORT_COMPONENT(EcsTypeSerializer);  
 
     /* -- Initialize builtin primitive types -- */
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"bool"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsBool});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"char"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsChar});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"ecs_byte_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsByte});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"uint8_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsU8});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"uint16_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsU16});   
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"uint32_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsU32});   
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"uint64_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsU64});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"int8_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsI8});  
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"int16_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsI16});  
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"int32_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsI32});  
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"int64_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsI64});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"intptr_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsIPtr});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"uintptr_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsUPtr});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"size_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsUPtr});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"float"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsF32});   
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"double"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsF64});   
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"ecs_string_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsString});
-
-    ecs_set(world, ecs_set(world, ecs_set(world, 0, 
-        EcsId, {"ecs_entity_t"}),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsEntity});
+    ECS_COMPONENT_PRIMITIVE(world, bool, EcsBool);
+    ECS_COMPONENT_PRIMITIVE(world, char, EcsChar);
+    ECS_COMPONENT_PRIMITIVE(world, ecs_byte_t, EcsByte);
+    ECS_COMPONENT_PRIMITIVE(world, uint8_t, EcsU8);
+    ECS_COMPONENT_PRIMITIVE(world, uint16_t, EcsU16);
+    ECS_COMPONENT_PRIMITIVE(world, uint32_t, EcsU32);
+    ECS_COMPONENT_PRIMITIVE(world, uint64_t, EcsU64);
+    ECS_COMPONENT_PRIMITIVE(world, uintptr_t, EcsUPtr);
+    ECS_COMPONENT_PRIMITIVE(world, int8_t, EcsI8);
+    ECS_COMPONENT_PRIMITIVE(world, int16_t, EcsI16);
+    ECS_COMPONENT_PRIMITIVE(world, int32_t, EcsI32);
+    ECS_COMPONENT_PRIMITIVE(world, int64_t, EcsI64);
+    ECS_COMPONENT_PRIMITIVE(world, intptr_t, EcsIPtr);
+    ECS_COMPONENT_PRIMITIVE(world, size_t, EcsUPtr);
+    ECS_COMPONENT_PRIMITIVE(world, float, EcsF32);
+    ECS_COMPONENT_PRIMITIVE(world, double, EcsF64);
+    ECS_COMPONENT_PRIMITIVE(world, ecs_string_t, EcsString);
+    ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);  
 
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
@@ -440,53 +381,20 @@ void FlecsComponentsMetaImport(
             __ecs_type_kind_t__
         });
 
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsPrimitive),
-        EcsId, {"EcsPrimitive"}),
-        EcsType, &__EcsPrimitive__);
 
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsArray),
-        EcsId, {"EcsArray"}),
-        EcsType, &__EcsArray__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsVector),
-        EcsId, {"EcsVector"}),
-        EcsType, &__EcsVector__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsMap),
-        EcsId, {"EcsMap"}),
-        EcsType, &__EcsMap__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsBitmask),
-        EcsId, {"EcsBitmask"}),
-        EcsType, &__EcsBitmask__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsEnum),
-        EcsId, {"EcsEnum"}),
-        EcsType, &__EcsEnum__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsMember),
-        EcsId, {"EcsMember"}),
-        EcsType, &__EcsMember__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsStruct),
-        EcsId, {"EcsStruct"}),
-        EcsType, &__EcsStruct__);
-
-    ecs_set_ptr(world, ecs_set(world, ecs_entity(EcsType),
-        EcsId, {"EcsType"}),
-        EcsType, &__EcsType__);
-
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"ecs_type_op_kind_t"}),
-        EcsType, &__ecs_type_op_kind_t__);
-
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"ecs_type_op_t"}),
-        EcsType, &__ecs_type_op_t__);
-
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"EcsTypeSerializer"}),
-        EcsType, &__EcsTypeSerializer__);
+    /* Insert meta definitions for other types */
+    ECS_COMPONENT_TYPE(world, EcsPrimitive);
+    ECS_COMPONENT_TYPE(world, EcsEnum);
+    ECS_COMPONENT_TYPE(world, EcsBitmask);
+    ECS_COMPONENT_TYPE(world, EcsMember);
+    ECS_COMPONENT_TYPE(world, EcsStruct);
+    ECS_COMPONENT_TYPE(world, EcsArray);
+    ECS_COMPONENT_TYPE(world, EcsVector);
+    ECS_COMPONENT_TYPE(world, EcsMap);
+    ECS_COMPONENT_TYPE(world, EcsType);
+    ECS_COMPONENT_TYPE(world, ecs_type_op_kind_t);
+    ECS_COMPONENT_TYPE(world, ecs_type_op_t);
+    ECS_COMPONENT_TYPE(world, EcsTypeSerializer);
 
     /* -- Initialize metadata for public Flecs core components -- */
     ecs_set(world, ecs_set(world, ecs_entity(EcsId),
@@ -499,4 +407,24 @@ void FlecsComponentsMetaImport(
         .alignment = ECS_ALIGNOF(EcsComponent),
         .descriptor = "{size_t size;}"
     });
+
+    /* Export components to public handles */
+    ECS_EXPORT_COMPONENT(bool);
+    ECS_EXPORT_COMPONENT(char);
+    ECS_EXPORT_COMPONENT(ecs_byte_t);
+    ECS_EXPORT_COMPONENT(uint8_t);
+    ECS_EXPORT_COMPONENT(uint16_t);
+    ECS_EXPORT_COMPONENT(uint32_t);
+    ECS_EXPORT_COMPONENT(uint64_t);
+    ECS_EXPORT_COMPONENT(uintptr_t);
+    ECS_EXPORT_COMPONENT(int8_t);
+    ECS_EXPORT_COMPONENT(int16_t);
+    ECS_EXPORT_COMPONENT(int32_t);
+    ECS_EXPORT_COMPONENT(int64_t);
+    ECS_EXPORT_COMPONENT(intptr_t);
+    ECS_EXPORT_COMPONENT(size_t);
+    ECS_EXPORT_COMPONENT(float);
+    ECS_EXPORT_COMPONENT(double);
+    ECS_EXPORT_COMPONENT(ecs_string_t);
+    ECS_EXPORT_COMPONENT(ecs_entity_t);
 }

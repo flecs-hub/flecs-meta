@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     Position p = {10, 20};
 
     /* Serialize the value to a string */
-    char *str = ecs_pretty_print_ptr(world, position_type, &p);
+    char *str = ecs_ptr_to_str(world, position_type, &p);
     printf("Position: %s\n", str);
     free(str);
 

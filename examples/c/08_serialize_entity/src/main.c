@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
         Position, {10, 20});
 
     /* Pretty print the player entity */
-    char *str = ecs_pretty_print_entity(world, player);
+    char *str = ecs_entity_to_str(world, player);
     printf("%s\n", str);
     free(str);
 

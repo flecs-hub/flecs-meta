@@ -4,14 +4,14 @@
  * for when implementing a new serializer. */
 
 static
-void str_ser_type(
+int str_ser_type(
     ecs_world_t *world,
     ecs_vector_t *ser, 
     void *base, 
     ecs_strbuf_t *str);
 
 static
-void str_ser_type_op(
+int str_ser_type_op(
     ecs_world_t *world,
     ecs_type_op_t *op, 
     void *base,
@@ -31,11 +31,15 @@ void str_ser_primitive(
     case EcsBool:
         ecs_strbuf_appendstr(str, bool_str[(int)*(bool*)base]);
         break;
-    case EcsChar:
+    case EcsChar: {
+        char chbuf[3];
+        ecs_chresc(chbuf, *(char*)base, '\'');
+
         ecs_strbuf_appendstrn(str, "'", 1);
-        ecs_strbuf_appendstrn(str, (char*)base, 1);
+        ecs_strbuf_appendstr(str, chbuf);
         ecs_strbuf_appendstrn(str, "'", 1);
         break;
+    }
     case EcsByte:
         ecs_strbuf_append(str, "0x%x", *(uint8_t*)base);
         break;
@@ -49,7 +53,7 @@ void str_ser_primitive(
         ecs_strbuf_append(str, "%u", *(uint32_t*)base);
         break;
     case EcsU64:
-        ecs_strbuf_append(str, "%u", *(uint64_t*)base);
+        ecs_strbuf_append(str, "%llu", *(uint64_t*)base);
         break;
     case EcsI8:
         ecs_strbuf_append(str, "%d", *(int8_t*)base);
@@ -61,7 +65,7 @@ void str_ser_primitive(
         ecs_strbuf_append(str, "%d", *(int32_t*)base);
         break;
     case EcsI64:
-        ecs_strbuf_append(str, "%d", *(int64_t*)base);
+        ecs_strbuf_append(str, "%lld", *(int64_t*)base);
         break;
     case EcsF32:
         ecs_strbuf_append(str, "%f", *(float*)base);
@@ -78,9 +82,19 @@ void str_ser_primitive(
     case EcsString: {
         char *value = *(char**)base;
         if (value) {
-            ecs_strbuf_appendstrn(str, "\"", 1);
-            ecs_strbuf_appendstr(str, value);
-            ecs_strbuf_appendstrn(str, "\"", 1);
+            int32_t length = ecs_stresc(NULL, 0, '"', value);
+            if (length == strlen(value)) {
+                ecs_strbuf_appendstrn(str, "\"", 1);
+                ecs_strbuf_appendstr(str, value);
+                ecs_strbuf_appendstrn(str, "\"", 1);
+            } else {
+                char *out = ecs_os_malloc(length + 3);
+                ecs_stresc(out + 1, length, '"', value);
+                out[0] = '"';
+                out[length + 1] = '"';
+                out[length + 2] = '\0';
+                ecs_strbuf_appendstr_zerocpy(str, out);
+            }
         } else {
             ecs_strbuf_appendstr(str, "nullptr");
         }
@@ -101,7 +115,7 @@ void str_ser_primitive(
 
 /* Serialize enumeration */
 static
-void str_ser_enum(
+int str_ser_enum(
     ecs_type_op_t *op, 
     void *base, 
     ecs_strbuf_t *str) 
@@ -113,14 +127,18 @@ void str_ser_enum(
     /* Enumeration constants are stored in a map that is keyed on the
      * enumeration value. */
     char **constant = ecs_map_get(op->is.constant, char*, value);
-    ecs_assert(constant != NULL, ECS_INVALID_PARAMETER, NULL);
+    if (!constant) {
+        return -1;
+    }
 
     ecs_strbuf_appendstr(str, *constant);
+
+    return 0;
 }
 
 /* Serialize bitmask */
 static
-void str_ser_bitmask(
+int str_ser_bitmask(
     ecs_type_op_t *op, 
     void *base, 
     ecs_strbuf_t *str) 
@@ -130,6 +148,7 @@ void str_ser_bitmask(
     int32_t value = *(int32_t*)base;
     ecs_map_key_t key;
     char **constant;
+    int count = 0;
 
     ecs_strbuf_list_push(str, "", " | ");
 
@@ -139,15 +158,22 @@ void str_ser_bitmask(
     while ((constant = ecs_map_next(&it, char*, &key))) {
         if ((value & key) == key) {
             ecs_strbuf_list_appendstr(str, *constant);
+            count ++;
         }
     }
 
+    if (!count) {
+        ecs_strbuf_list_appendstr(str, "0");
+    }
+
     ecs_strbuf_list_pop(str, "");
+
+    return 0;
 }
 
 /* Serialize elements of a contiguous array */
 static
-void str_ser_elements(
+int str_ser_elements(
     ecs_world_t *world,
     ecs_vector_t *elem_ops, 
     void *base, 
@@ -162,33 +188,42 @@ void str_ser_elements(
     int i;
     for (i = 0; i < elem_count; i ++) {
         ecs_strbuf_list_next(str);
-        str_ser_type(world, elem_ops, ptr, str);
+        if (str_ser_type(world, elem_ops, ptr, str)) {
+            return -1;
+        }
         ptr = ECS_OFFSET(ptr, elem_size);
     }
 
     ecs_strbuf_list_pop(str, "]");
+
+    return 0;
 }
 
 /* Serialize array */
 static
-void str_ser_array(
+int str_ser_array(
     ecs_world_t *world,
     ecs_type_op_t *op, 
     void *base, 
     ecs_strbuf_t *str) 
 {
-    str_ser_elements(world, op->is.collection, base, op->count, op->size, str);
+    return str_ser_elements(
+        world, op->is.collection, base, op->count, op->size, str);
 }
 
 /* Serialize vector */
 static
-void str_ser_vector(
+int str_ser_vector(
     ecs_world_t *world,
     ecs_type_op_t *op, 
     void *base, 
     ecs_strbuf_t *str) 
 {
     ecs_vector_t *value = *(ecs_vector_t**)base;
+    if (!value) {
+        ecs_strbuf_appendstr(str, "nullptr");
+        return 0;
+    }
     
     int32_t count = ecs_vector_count(value);
     void *array = ecs_vector_first(value);
@@ -200,12 +235,12 @@ void str_ser_vector(
     size_t elem_size = elem_op_hdr->size;
 
     /* Serialize contiguous buffer of vector */
-    str_ser_elements(world, elem_ops, array, count, elem_size, str);
+    return str_ser_elements(world, elem_ops, array, count, elem_size, str);
 }
 
 /* Serialize map */
 static
-void str_ser_map(
+int str_ser_map(
     ecs_world_t *world,
     ecs_type_op_t *op, 
     void *base, 
@@ -221,19 +256,27 @@ void str_ser_map(
 
     while ((ptr = _ecs_map_next(&it, 0, &key))) {
         ecs_strbuf_list_next(str);
-        str_ser_type_op(world, op->is.map.key_op, (void*)&key, str);
+        if (str_ser_type_op(world, op->is.map.key_op, (void*)&key, str)) {
+            return -1;
+        }
+
         ecs_strbuf_appendstr(str, " = ");
-        str_ser_type(world, op->is.map.element_ops, ptr, str);
+        
+        if (str_ser_type(world, op->is.map.element_ops, ptr, str)) {
+            return -1;
+        }
 
         key = 0;
     }
 
     ecs_strbuf_list_pop(str, "}");
+
+    return 0;
 }
 
 /* Forward serialization to the different type kinds */
 static
-void str_ser_type_op(
+int str_ser_type_op(
     ecs_world_t *world,
     ecs_type_op_t *op, 
     void *base,
@@ -250,26 +293,38 @@ void str_ser_type_op(
         str_ser_primitive(world, op, ECS_OFFSET(base, op->offset), str);
         break;
     case EcsOpEnum:
-        str_ser_enum(op, ECS_OFFSET(base, op->offset), str);
+        if (str_ser_enum(op, ECS_OFFSET(base, op->offset), str)) {
+            return -1;
+        }
         break;
     case EcsOpBitmask:
-        str_ser_bitmask(op, ECS_OFFSET(base, op->offset), str);
+        if (str_ser_bitmask(op, ECS_OFFSET(base, op->offset), str)) {
+            return -1;
+        }
         break;
     case EcsOpArray:
-        str_ser_array(world, op, ECS_OFFSET(base, op->offset), str);
+        if (str_ser_array(world, op, ECS_OFFSET(base, op->offset), str)) {
+            return -1;
+        }
         break;
     case EcsOpVector:
-        str_ser_vector(world, op, ECS_OFFSET(base, op->offset), str);
+        if (str_ser_vector(world, op, ECS_OFFSET(base, op->offset), str)) {
+            return -1;
+        }
         break;
     case EcsOpMap:
-        str_ser_map(world, op, ECS_OFFSET(base, op->offset), str);
+        if (str_ser_map(world, op, ECS_OFFSET(base, op->offset), str)) {
+            return -1;
+        }
         break;
     }
+
+    return 0;
 }
 
 /* Iterate over the type ops of a type */
 static
-void str_ser_type(
+int str_ser_type(
     ecs_world_t *world,
     ecs_vector_t *ser, 
     void *base, 
@@ -300,13 +355,20 @@ void str_ser_type(
             ecs_strbuf_list_pop(str, "}");
             break;
         default:
-            str_ser_type_op(world, op, base, str);
+            if (str_ser_type_op(world, op, base, str)) {
+                goto error;
+            }
             break;
         }
     }
+
+    return 0;
+error:
+    ecs_strbuf_reset(str);
+    return -1;
 }
 
-char* ecs_pretty_print_ptr(
+char* ecs_ptr_to_str(
     ecs_world_t *world, 
     ecs_entity_t type, 
     void* ptr)
@@ -316,11 +378,14 @@ char* ecs_pretty_print_ptr(
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
     ecs_strbuf_t str = ECS_STRBUF_INIT;
-    str_ser_type(world, ser->ops, ptr, &str);
+    if (str_ser_type(world, ser->ops, ptr, &str)) {
+        return NULL;
+    }
+
     return ecs_strbuf_get(&str);
 }
 
-char* ecs_pretty_print_entity(
+char* ecs_entity_to_str(
     ecs_world_t *world, 
     ecs_entity_t entity)
 {
@@ -344,7 +409,10 @@ char* ecs_pretty_print_entity(
         if (ser) {
             void *ptr = _ecs_get_ptr(world, entity, ids[i]);
             ecs_strbuf_append(&str, "    %s: ", ecs_get_id(world, ids[i]));
-            str_ser_type(world, ser->ops, ptr, &str);
+            if (str_ser_type(world, ser->ops, ptr, &str)) {
+                goto error;
+            }
+
             ecs_strbuf_appendstr(&str, "\n");
             comps_serialized ++;
         }
@@ -353,4 +421,7 @@ char* ecs_pretty_print_entity(
     ecs_strbuf_appendstr(&str, "}");
 
     return ecs_strbuf_get(&str);  
+error:
+    ecs_strbuf_reset(&str);
+    return NULL;
 }

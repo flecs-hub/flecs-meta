@@ -316,10 +316,9 @@ void ecs_meta_parse_params(
     /* Parse type identifier */
     ptr = ecs_meta_parse_type(ptr, &token->type, ctx);
     ptr = skip_ws(ptr);
-
+    
     /* If next token is a ',' the first type was a key type */
     if (*ptr == ',') {
-        ptr ++;
         ptr = skip_ws(ptr + 1);
         
         if (isdigit(*ptr)) {

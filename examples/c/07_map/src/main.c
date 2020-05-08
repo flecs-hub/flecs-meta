@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     ecs_map_set(m.items, (intptr_t)"Turkey sub", &s);
 
     /* Pretty print the value */
-    char *str = ecs_pretty_print_ptr(world, ecs_entity(Menu), &m);
+    char *str = ecs_ptr_to_str(world, ecs_entity(Menu), &m);
     printf("%s\n", str);
     free(str);
 

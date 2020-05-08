@@ -42,6 +42,21 @@ static EcsType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), 
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 
+#define ECS_ARRAY(name, T, length)\
+typedef T *name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"};
+
+#define ECS_VECTOR(name, T)\
+typedef ecs_vector_t *name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")"};
+
+#define ECS_MAP(name, K, T)\
+typedef ecs_map_t *name;\
+ECS_UNUSED \
+static EcsType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")"};
+
 #ifdef __cplusplus
 
 // Unspecialized class (see below)
@@ -297,10 +312,92 @@ ECS_STRUCT_C( EcsTypeSerializer, {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//// Serialization utilities
+////////////////////////////////////////////////////////////////////////////////
+
+#define ECS_MAX_I8 127
+#define ECS_MIN_I8 -128
+
+#define ECS_MAX_I16 32767
+#define ECS_MIN_I16 -32768
+
+#define ECS_MAX_I32 2147483647
+#define ECS_MIN_I32 -2147483648
+
+#define ECS_MAX_I64 9223372036854775807
+#define ECS_MIN_I64 (-9223372036854775807 - 1)
+
+#define ECS_MAX_U8 255u
+#define ECS_MAX_U16 65535u
+#define ECS_MAX_U32 4294967295u
+#define ECS_MAX_U64 18446744073709551615u
+
+#define ECS_MAX_I8_STR "127"
+#define ECS_MIN_I8_STR "-128"
+
+#define ECS_MAX_I16_STR "32767"
+#define ECS_MIN_I16_STR "-32768"
+
+#define ECS_MAX_I32_STR "2147483647"
+#define ECS_MIN_I32_STR "-2147483648"
+
+#define ECS_MAX_I64_STR "9223372036854775807"
+#define ECS_MIN_I64_STR "-9223372036854775808"
+
+#define ECS_MAX_U8_STR "255"
+#define ECS_MAX_U16_STR "65535"
+#define ECS_MAX_U32_STR "4294967295"
+#define ECS_MAX_U64_STR "18446744073709551615"
+
+/** Escape a character */
+FLECS_COMPONENTS_META_EXPORT
+char* ecs_chresc(
+    char *out, 
+    char in, 
+    char delimiter);
+
+/** Parse an escaped character */
+FLECS_COMPONENTS_META_EXPORT
+const char* ecs_chrparse(
+    const char *in, 
+    char *out);
+
+/** Escape a string */
+FLECS_COMPONENTS_META_EXPORT
+size_t ecs_stresc(
+    char *out, 
+    size_t n, 
+    char delimiter, 
+    const char *in);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+////////////////////////////////////////////////////////////////////////////////
 //// Module implementation
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct FlecsComponentsMeta {
+    ECS_DECLARE_COMPONENT(bool);
+    ECS_DECLARE_COMPONENT(char);
+    ECS_DECLARE_COMPONENT(ecs_byte_t);
+    ECS_DECLARE_COMPONENT(uint8_t);
+    ECS_DECLARE_COMPONENT(uint16_t);
+    ECS_DECLARE_COMPONENT(uint32_t);
+    ECS_DECLARE_COMPONENT(uint64_t);
+    ECS_DECLARE_COMPONENT(uintptr_t);
+    ECS_DECLARE_COMPONENT(int8_t);
+    ECS_DECLARE_COMPONENT(int16_t);
+    ECS_DECLARE_COMPONENT(int32_t);
+    ECS_DECLARE_COMPONENT(int64_t);
+    ECS_DECLARE_COMPONENT(intptr_t);
+    ECS_DECLARE_COMPONENT(size_t);
+    ECS_DECLARE_COMPONENT(float);
+    ECS_DECLARE_COMPONENT(double);
+    ECS_DECLARE_COMPONENT(ecs_string_t);
+    ECS_DECLARE_COMPONENT(ecs_entity_t);
     ECS_DECLARE_COMPONENT(EcsPrimitive);
     ECS_DECLARE_COMPONENT(EcsEnum);
     ECS_DECLARE_COMPONENT(EcsBitmask);
@@ -318,14 +415,14 @@ extern "C" {
 
 /** Convert value to a string. */
 FLECS_COMPONENTS_META_EXPORT
-char* ecs_pretty_print_ptr(
+char* ecs_ptr_to_str(
     ecs_world_t *world, 
     ecs_entity_t type, 
     void* ptr);
 
 /** Convert value to a string. */
 FLECS_COMPONENTS_META_EXPORT
-char* ecs_pretty_print_entity(
+char* ecs_entity_to_str(
     ecs_world_t *world, 
     ecs_entity_t entity);
 
@@ -334,11 +431,25 @@ void FlecsComponentsMetaImport(
     ecs_world_t *world,
     int flags);
 
-#ifdef __cplusplus
-}
-#endif
-
 #define FlecsComponentsMetaImportHandles(handles)\
+    ECS_IMPORT_COMPONENT(handles, bool);\
+    ECS_IMPORT_COMPONENT(handles, char);\
+    ECS_IMPORT_COMPONENT(handles, ecs_byte_t);\
+    ECS_IMPORT_COMPONENT(handles, uint8_t);\
+    ECS_IMPORT_COMPONENT(handles, uint16_t);\
+    ECS_IMPORT_COMPONENT(handles, uint32_t);\
+    ECS_IMPORT_COMPONENT(handles, uint64_t);\
+    ECS_IMPORT_COMPONENT(handles, uintptr_t);\
+    ECS_IMPORT_COMPONENT(handles, int8_t);\
+    ECS_IMPORT_COMPONENT(handles, int16_t);\
+    ECS_IMPORT_COMPONENT(handles, int32_t);\
+    ECS_IMPORT_COMPONENT(handles, int64_t);\
+    ECS_IMPORT_COMPONENT(handles, intptr_t);\
+    ECS_IMPORT_COMPONENT(handles, size_t);\
+    ECS_IMPORT_COMPONENT(handles, float);\
+    ECS_IMPORT_COMPONENT(handles, double);\
+    ECS_IMPORT_COMPONENT(handles, ecs_string_t);\
+    ECS_IMPORT_COMPONENT(handles, ecs_entity_t);\
     ECS_IMPORT_COMPONENT(handles, EcsPrimitive);\
     ECS_IMPORT_COMPONENT(handles, EcsEnum);\
     ECS_IMPORT_COMPONENT(handles, EcsBitmask);\
@@ -437,7 +548,7 @@ namespace flecs {
 
 template <typename T>
 std::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
-    char *str = ecs_pretty_print_ptr(world.c_ptr(), type, &data);
+    char *str = ecs_ptr_to_str(world.c_ptr(), type, &data);
     std::string result = std::string(str);
     free(str);
     return result;
@@ -456,7 +567,7 @@ std::string pretty_print(flecs::world& world, T& data) {
 
 template <>
 std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
-    char *str = ecs_pretty_print_entity(world.c_ptr(), entity.id());
+    char *str = ecs_entity_to_str(world.c_ptr(), entity.id());
     std::string result = std::string(str);
     free(str);
     return result;
