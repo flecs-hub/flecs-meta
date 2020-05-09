@@ -384,6 +384,7 @@ size_t ecs_stresc(
 typedef struct ecs_meta_scope_t {
     ecs_entity_t type;
     ecs_vector_t *ops;
+    int32_t start;
     int32_t cur;
     void *base;
 } ecs_meta_scope_t;

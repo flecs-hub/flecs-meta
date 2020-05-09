@@ -11,11 +11,15 @@
 // Testsuite 'Struct'
 void Struct_struct(void);
 void Struct_nested_struct(void);
+void Struct_struct_by_name(void);
+void Struct_nested_struct_by_name(void);
+void Struct_struct_w_array(void);
+void Struct_struct_w_array_by_name(void);
 
 static bake_test_suite suites[] = {
     {
         .id = "Struct",
-        .testcase_count = 2,
+        .testcase_count = 6,
         .testcases = (bake_test_case[]){
             {
                 .id = "struct",
@@ -24,6 +28,22 @@ static bake_test_suite suites[] = {
             {
                 .id = "nested_struct",
                 .function = Struct_nested_struct
+            },
+            {
+                .id = "struct_by_name",
+                .function = Struct_struct_by_name
+            },
+            {
+                .id = "nested_struct_by_name",
+                .function = Struct_nested_struct_by_name
+            },
+            {
+                .id = "struct_w_array",
+                .function = Struct_struct_w_array
+            },
+            {
+                .id = "struct_w_array_by_name",
+                .function = Struct_struct_w_array_by_name
             }
         }
     }

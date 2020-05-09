@@ -16,7 +16,11 @@
             "id": "Struct",
             "testcases": [
                 "struct",
-                "nested_struct"
+                "nested_struct",
+                "struct_by_name",
+                "nested_struct_by_name",
+                "struct_w_array",
+                "struct_w_array_by_name"
             ]
         }]
     }

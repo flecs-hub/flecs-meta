@@ -50,6 +50,7 @@ ecs_meta_iter_t ecs_meta_iter(
     result.depth = 0;
     result.scope[0].type = type;
     result.scope[0].ops = ser->ops;
+    result.scope[0].start = 1;
     result.scope[0].cur = 1;
     result.scope[0].base = base;
 
@@ -98,13 +99,31 @@ int ecs_meta_move_cursor_name(
     const char *name)
 {
     ecs_meta_scope_t *scope = get_scope(iter);
+    ecs_type_op_t *ops = ecs_vector_first(scope->ops);
+    int32_t i, ops_count = ecs_vector_count(scope->ops);
+    int32_t depth = 1;
 
-    ecs_vector_each(scope->ops, ecs_type_op_t, op, {
-        if (op->name && !strcmp(op->name, name)) {
-            scope->cur = op_i;
-            return -0;
+    for (i = scope->start; i < ops_count; i ++) {
+        ecs_type_op_t *op = &ops[i];
+
+        if (depth <= 1) {
+            if (op->name && !strcmp(op->name, name)) {
+                scope->cur = i;
+                return 0;
+            }
         }
-    });
+
+        if (op->kind == EcsOpPush) {
+            depth ++;
+        }
+
+        if (op->kind == EcsOpPop) {
+            depth --;
+            if (depth < 0) {
+                return -1;
+            }
+        }
+    }
 
     return -1;
 }
@@ -119,6 +138,14 @@ int ecs_meta_push(
         return -1;
     } else {
         scope->cur ++;
+        iter->depth ++;
+
+        ecs_meta_scope_t *child_scope = get_scope(iter);
+        child_scope->base = scope->base;
+        child_scope->start = scope->cur;
+        child_scope->cur = scope->cur;
+        child_scope->ops = scope->ops;
+
         return 0;
     }
 }
@@ -133,7 +160,9 @@ int ecs_meta_pop(
     for (i = scope->cur; i < ops_count; i ++) {
         ecs_type_op_t *op = &ops[i];
         if (op->kind == EcsOpPop) {
-            scope->cur = i;
+            iter->depth -- ;
+            ecs_meta_scope_t *parent_scope = get_scope(iter);
+            parent_scope->cur = i;
             return 0;
         }
     }

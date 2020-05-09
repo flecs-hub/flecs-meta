@@ -253,8 +253,8 @@ void Map_map_int_vector_int() {
     ECS_META(world, MapIntVectorInt);
 
     {
-    ecs_vector_t *v1 = ecs_vector_from_array(2, (&(int32_t[]){10, 20}));
-    ecs_vector_t *v2 = ecs_vector_from_array(2, (&(int32_t[]){30, 40}));
+    ecs_vector_t *v1 = ecs_vector_from_array(2, ((int32_t[]){10, 20}));
+    ecs_vector_t *v2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}));
     ecs_map_t *value = ecs_map_new(ArrayInt, 0);
     ecs_map_set(value, 1, &v1);
     ecs_map_set(value, 2, &v2);
