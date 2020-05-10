@@ -14,7 +14,7 @@ ecs_type_op_t* get_op(
 {
     ecs_type_op_t *ops = ecs_vector_first(scope->ops);
     ecs_assert(ops != NULL, ECS_INVALID_PARAMETER, NULL);
-    return &ops[scope->cur];
+    return &ops[scope->cur_op];
 }
 
 static
@@ -22,7 +22,7 @@ ecs_type_op_t* get_ptr(
     ecs_meta_scope_t *scope)
 {
     ecs_type_op_t *op = get_op(scope);
-    return ECS_OFFSET(scope->base, op->offset);
+    return ECS_OFFSET(scope->base, op->offset + op->size * scope->cur_elem);
 }
 
 ecs_meta_iter_t ecs_meta_iter(
@@ -51,8 +51,10 @@ ecs_meta_iter_t ecs_meta_iter(
     result.scope[0].type = type;
     result.scope[0].ops = ser->ops;
     result.scope[0].start = 1;
-    result.scope[0].cur = 1;
+    result.scope[0].cur_op = 1;
     result.scope[0].base = base;
+    result.scope[0].is_collection = false;
+    result.scope[0].count = 0;
 
     return result;
 }
@@ -68,12 +70,23 @@ int ecs_meta_next(
 {
     ecs_meta_scope_t *scope = get_scope(iter);
     int32_t ops_count = ecs_vector_count(scope->ops);
-    
-    if (scope->cur >= ops_count) {
-        return -1;
+
+    if (scope->count) {
+        if (scope->cur_op >= scope->count) {
+            return -1;
+        }
+    } else {
+        if (scope->cur_op >= ops_count) {
+            return -1;
+        }
     }
 
-    scope->cur ++;
+    if (scope->is_collection) {
+        scope->cur_op = 1;
+        scope->cur_elem ++;
+    } else {
+        scope->cur_op ++;
+    }
 
     return 0;
 }
@@ -89,7 +102,7 @@ int ecs_meta_move_cursor(
         return -1;
     }
 
-    scope->cur = cursor;
+    scope->cur_op = cursor;
 
     return 0;
 }
@@ -108,7 +121,7 @@ int ecs_meta_move_cursor_name(
 
         if (depth <= 1) {
             if (op->name && !strcmp(op->name, name)) {
-                scope->cur = i;
+                scope->cur_op = i;
                 return 0;
             }
         }
@@ -133,21 +146,39 @@ int ecs_meta_push(
 {
     ecs_meta_scope_t *scope = get_scope(iter);
     ecs_type_op_t *op = get_op(scope);
-   
-    if (op->kind != EcsOpPush) {
-        return -1;
-    } else {
-        scope->cur ++;
-        iter->depth ++;
+    
+    scope->cur_op ++;
+    iter->depth ++;
+    ecs_meta_scope_t *child_scope = get_scope(iter);
+    child_scope->cur_elem = 0;
 
-        ecs_meta_scope_t *child_scope = get_scope(iter);
+    switch(op->kind) {
+    case EcsOpPush: {
         child_scope->base = scope->base;
-        child_scope->start = scope->cur;
-        child_scope->cur = scope->cur;
+        child_scope->start = scope->cur_op;
+        child_scope->cur_op = scope->cur_op;
         child_scope->ops = scope->ops;
-
-        return 0;
+        child_scope->is_collection = false;
+        child_scope->count = 0;
+        break;
     }
+    case EcsOpArray:
+        child_scope->base = ECS_OFFSET(scope->base, op->offset);
+        child_scope->start = 1;
+        child_scope->cur_op = 1;
+        child_scope->ops = op->is.collection;
+        child_scope->is_collection = true;
+        child_scope->count = op->count;
+#ifndef NDEBUG
+        ecs_type_op_t *op = ecs_vector_first(child_scope->ops);
+        ecs_assert(op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+#endif
+        break;
+    default:
+        return -1;
+    }
+
+    return 0;
 }
 
 int ecs_meta_pop(
@@ -157,13 +188,18 @@ int ecs_meta_pop(
     ecs_type_op_t *ops = ecs_vector_first(scope->ops);
     int32_t i, ops_count = ecs_vector_count(scope->ops);
 
-    for (i = scope->cur; i < ops_count; i ++) {
-        ecs_type_op_t *op = &ops[i];
-        if (op->kind == EcsOpPop) {
-            iter->depth -- ;
-            ecs_meta_scope_t *parent_scope = get_scope(iter);
-            parent_scope->cur = i;
-            return 0;
+    if (scope->is_collection) {
+        iter->depth --;
+        return 0;
+    } else {
+        for (i = scope->cur_op; i < ops_count; i ++) {
+            ecs_type_op_t *op = &ops[i];
+            if (op->kind == EcsOpPop) {
+                iter->depth -- ;
+                ecs_meta_scope_t *parent_scope = get_scope(iter);
+                parent_scope->cur_op = i;
+                return 0;
+            }
         }
     }
 

@@ -385,8 +385,11 @@ typedef struct ecs_meta_scope_t {
     ecs_entity_t type;
     ecs_vector_t *ops;
     int32_t start;
-    int32_t cur;
+    int32_t cur_op;
+    int32_t cur_elem;
+    int32_t count;
     void *base;
+    bool is_collection;
 } ecs_meta_scope_t;
 
 typedef struct ecs_meta_iter_t {
