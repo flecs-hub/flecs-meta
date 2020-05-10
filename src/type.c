@@ -196,6 +196,7 @@ ecs_entity_t ecs_meta_lookup(
         type = ecs_lookup(world, typename);
         if (!type) {
             ecs_meta_error(ctx, ptr, "unknown type '%s'", typename);
+            return 0;
         }
     }
 

@@ -376,7 +376,7 @@ size_t ecs_stresc(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Deserialization utilities
+//// Deserialization API
 ////////////////////////////////////////////////////////////////////////////////
 
 #define ECS_META_MAX_SCOPE_DEPTH (32) /* >32 levels of nesting is not sane */
@@ -392,77 +392,77 @@ typedef struct ecs_meta_scope_t {
     bool is_collection;
 } ecs_meta_scope_t;
 
-typedef struct ecs_meta_iter_t {
+typedef struct ecs_meta_cursor_t {
     ecs_world_t *world;
     ecs_meta_scope_t scope[ECS_META_MAX_SCOPE_DEPTH];
     int32_t depth;
-} ecs_meta_iter_t;
+} ecs_meta_cursor_t;
 
 FLECS_COMPONENTS_META_EXPORT
-ecs_meta_iter_t ecs_meta_iter(
+ecs_meta_cursor_t ecs_meta_cursor(
     ecs_world_t *world,
     ecs_entity_t type, 
     void *base);
 
 FLECS_COMPONENTS_META_EXPORT
 void* ecs_meta_get_ptr(
-    ecs_meta_iter_t *iter);
+    ecs_meta_cursor_t *cursor);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_next(
-    ecs_meta_iter_t *iter);
+    ecs_meta_cursor_t *cursor);
 
 FLECS_COMPONENTS_META_EXPORT
-int ecs_meta_move_cursor(
-    ecs_meta_iter_t *iter,
-    int32_t cursor);
+int ecs_meta_move(
+    ecs_meta_cursor_t *cursor,
+    int32_t pos);
 
 FLECS_COMPONENTS_META_EXPORT
-int ecs_meta_move_cursor_name(
-    ecs_meta_iter_t *iter,
+int ecs_meta_move_name(
+    ecs_meta_cursor_t *cursor,
     const char *name);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_push(
-    ecs_meta_iter_t *iter);
+    ecs_meta_cursor_t *cursor);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_pop(
-    ecs_meta_iter_t *iter);
+    ecs_meta_cursor_t *cursor);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_bool(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     bool value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_char(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     char value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_int(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     int64_t value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_uint(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     uint64_t value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_float(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     double value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_string(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     const char *value);
 
 FLECS_COMPONENTS_META_EXPORT
 int ecs_meta_set_entity(
-    ecs_meta_iter_t *iter,
+    ecs_meta_cursor_t *cursor,
     ecs_entity_t value);
 
 

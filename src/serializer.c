@@ -172,6 +172,8 @@ ecs_vector_t* serialize_struct(
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
     }
 
+    int32_t push_op = ecs_vector_count(ops);
+
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t) {
         .kind = EcsOpPush,
@@ -280,13 +282,18 @@ ecs_vector_t* serialize_struct(
     };
 
     if (op_header) {
-        op_header = ecs_vector_first(ops); /* Might have reallocd */
+        op_header = ecs_vector_first(ops);
         *op_header = (ecs_type_op_t) {
             .kind = EcsOpHeader,
             .size = size,
             .alignment = alignment
         };
     }
+
+    ecs_type_op_t *op_push = ecs_vector_get(ops, ecs_type_op_t, push_op);
+    ecs_assert(op_push->kind == EcsOpPush, ECS_INTERNAL_ERROR, NULL);
+    op_push->size = size;
+    op_push->alignment = alignment;
 
     return ops;
 }
