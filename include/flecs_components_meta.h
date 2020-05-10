@@ -389,6 +389,7 @@ typedef struct ecs_meta_scope_t {
     int32_t cur_elem;
     int32_t count;
     void *base;
+    ecs_vector_t *vector;
     bool is_collection;
 } ecs_meta_scope_t;
 

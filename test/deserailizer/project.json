@@ -22,7 +22,12 @@
                 "struct_w_array",
                 "struct_w_array_by_name",
                 "struct_w_array_nested_struct",
-                "struct_w_array_nested_struct_by_name"
+                "struct_w_array_nested_struct_by_name",
+                "struct_w_vector",
+                "struct_w_vector_by_name",
+                "struct_w_vector_nested_struct",
+                "struct_w_vector_nested_struct_by_name"
+
             ]
         }]
     }

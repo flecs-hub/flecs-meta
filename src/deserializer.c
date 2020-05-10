@@ -22,6 +22,12 @@ ecs_type_op_t* get_ptr(
     ecs_meta_scope_t *scope)
 {
     ecs_type_op_t *op = get_op(scope);
+
+    if (scope->vector) {
+        _ecs_vector_set_min_count(&scope->vector, op->size, scope->cur_elem + 1);
+        scope->base = ecs_vector_first(scope->vector);
+    }
+
     return ECS_OFFSET(scope->base, op->offset + op->size * scope->cur_elem);
 }
 
@@ -56,6 +62,7 @@ ecs_meta_cursor_t ecs_meta_cursor(
     result.scope[0].base = base;
     result.scope[0].is_collection = false;
     result.scope[0].count = 0;
+    result.scope[0].vector = NULL;
 
     return result;
 }
@@ -85,10 +92,12 @@ int ecs_meta_next(
     if (scope->is_collection) {
         scope->cur_op = 1;
         scope->cur_elem ++;
-        if (scope->cur_elem >= scope->count) {
-            printf("cur_elem = %d, count = %d\n", scope->cur_elem, scope->count);
-            return -1;
-        }
+
+        if (scope->count) {
+            if (scope->cur_elem >= scope->count) {
+                return -1;
+            }
+        }        
     } else {
         scope->cur_op ++;
     }
@@ -151,6 +160,11 @@ int ecs_meta_push(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
+
+    if (scope->vector) {
+        /* This makes sure the vector has enough space for the pushed element */
+        get_ptr(scope);
+    }
     
     scope->cur_op ++;
     cursor->depth ++;
@@ -165,19 +179,41 @@ int ecs_meta_push(
         child_scope->ops = scope->ops;
         child_scope->is_collection = false;
         child_scope->count = 0;
+        child_scope->vector = NULL;
         break;
     }
     case EcsOpArray:
-        child_scope->base = ECS_OFFSET(scope->base, op->offset);
+    case EcsOpVector: {
+        void *ptr = ECS_OFFSET(scope->base, op->offset);
+        ecs_vector_t *ops = op->is.collection;
+
+        if (op->kind == EcsOpArray) {
+            child_scope->base = ptr;
+            child_scope->count = op->count;
+            child_scope->vector = NULL;
+        } else {
+            ecs_type_op_t *header = ecs_vector_first(ops);
+            ecs_assert(header->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+            size_t elem_size = header->size;
+
+            ecs_vector_t *v = *(ecs_vector_t**)ptr;
+            if (!v) {
+                v = ecs_vector_new(elem_size, 2);
+            }
+            
+            child_scope->base = ecs_vector_first(v);
+            child_scope->count = 0;
+            child_scope->vector = v;
+        }
         child_scope->start = 1;
         child_scope->cur_op = 1;
-        child_scope->ops = op->is.collection;
+        child_scope->ops = ops;
         child_scope->is_collection = true;
-        child_scope->count = op->count;
 #ifndef NDEBUG
         ecs_type_op_t *op = ecs_vector_first(child_scope->ops);
         ecs_assert(op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
 #endif
+        }
         break;
     default:
         return -1;
@@ -195,19 +231,25 @@ int ecs_meta_pop(
 
     if (scope->is_collection) {
         cursor->depth --;
+        if (scope->vector) {
+            ecs_meta_scope_t *parent_scope = get_scope(cursor);
+            parent_scope->cur_op --;
+            void *ptr = get_ptr(parent_scope);
+            *(ecs_vector_t**)ptr = scope->vector;
+            parent_scope->cur_op ++;
+        }         
         return 0;
     } else {
         for (i = scope->cur_op; i < ops_count; i ++) {
             ecs_type_op_t *op = &ops[i];
             if (op->kind == EcsOpPop) {
-                cursor->depth -- ;
+                cursor->depth -- ;                
                 ecs_meta_scope_t *parent_scope = get_scope(cursor);
-
                 if (parent_scope->is_collection) {
                     parent_scope->cur_op = 1;
                     parent_scope->cur_elem ++;
                 } else {
-                    parent_scope->cur_op = i;
+                    parent_scope->cur_op = i;                   
                 }
                 return 0;
             }

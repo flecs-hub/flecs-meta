@@ -17,11 +17,15 @@ void Struct_struct_w_array(void);
 void Struct_struct_w_array_by_name(void);
 void Struct_struct_w_array_nested_struct(void);
 void Struct_struct_w_array_nested_struct_by_name(void);
+void Struct_struct_w_vector(void);
+void Struct_struct_w_vector_by_name(void);
+void Struct_struct_w_vector_nested_struct(void);
+void Struct_struct_w_vector_nested_struct_by_name(void);
 
 static bake_test_suite suites[] = {
     {
         .id = "Struct",
-        .testcase_count = 8,
+        .testcase_count = 12,
         .testcases = (bake_test_case[]){
             {
                 .id = "struct",
@@ -54,6 +58,22 @@ static bake_test_suite suites[] = {
             {
                 .id = "struct_w_array_nested_struct_by_name",
                 .function = Struct_struct_w_array_nested_struct_by_name
+            },
+            {
+                .id = "struct_w_vector",
+                .function = Struct_struct_w_vector
+            },
+            {
+                .id = "struct_w_vector_by_name",
+                .function = Struct_struct_w_vector_by_name
+            },
+            {
+                .id = "struct_w_vector_nested_struct",
+                .function = Struct_struct_w_vector_nested_struct
+            },
+            {
+                .id = "struct_w_vector_nested_struct_by_name",
+                .function = Struct_struct_w_vector_nested_struct_by_name
             }
         }
     }
