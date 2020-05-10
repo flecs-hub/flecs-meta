@@ -4,6 +4,7 @@
 /* This generated file contains includes for project dependencies */
 #include "flecs-components-meta/bake_config.h"
 
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Utility macro's (do not use in code!)
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +159,7 @@ namespace flecs {
 
     // Define a bitmask
     // In C++ trying to assign multiple flags to a variable of an enum type will
-    // result in a compiler error. Use this macro so that the serializer knows 
+    // result in a compiler error. Use this template so that the serializer knows 
     // this value is a bitmask, while also keeping the compiler happy.
     template<typename T>
     using bitmask = int32_t;
@@ -286,15 +287,16 @@ typedef ecs_vector_t ecs_constant_vector_t;
 
 ECS_STRUCT_C( ecs_type_op_t, {
     ecs_type_op_kind_t kind;
-    uint16_t size;
-    uint16_t count;
-    const char *name;
-
-    uint32_t offset;
-    uint8_t alignment;
+    uint16_t size;        /* Size of value or element type if array or vector */
+    uint16_t count;       /* Number of elements (only used for arrays) */
+    uint32_t offset;      /* Offset of value */
+    uint8_t alignment;    /* Alignment of value */
+    
+    const char *name;     /* Name of value (only used for struct members) */
 
 ECS_NON_SERIALIZABLE
 
+    /* Instruction-specific data */
     union {
         ecs_vector(ecs_type_op_t) collection;
         ecs_primitive_kind_t primitive;
@@ -309,6 +311,24 @@ ECS_NON_SERIALIZABLE
 ECS_STRUCT_C( EcsTypeSerializer, {
     ecs_vector(ecs_type_op_t) ops;
 });
+
+
+////////////////////////////////////////////////////////////////////////////////
+//// Pretty printer
+////////////////////////////////////////////////////////////////////////////////
+
+/** Convert value to a string. */
+FLECS_COMPONENTS_META_EXPORT
+char* ecs_ptr_to_str(
+    ecs_world_t *world, 
+    ecs_entity_t type, 
+    void* ptr);
+
+/** Convert value to a string. */
+FLECS_COMPONENTS_META_EXPORT
+char* ecs_entity_to_str(
+    ecs_world_t *world, 
+    ecs_entity_t entity);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -466,6 +486,10 @@ int ecs_meta_set_entity(
     ecs_meta_cursor_t *cursor,
     ecs_entity_t value);
 
+FLECS_COMPONENTS_META_EXPORT
+int ecs_meta_set_null(
+    ecs_meta_cursor_t *cursor);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Module implementation
@@ -504,19 +528,6 @@ typedef struct FlecsComponentsMeta {
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/** Convert value to a string. */
-FLECS_COMPONENTS_META_EXPORT
-char* ecs_ptr_to_str(
-    ecs_world_t *world, 
-    ecs_entity_t type, 
-    void* ptr);
-
-/** Convert value to a string. */
-FLECS_COMPONENTS_META_EXPORT
-char* ecs_entity_to_str(
-    ecs_world_t *world, 
-    ecs_entity_t entity);
 
 FLECS_COMPONENTS_META_EXPORT
 void FlecsComponentsMetaImport(

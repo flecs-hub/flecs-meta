@@ -192,13 +192,11 @@ int ecs_meta_push(
             child_scope->count = op->count;
             child_scope->vector = NULL;
         } else {
-            ecs_type_op_t *header = ecs_vector_first(ops);
-            ecs_assert(header->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
-            size_t elem_size = header->size;
-
             ecs_vector_t *v = *(ecs_vector_t**)ptr;
             if (!v) {
-                v = ecs_vector_new(elem_size, 2);
+                v = _ecs_vector_new(op->size, 2);
+            } else {
+                _ecs_vector_set_count(&v, op->size, 0);
             }
             
             child_scope->base = ecs_vector_first(v);
@@ -232,6 +230,7 @@ int ecs_meta_pop(
     if (scope->is_collection) {
         cursor->depth --;
         if (scope->vector) {
+            /* Vector ptr may have changed, so reassign vector field */
             ecs_meta_scope_t *parent_scope = get_scope(cursor);
             parent_scope->cur_op --;
             void *ptr = get_ptr(parent_scope);
@@ -343,6 +342,7 @@ int ecs_meta_set_uint(
 
         switch(op->is.primitive) {
         case EcsU8:
+        case EcsByte:
             *(uint8_t*)ptr = value;
             break;
         case EcsU16:
@@ -449,4 +449,45 @@ int ecs_meta_set_entity(
 
         return 0;
     }
+}
+
+int ecs_meta_set_null(
+    ecs_meta_cursor_t *cursor)
+{
+    ecs_meta_scope_t *scope = get_scope(cursor);
+    ecs_type_op_t *op = get_op(scope);
+
+    switch(op->kind) {
+    case EcsOpPrimitive: {
+        if (op->is.primitive != EcsString) {
+            return -1;
+        }
+
+        void *ptr = get_ptr(scope);
+        char *str = *(char**)ptr;
+        if (str) {
+            ecs_os_free(str);
+        }
+
+        *(char**)ptr = NULL;
+        break;
+    }
+
+    case EcsOpVector: {
+        void *ptr = get_ptr(scope);
+        ecs_vector_t *vec = *(ecs_vector_t**)ptr;
+        if (vec) {
+            ecs_vector_free(vec);
+        }
+
+        *(ecs_vector_t**)ptr = NULL;
+        break;
+    }
+
+    default:
+        return -1;
+        break;
+    }
+
+    return 0;
 }

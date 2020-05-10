@@ -176,7 +176,7 @@ ecs_vector_t* serialize_struct(
 
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t) {
-        .kind = EcsOpPush,
+        .kind = EcsOpPush
     };
 
     size_t size = 0;
@@ -198,19 +198,9 @@ ecs_vector_t* serialize_struct(
         ecs_type_op_t *op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
 
-        /* If only one operation was added, we can use the size and alignment of
-         * this operation. Otherwise we have to get it from the type itself */
-        size_t member_size;
-        uint8_t member_alignment;
-
-        if (count - prev_count == 1) {
-            member_size = op->size * op->count;
-            member_alignment = op->alignment;
-        } else {
-            EcsType *type = ecs_get_ptr(world, members[i].type, EcsType);
-            member_size = type->size;
-            member_alignment = type->alignment;
-        }
+        EcsType *type = ecs_get_ptr(world, members[i].type, EcsType);
+        size_t member_size = type->size * op->count;
+        uint8_t member_alignment = type->alignment;
 
         ecs_assert(member_size != 0, ECS_INTERNAL_ERROR, op->name);
         ecs_assert(member_alignment != 0, ECS_INTERNAL_ERROR, op->name);
@@ -294,6 +284,7 @@ ecs_vector_t* serialize_struct(
     ecs_assert(op_push->kind == EcsOpPush, ECS_INTERNAL_ERROR, NULL);
     op_push->size = size;
     op_push->alignment = alignment;
+    op_push->count = 1;
 
     return ops;
 }
@@ -316,7 +307,6 @@ ecs_vector_t* serialize_array(
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
     }
 
-    /* If element is inlined, don't add indirection to other cache */
     EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
     ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
@@ -361,6 +351,9 @@ ecs_vector_t* serialize_vector(
         };         
     }
 
+    EcsType *element_type = ecs_get_ptr(world, type->element_type, EcsType);
+    ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
+
     EcsTypeSerializer *element_cache = ecs_get_ptr(world, type->element_type, EcsTypeSerializer);
     ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
 
@@ -368,8 +361,8 @@ ecs_vector_t* serialize_vector(
     *op = (ecs_type_op_t){
         .kind = EcsOpVector, 
         .count = 1,
-        .size = sizeof(ecs_vector_t*),
-        .alignment = ECS_ALIGNOF(ecs_vector_t*),
+        .size = element_type->size,
+        .alignment = element_type->alignment,
         .is.collection = element_cache->ops
     };
 

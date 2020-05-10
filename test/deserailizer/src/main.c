@@ -10,6 +10,9 @@
 
 // Testsuite 'Struct'
 void Struct_struct(void);
+void Struct_struct_primitives(void);
+void Struct_struct_reassign_string(void);
+void Struct_struct_reassign_null(void);
 void Struct_nested_struct(void);
 void Struct_struct_by_name(void);
 void Struct_nested_struct_by_name(void);
@@ -21,15 +24,31 @@ void Struct_struct_w_vector(void);
 void Struct_struct_w_vector_by_name(void);
 void Struct_struct_w_vector_nested_struct(void);
 void Struct_struct_w_vector_nested_struct_by_name(void);
+void Struct_struct_reassign_vector(void);
+void Struct_struct_reassign_smaller_vector(void);
+void Struct_struct_reassign_larger_vector(void);
+void Struct_struct_reassign_vector_null(void);
 
 static bake_test_suite suites[] = {
     {
         .id = "Struct",
-        .testcase_count = 12,
+        .testcase_count = 19,
         .testcases = (bake_test_case[]){
             {
                 .id = "struct",
                 .function = Struct_struct
+            },
+            {
+                .id = "struct_primitives",
+                .function = Struct_struct_primitives
+            },
+            {
+                .id = "struct_reassign_string",
+                .function = Struct_struct_reassign_string
+            },
+            {
+                .id = "struct_reassign_null",
+                .function = Struct_struct_reassign_null
             },
             {
                 .id = "nested_struct",
@@ -74,6 +93,22 @@ static bake_test_suite suites[] = {
             {
                 .id = "struct_w_vector_nested_struct_by_name",
                 .function = Struct_struct_w_vector_nested_struct_by_name
+            },
+            {
+                .id = "struct_reassign_vector",
+                .function = Struct_struct_reassign_vector
+            },
+            {
+                .id = "struct_reassign_smaller_vector",
+                .function = Struct_struct_reassign_smaller_vector
+            },
+            {
+                .id = "struct_reassign_larger_vector",
+                .function = Struct_struct_reassign_larger_vector
+            },
+            {
+                .id = "struct_reassign_vector_null",
+                .function = Struct_struct_reassign_vector_null
             }
         }
     }
