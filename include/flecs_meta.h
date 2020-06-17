@@ -233,7 +233,7 @@ ECS_STRUCT( EcsEnum, {
 #endif
 
 ECS_STRUCT( EcsMember, {
-    const char *name;
+    char *name;
     ecs_entity_t type;
 });
 

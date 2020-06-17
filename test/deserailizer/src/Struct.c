@@ -661,10 +661,10 @@ void Struct_struct_w_vector_nested_struct() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    Point *arr_1 = ecs_vector_first(value.vec_1, int32_t);
+    Point *arr_1 = ecs_vector_first(value.vec_1, Point);
     test_assert(arr_1 != NULL);
 
-    Point *arr_2 = ecs_vector_first(value.vec_2, int32_t);
+    Point *arr_2 = ecs_vector_first(value.vec_2, Point);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0].x, 10);
@@ -748,10 +748,10 @@ void Struct_struct_w_vector_nested_struct_by_name() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    Point *arr_1 = ecs_vector_first(value.vec_1, int32_t);
+    Point *arr_1 = ecs_vector_first(value.vec_1, Point);
     test_assert(arr_1 != NULL);
 
-    Point *arr_2 = ecs_vector_first(value.vec_2, int32_t);
+    Point *arr_2 = ecs_vector_first(value.vec_2, Point);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0].x, 10);
@@ -829,8 +829,8 @@ void Struct_struct_reassign_vector() {
     ECS_META(world, Struct_w_vector);
 
     Struct_w_vector value = {
-        .vec_1 = ecs_vector_from_array(2, ((int32_t[]){10, 20})),
-        .vec_2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}))
+        .vec_1 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){10, 20})),
+        .vec_2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){30, 40}))
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
@@ -873,8 +873,8 @@ void Struct_struct_reassign_smaller_vector() {
     ECS_META(world, Struct_w_vector);
 
     Struct_w_vector value = {
-        .vec_1 = ecs_vector_from_array(3, ((int32_t[]){10, 20, 30})),
-        .vec_2 = ecs_vector_from_array(2, ((int32_t[]){40, 50}))
+        .vec_1 = ecs_vector_from_array(int32_t, 3, ((int32_t[]){10, 20, 30})),
+        .vec_2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){40, 50}))
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
@@ -916,8 +916,8 @@ void Struct_struct_reassign_larger_vector() {
     ECS_META(world, Struct_w_vector);
 
     Struct_w_vector value = {
-        .vec_1 = ecs_vector_from_array(2, ((int32_t[]){10, 20})),
-        .vec_2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}))
+        .vec_1 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){10, 20})),
+        .vec_2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){30, 40}))
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
@@ -931,7 +931,7 @@ void Struct_struct_reassign_larger_vector() {
     test_int(ecs_meta_next(&it), 0);
     test_int(ecs_meta_set_int(&it, 60), 0);
     test_int(ecs_meta_next(&it), 0);
-    test_int(ecs_meta_set_int(&it, 70), 0);    
+    test_int(ecs_meta_set_int(&it, 70), 0);
     test_int(ecs_meta_pop(&it), 0);
 
     test_int(ecs_meta_pop(&it), 0);
@@ -963,8 +963,8 @@ void Struct_struct_reassign_vector_null() {
     ECS_META(world, Struct_w_vector);
 
     Struct_w_vector value = {
-        .vec_1 = ecs_vector_from_array(2, ((int32_t[]){10, 20})),
-        .vec_2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}))
+        .vec_1 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){10, 20})),
+        .vec_2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){30, 40}))
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(

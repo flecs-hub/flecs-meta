@@ -69,6 +69,9 @@ void Map_map_int_bool() {
     ecs_map_t *value = ecs_map_new(bool, 0);
     ecs_map_set(value, 1, &(bool){false});
     ecs_map_set(value, 2, &(bool){true});
+
+    bool *tst = ecs_map_get(value, bool, 1);
+
     char *str = ecs_ptr_to_str(world, ecs_entity(MapIntBool), &value);
     test_str(str, "{1 = false, 2 = true}");
     ecs_os_free(str);
@@ -253,8 +256,8 @@ void Map_map_int_vector_int() {
     ECS_META(world, MapIntVectorInt);
 
     {
-    ecs_vector_t *v1 = ecs_vector_from_array(2, ((int32_t[]){10, 20}));
-    ecs_vector_t *v2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}));
+    ecs_vector_t *v1 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){10, 20}));
+    ecs_vector_t *v2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){30, 40}));
     ecs_map_t *value = ecs_map_new(ArrayInt, 0);
     ecs_map_set(value, 1, &v1);
     ecs_map_set(value, 2, &v2);

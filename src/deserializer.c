@@ -24,7 +24,7 @@ ecs_type_op_t* get_ptr(
     ecs_type_op_t *op = get_op(scope);
 
     if (scope->vector) {
-        _ecs_vector_set_min_count(&scope->vector, op->size, op->alignment, scope->cur_elem + 1);
+        _ecs_vector_set_min_count(&scope->vector, ECS_VECTOR_U(op->size, op->alignment), scope->cur_elem + 1);
         scope->base = ecs_vector_first_t(scope->vector, op->size, op->alignment);
     }
 
@@ -42,7 +42,7 @@ ecs_meta_cursor_t ecs_meta_cursor(
     
     ecs_meta_cursor_t result;
     ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = 
-        ecs_lookup(world, "EcsMetaTypeSerializer");
+        ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
 
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);

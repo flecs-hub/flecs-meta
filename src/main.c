@@ -8,6 +8,43 @@ ECS_CTOR(EcsStruct, ptr, {
     ptr->is_partial = false;
 });
 
+ECS_DTOR(EcsStruct, ptr, {
+    ecs_vector_each(ptr->members, EcsMember, m, {
+        ecs_os_free(m->name);
+    });
+    ecs_vector_free(ptr->members);
+});
+
+ECS_CTOR(EcsEnum, ptr, {
+    ptr->constants = NULL;
+});
+
+ECS_DTOR(EcsEnum, ptr, {
+    ecs_map_each(ptr->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(ptr->constants);
+});
+
+ECS_CTOR(EcsBitmask, ptr, {
+    ptr->constants = NULL;
+});
+
+ECS_DTOR(EcsBitmask, ptr, {
+    ecs_map_each(ptr->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })    
+    ecs_map_free(ptr->constants);
+});
+
+ECS_CTOR(EcsMetaTypeSerializer, ptr, {
+    ptr->ops = NULL;
+});
+
+ECS_DTOR(EcsMetaTypeSerializer, ptr, {
+    ecs_vector_free(ptr->ops);
+});
+
 static
 void ecs_set_primitive(
     ecs_world_t *world, 
@@ -335,8 +372,24 @@ void FlecsMetaImport(
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 
     ecs_set_component_actions(world, ecs_entity(EcsStruct), &(EcsComponentLifecycle){
-        .ctor = ecs_ctor(EcsStruct)
+        .ctor = ecs_ctor(EcsStruct),
+        .dtor = ecs_dtor(EcsStruct)
     });
+
+    ecs_set_component_actions(world, ecs_entity(EcsEnum), &(EcsComponentLifecycle){
+        .ctor = ecs_ctor(EcsEnum),
+        .dtor = ecs_dtor(EcsEnum)
+    });    
+
+    ecs_set_component_actions(world, ecs_entity(EcsBitmask), &(EcsComponentLifecycle){
+        .ctor = ecs_ctor(EcsBitmask),
+        .dtor = ecs_dtor(EcsBitmask)
+    });
+
+    ecs_set_component_actions(world, ecs_entity(EcsMetaTypeSerializer), &(EcsComponentLifecycle){
+        .ctor = ecs_ctor(EcsMetaTypeSerializer),
+        .dtor = ecs_dtor(EcsMetaTypeSerializer)
+    });    
 
     ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
     ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
