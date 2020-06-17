@@ -23,7 +23,7 @@ ECS_STRUCT(i32_bool, {
 void Struct_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
 
@@ -40,7 +40,7 @@ void Struct_struct() {
 void Struct_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -58,7 +58,7 @@ void Struct_nested_struct() {
 void Struct_struct_bool_i32() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, bool_i32);
 
@@ -75,7 +75,7 @@ void Struct_struct_bool_i32() {
 void Struct_struct_i32_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, i32_bool);
 

@@ -41,7 +41,7 @@ ECS_MAP(MapIntMapIntBool, int32_t, MapIntBool);
 void Map_map_bool_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapBoolBool);
 
@@ -61,7 +61,7 @@ void Map_map_bool_bool() {
 void Map_map_int_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapIntBool);
 
@@ -81,7 +81,7 @@ void Map_map_int_bool() {
 void Map_map_string_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapStringBool);
 
@@ -101,7 +101,7 @@ void Map_map_string_bool() {
 void Map_map_enum_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Color);
     ECS_META(world, MapColorBool);
@@ -122,7 +122,7 @@ void Map_map_enum_bool() {
 void Map_map_bitmask_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Toppings);
     ECS_META(world, MapToppingsBool);
@@ -143,7 +143,7 @@ void Map_map_bitmask_bool() {
 void Map_map_int_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapIntInt);
 
@@ -163,7 +163,7 @@ void Map_map_int_int() {
 void Map_map_int_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapIntString);
 
@@ -183,7 +183,7 @@ void Map_map_int_string() {
 void Map_map_int_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, MapIntPoint);
@@ -204,7 +204,7 @@ void Map_map_int_struct() {
 void Map_map_int_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -226,7 +226,7 @@ void Map_map_int_nested_struct() {
 void Map_map_int_array_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, ArrayInt);
     ECS_META(world, MapIntArrayInt);
@@ -247,7 +247,7 @@ void Map_map_int_array_int() {
 void Map_map_int_vector_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
     ECS_META(world, MapIntVectorInt);
@@ -272,7 +272,7 @@ void Map_map_int_vector_int() {
 void Map_map_int_map_int_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, MapIntBool);
     ECS_META(world, MapIntMapIntBool);

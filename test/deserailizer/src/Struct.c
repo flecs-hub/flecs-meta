@@ -61,7 +61,7 @@ ECS_STRUCT(Struct_w_vector_nested_struct, {
 void Struct_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
 
@@ -82,7 +82,7 @@ void Struct_struct() {
 void Struct_struct_primitives() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Primitives);
 
@@ -145,7 +145,7 @@ void Struct_struct_primitives() {
 void Struct_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -182,7 +182,7 @@ void Struct_nested_struct() {
 void Struct_struct_by_name() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
 
@@ -205,7 +205,7 @@ void Struct_struct_by_name() {
 void Struct_nested_struct_by_name() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -244,7 +244,7 @@ void Struct_nested_struct_by_name() {
 void Struct_struct_w_array() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_array);
 
@@ -290,7 +290,7 @@ void Struct_struct_w_array() {
 void Struct_struct_w_array_by_name() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_array);
 
@@ -340,7 +340,7 @@ void Struct_struct_w_array_by_name() {
 void Struct_struct_w_array_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Struct_w_array_nested_struct);
@@ -411,7 +411,7 @@ void Struct_struct_w_array_nested_struct() {
 void Struct_struct_w_array_nested_struct_by_name() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Struct_w_array_nested_struct);
@@ -489,7 +489,7 @@ void Struct_struct_w_array_nested_struct_by_name() {
 void Struct_struct_w_vector() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -526,10 +526,10 @@ void Struct_struct_w_vector() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0], 10);
@@ -544,7 +544,7 @@ void Struct_struct_w_vector() {
 void Struct_struct_w_vector_by_name() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -585,10 +585,10 @@ void Struct_struct_w_vector_by_name() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0], 10);
@@ -603,7 +603,7 @@ void Struct_struct_w_vector_by_name() {
 void Struct_struct_w_vector_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Struct_w_vector_nested_struct);
@@ -661,10 +661,10 @@ void Struct_struct_w_vector_nested_struct() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    Point *arr_1 = ecs_vector_first(value.vec_1);
+    Point *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    Point *arr_2 = ecs_vector_first(value.vec_2);
+    Point *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0].x, 10);
@@ -683,7 +683,7 @@ void Struct_struct_w_vector_nested_struct() {
 void Struct_struct_w_vector_nested_struct_by_name() {
   ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Struct_w_vector_nested_struct);
@@ -748,10 +748,10 @@ void Struct_struct_w_vector_nested_struct_by_name() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    Point *arr_1 = ecs_vector_first(value.vec_1);
+    Point *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    Point *arr_2 = ecs_vector_first(value.vec_2);
+    Point *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0].x, 10);
@@ -770,7 +770,7 @@ void Struct_struct_w_vector_nested_struct_by_name() {
 void Struct_struct_reassign_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Primitives);
 
@@ -797,7 +797,7 @@ void Struct_struct_reassign_string() {
 void Struct_struct_reassign_null() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Primitives);
 
@@ -824,7 +824,7 @@ void Struct_struct_reassign_null() {
 void Struct_struct_reassign_vector() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -850,10 +850,10 @@ void Struct_struct_reassign_vector() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0], 50);
@@ -868,7 +868,7 @@ void Struct_struct_reassign_vector() {
 void Struct_struct_reassign_smaller_vector() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -893,10 +893,10 @@ void Struct_struct_reassign_smaller_vector() {
     test_int(ecs_vector_count(value.vec_1), 2);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0], 60);
@@ -911,7 +911,7 @@ void Struct_struct_reassign_smaller_vector() {
 void Struct_struct_reassign_larger_vector() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -939,10 +939,10 @@ void Struct_struct_reassign_larger_vector() {
     test_int(ecs_vector_count(value.vec_1), 3);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 != NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_1[0], 50);
@@ -958,7 +958,7 @@ void Struct_struct_reassign_larger_vector() {
 void Struct_struct_reassign_vector_null() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Struct_w_vector);
 
@@ -980,10 +980,10 @@ void Struct_struct_reassign_vector_null() {
     test_int(ecs_vector_count(value.vec_1), 0);
     test_int(ecs_vector_count(value.vec_2), 2);
 
-    int32_t *arr_1 = ecs_vector_first(value.vec_1);
+    int32_t *arr_1 = ecs_vector_first(value.vec_1, int32_t);
     test_assert(arr_1 == NULL);
 
-    int32_t *arr_2 = ecs_vector_first(value.vec_2);
+    int32_t *arr_2 = ecs_vector_first(value.vec_2, int32_t);
     test_assert(arr_2 != NULL);
 
     test_int(arr_2[0], 30);

@@ -1,30 +1,30 @@
-#ifndef FLECS_COMPONENTS_META_SERIALIZER_H
-#define FLECS_COMPONENTS_META_SERIALIZER_H
+#ifndef FLECS_META_SERIALIZER_H
+#define FLECS_META_SERIALIZER_H
 
-#include "flecs_components_meta.h"
+#include "flecs_meta.h"
 
 void EcsAddStruct(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetPrimitive(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetEnum(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetBitmask(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetStruct(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetArray(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetVector(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 void EcsSetMap(
-    ecs_rows_t *rows);
+    ecs_iter_t *it);
 
 #endif

@@ -3,12 +3,12 @@
     "type": "application",
     "value": {
         "author": "Sander Mertens",
-        "description": "Test project for flecs.components.meta",
+        "description": "Test project for flecs.meta",
         "public": false,
         "coverage": false,
         "use": [
             "flecs",
-            "flecs.components.meta"
+            "flecs.meta"
         ]
     },
     "test": {

@@ -23,7 +23,7 @@ ECS_VECTOR(VectorVectorLine, VectorLine);
 void Vector_vector_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorBool);
 
@@ -41,7 +41,7 @@ void Vector_vector_bool() {
 void Vector_vector_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
 
@@ -59,7 +59,7 @@ void Vector_vector_int() {
 void Vector_vector_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorString);
 
@@ -77,11 +77,11 @@ void Vector_vector_string() {
 void Vector_vector_entity() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorEntity);
 
-    ecs_entity_t e = ecs_set(world, 0, EcsId, {"Foo"});
+    ecs_entity_t e = ecs_set(world, 0, EcsName, {"Foo"});
 
     {
     ecs_vector_t *value = ecs_vector_from_array(3, ((ecs_entity_t[]){0, 1000, e}));
@@ -97,7 +97,7 @@ void Vector_vector_entity() {
 void Vector_vector_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, VectorPoint);
@@ -116,7 +116,7 @@ void Vector_vector_struct() {
 void Vector_vector_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -139,7 +139,7 @@ void Vector_vector_nested_struct() {
 void Vector_vector_vector_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
     ECS_META(world, VectorVectorInt);
@@ -168,7 +168,7 @@ void Vector_vector_vector_int() {
 void Vector_vector_vector_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, VectorPoint);
@@ -198,7 +198,7 @@ void Vector_vector_vector_struct() {
 void Vector_vector_vector_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -239,7 +239,7 @@ void Vector_vector_vector_nested_struct() {
 void Vector_vector_null() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorBool);
 
@@ -257,7 +257,7 @@ void Vector_vector_null() {
 void Vector_vector_vector_null() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
     ECS_META(world, VectorVectorInt);
@@ -276,7 +276,7 @@ void Vector_vector_vector_null() {
 void Vector_vector_empty() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
     ECS_META(world, VectorVectorInt);
@@ -295,7 +295,7 @@ void Vector_vector_empty() {
 void Vector_vector_vector_empty() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta, 0);
 
     ECS_META(world, VectorInt);
     ECS_META(world, VectorVectorInt);

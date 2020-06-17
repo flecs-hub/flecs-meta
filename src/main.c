@@ -1,19 +1,24 @@
-#include <flecs_components_meta.h>
+#include <flecs_meta.h>
 #include "parser.h"
 #include "serializer.h"
 #include "type.h"
+
+ECS_CTOR(EcsStruct, ptr, {
+    ptr->members = NULL;
+    ptr->is_partial = false;
+});
 
 static
 void ecs_set_primitive(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_entity_t ecs_entity(EcsPrimitive) = ecs_lookup(world, "EcsPrimitive");
+    ecs_entity_t ecs_entity(EcsPrimitive) = ecs_lookup_fullpath(world, "flecs.meta.Primitive");
     ecs_assert(ecs_entity(EcsPrimitive) != 0, ECS_INTERNAL_ERROR, NULL);
 
     const char *descr = type->descriptor;
@@ -74,14 +79,14 @@ void ecs_set_constants(
     ecs_entity_t e, 
     ecs_entity_t comp,
     bool is_bitmask,
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     const char *ptr = type->descriptor;
-    const char *name = ecs_get_id(world, e);
+    const char *name = ecs_get_name(world, e);
 
     ecs_meta_parse_ctx_t ctx = {
         .name = name,
@@ -106,7 +111,7 @@ void ecs_set_constants(
         last_value ++;
     }
 
-    _ecs_set_ptr(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
+    ecs_set_ptr_w_entity(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
         .constants = constants
     });
 }
@@ -115,9 +120,9 @@ static
 void ecs_set_bitmask(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
-    ecs_entity_t comp = ecs_lookup(world, "EcsBitmask");
+    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Bitmask");
     ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set_constants(world, e, comp, true, type);
 }
@@ -126,9 +131,9 @@ static
 void ecs_set_enum(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
-    ecs_entity_t comp = ecs_lookup(world, "EcsEnum");
+    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Enum");
     ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);    
     ecs_set_constants(world, e, comp, false, type);
 }
@@ -137,14 +142,14 @@ static
 void ecs_set_struct(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     const char *ptr = type->descriptor;
-    const char *name = ecs_get_id(world, e);
+    const char *name = ecs_get_name(world, e);
     bool is_partial = false;
 
     ecs_meta_parse_ctx_t ctx = {
@@ -164,7 +169,7 @@ void ecs_set_struct(
 
     is_partial = token.is_partial;
 
-    ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup(world, "EcsStruct");
+    ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup_fullpath(world, "flecs.meta.Struct");
     ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set(world, e, EcsStruct, {members, is_partial});
 }
@@ -173,14 +178,14 @@ static
 void ecs_set_array(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     const char *ptr = type->descriptor;
-    const char *name = ecs_get_id(world, e);
+    const char *name = ecs_get_name(world, e);
 
     ecs_meta_parse_ctx_t ctx = {
         .name = name,
@@ -194,14 +199,14 @@ static
 void ecs_set_vector(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     const char *ptr = type->descriptor;
-    const char *name = ecs_get_id(world, e);
+    const char *name = ecs_get_name(world, e);
 
     ecs_meta_parse_ctx_t ctx = {
         .name = name,
@@ -215,14 +220,14 @@ static
 void ecs_set_map(
     ecs_world_t *world, 
     ecs_entity_t e, 
-    EcsType *type) 
+    EcsMetaType *type) 
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
     const char *ptr = type->descriptor;
-    const char *name = ecs_get_id(world, e);
+    const char *name = ecs_get_name(world, e);
 
     ecs_meta_parse_ctx_t ctx = {
         .name = name,
@@ -233,14 +238,14 @@ void ecs_set_map(
 }
 
 static
-void EcsSetType(ecs_rows_t *rows) {
-    ECS_COLUMN(rows, EcsType, type, 1);
+void EcsSetType(ecs_iter_t *it) {
+    ECS_COLUMN(it, EcsMetaType, type, 1);
 
-    ecs_world_t *world = rows->world;
+    ecs_world_t *world = it->world;
 
     int i;
-    for(i = 0; i < rows->count; i ++) {
-        ecs_entity_t e = rows->entities[i];
+    for(i = 0; i < it->count; i ++) {
+        ecs_entity_t e = it->entities[i];
 
         /* If type does not contain a descriptor, application will have to
          * manually initialize type specific data */
@@ -298,19 +303,21 @@ void EcsSetType(ecs_rows_t *rows) {
 
 /* Utility macro to insert meta data for type with meta descriptor */
 #define ECS_COMPONENT_TYPE(world, type)\
-    ecs_set_ptr(world, ecs_entity(type), EcsType, &__##type##__)
+    ecs_set_ptr(world, ecs_entity(type), EcsMetaType, &__##type##__)
 
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsType, {EcsPrimitiveType});\
+    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType});\
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
-void FlecsComponentsMetaImport(
+void FlecsMetaImport(
     ecs_world_t *world,
     int flags)
 {
-    ECS_MODULE(world, FlecsComponentsMeta);
+    ECS_MODULE(world, FlecsMeta);
+
+    ecs_set_name_prefix(world, "Ecs");
 
     ECS_COMPONENT(world, EcsPrimitive);
     ECS_COMPONENT(world, EcsEnum);
@@ -320,22 +327,24 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT(world, EcsArray);
     ECS_COMPONENT(world, EcsVector);
     ECS_COMPONENT(world, EcsMap);
-    ECS_COMPONENT(world, EcsType);
+    ECS_COMPONENT(world, EcsMetaType);
     ECS_COMPONENT(world, ecs_type_op_kind_t);
     ECS_COMPONENT(world, ecs_type_op_t);
-    ECS_COMPONENT(world, EcsTypeSerializer);
+    ECS_COMPONENT(world, EcsMetaTypeSerializer);
 
-    ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsType);
+    ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 
-    ECS_SYSTEM(world, EcsAddStruct, EcsOnAdd, EcsStruct);
+    ecs_set_component_actions(world, ecs_entity(EcsStruct), &(EcsComponentLifecycle){
+        .ctor = ecs_ctor(EcsStruct)
+    });
 
-    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, EcsPrimitive, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, EcsEnum, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, EcsBitmask, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, EcsStruct, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, EcsArray, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, EcsVector, $.FlecsComponentsMeta);
-    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, EcsMap, $.FlecsComponentsMeta);
+    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map, flecs.meta:flecs.meta);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
@@ -344,10 +353,11 @@ void FlecsComponentsMetaImport(
     ECS_EXPORT_COMPONENT(EcsArray);
     ECS_EXPORT_COMPONENT(EcsVector);
     ECS_EXPORT_COMPONENT(EcsMap);
-    ECS_EXPORT_COMPONENT(EcsType);
-    ECS_EXPORT_COMPONENT(EcsTypeSerializer);  
+    ECS_EXPORT_COMPONENT(EcsMetaType);
+    ECS_EXPORT_COMPONENT(EcsMetaTypeSerializer);  
 
     /* -- Initialize builtin primitive types -- */
+    ecs_entity_t old_scope = ecs_set_scope(world, EcsFlecsCore);
     ECS_COMPONENT_PRIMITIVE(world, bool, EcsBool);
     ECS_COMPONENT_PRIMITIVE(world, char, EcsChar);
     ECS_COMPONENT_PRIMITIVE(world, ecs_byte_t, EcsByte);
@@ -365,22 +375,22 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT_PRIMITIVE(world, float, EcsF32);
     ECS_COMPONENT_PRIMITIVE(world, double, EcsF64);
     ECS_COMPONENT_PRIMITIVE(world, ecs_string_t, EcsString);
-    ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);  
+    ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);
+    ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
-        EcsId, {"ecs_primitive_kind_t"}),
-        EcsType, &__ecs_primitive_kind_t__);
+        EcsName, {"ecs_primitive_kind_t"}),
+        EcsMetaType, &__ecs_primitive_kind_t__);
 
     ecs_set(world, ecs_set(world, 0,
-        EcsId, {"ecs_type_kind_t"}),
-        EcsType, {
+        EcsName, {"ecs_type_kind_t"}),
+        EcsMetaType, {
             EcsEnumType, 
             sizeof(ecs_type_kind_t), 
             ECS_ALIGNOF(ecs_type_kind_t), 
             __ecs_type_kind_t__
         });
-
 
     /* Insert meta definitions for other types */
     ECS_COMPONENT_TYPE(world, EcsPrimitive);
@@ -391,21 +401,24 @@ void FlecsComponentsMetaImport(
     ECS_COMPONENT_TYPE(world, EcsArray);
     ECS_COMPONENT_TYPE(world, EcsVector);
     ECS_COMPONENT_TYPE(world, EcsMap);
-    ECS_COMPONENT_TYPE(world, EcsType);
+    ECS_COMPONENT_TYPE(world, EcsMetaType);
     ECS_COMPONENT_TYPE(world, ecs_type_op_kind_t);
     ECS_COMPONENT_TYPE(world, ecs_type_op_t);
-    ECS_COMPONENT_TYPE(world, EcsTypeSerializer);
+    ECS_COMPONENT_TYPE(world, EcsMetaTypeSerializer);
 
     /* -- Initialize metadata for public Flecs core components -- */
-    ecs_set(world, ecs_set(world, ecs_entity(EcsId),
-        EcsType, {EcsPrimitiveType}), 
-        EcsPrimitive, {EcsString});
+    ecs_set(world, ecs_entity(EcsName), EcsMetaType, {
+        .kind = EcsStructType, 
+        .size = sizeof(EcsName),
+        .alignment = ECS_ALIGNOF(EcsName),
+        .descriptor = "{ecs_string_t value; ECS_NON_SERIALIZABLE; }"
+    });
 
-    ecs_set(world, ecs_entity(EcsComponent), EcsType, {
+    ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
         .kind = EcsStructType, 
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
-        .descriptor = "{size_t size;}"
+        .descriptor = "{size_t size; size_t alignment;}"
     });
 
     /* Export components to public handles */

@@ -1,4 +1,4 @@
-#include "flecs_components_meta.h"
+#include "flecs_meta.h"
 
 static
 ecs_meta_scope_t* get_scope(
@@ -12,7 +12,7 @@ static
 ecs_type_op_t* get_op(
     ecs_meta_scope_t *scope)
 {
-    ecs_type_op_t *ops = ecs_vector_first(scope->ops);
+    ecs_type_op_t *ops = ecs_vector_first(scope->ops, ecs_type_op_t);
     ecs_assert(ops != NULL, ECS_INVALID_PARAMETER, NULL);
     return &ops[scope->cur_op];
 }
@@ -24,8 +24,8 @@ ecs_type_op_t* get_ptr(
     ecs_type_op_t *op = get_op(scope);
 
     if (scope->vector) {
-        _ecs_vector_set_min_count(&scope->vector, op->size, scope->cur_elem + 1);
-        scope->base = ecs_vector_first(scope->vector);
+        _ecs_vector_set_min_count(&scope->vector, op->size, op->alignment, scope->cur_elem + 1);
+        scope->base = ecs_vector_first_t(scope->vector, op->size, op->alignment);
     }
 
     return ECS_OFFSET(scope->base, op->offset + op->size * scope->cur_elem);
@@ -41,14 +41,14 @@ ecs_meta_cursor_t ecs_meta_cursor(
     ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
     
     ecs_meta_cursor_t result;
-    ecs_entity_t ecs_entity(EcsTypeSerializer) = 
-        ecs_lookup(world, "EcsTypeSerializer");
-    ecs_assert(ecs_entity(EcsTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = 
+        ecs_lookup(world, "EcsMetaTypeSerializer");
+    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
 
-    EcsTypeSerializer *ser = ecs_get_ptr(world, type, EcsTypeSerializer);
+    const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
-    ecs_type_op_t *ops = ecs_vector_first(ser->ops);
+    ecs_type_op_t *ops = ecs_vector_first(ser->ops, ecs_type_op_t);
     ecs_assert(ops != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(ops[0].kind == EcsOpHeader, ECS_INVALID_PARAMETER, NULL);
 
@@ -126,7 +126,7 @@ int ecs_meta_move_name(
     const char *name)
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
-    ecs_type_op_t *ops = ecs_vector_first(scope->ops);
+    ecs_type_op_t *ops = ecs_vector_first(scope->ops, ecs_type_op_t);
     int32_t i, ops_count = ecs_vector_count(scope->ops);
     int32_t depth = 1;
 
@@ -194,12 +194,12 @@ int ecs_meta_push(
         } else {
             ecs_vector_t *v = *(ecs_vector_t**)ptr;
             if (!v) {
-                v = _ecs_vector_new(op->size, 2);
+                v = ecs_vector_new_t(op->size, op->alignment, 2);
             } else {
-                _ecs_vector_set_count(&v, op->size, 0);
+                ecs_vector_set_count_t(&v, op->size, op->alignment, 0);
             }
             
-            child_scope->base = ecs_vector_first(v);
+            child_scope->base = ecs_vector_first_t(v, op->size, op->alignment);
             child_scope->count = 0;
             child_scope->vector = v;
         }
@@ -208,7 +208,7 @@ int ecs_meta_push(
         child_scope->ops = ops;
         child_scope->is_collection = true;
 #ifndef NDEBUG
-        ecs_type_op_t *op = ecs_vector_first(child_scope->ops);
+        ecs_type_op_t *op = ecs_vector_first(child_scope->ops, ecs_type_op_t);
         ecs_assert(op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
 #endif
         }
@@ -224,7 +224,7 @@ int ecs_meta_pop(
     ecs_meta_cursor_t *cursor)
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
-    ecs_type_op_t *ops = ecs_vector_first(scope->ops);
+    ecs_type_op_t *ops = ecs_vector_first(scope->ops, ecs_type_op_t);
     int32_t i, ops_count = ecs_vector_count(scope->ops);
 
     if (scope->is_collection) {

@@ -14,30 +14,30 @@
  * dependencies will automatically show up in this file. Include bake_config.h
  * in your main project file. Do not edit! */
 
-#ifndef FLECS_COMPONENTS_META_BAKE_CONFIG_H
-#define FLECS_COMPONENTS_META_BAKE_CONFIG_H
+#ifndef FLECS_META_BAKE_CONFIG_H
+#define FLECS_META_BAKE_CONFIG_H
 
 /* Headers of public dependencies */
 #include <flecs.h>
 
 /* Headers of private dependencies */
-#ifdef FLECS_COMPONENTS_META_IMPL
+#ifdef FLECS_META_IMPL
 /* No dependencies */
 #endif
 
 /* Convenience macro for exporting symbols */
-#ifndef FLECS_COMPONENTS_META_STATIC
-  #if FLECS_COMPONENTS_META_IMPL && (defined(_MSC_VER) || defined(__MINGW32__))
-    #define FLECS_COMPONENTS_META_EXPORT __declspec(dllexport)
-  #elif FLECS_COMPONENTS_META_IMPL
-    #define FLECS_COMPONENTS_META_EXPORT __attribute__((__visibility__("default")))
+#ifndef FLECS_META_STATIC
+  #if FLECS_META_IMPL && (defined(_MSC_VER) || defined(__MINGW32__))
+    #define FLECS_META_EXPORT __declspec(dllexport)
+  #elif FLECS_META_IMPL
+    #define FLECS_META_EXPORT __attribute__((__visibility__("default")))
   #elif defined _MSC_VER
-    #define FLECS_COMPONENTS_META_EXPORT __declspec(dllimport)
+    #define FLECS_META_EXPORT __declspec(dllimport)
   #else
-    #define FLECS_COMPONENTS_META_EXPORT
+    #define FLECS_META_EXPORT
   #endif
 #else
-  #define FLECS_COMPONENTS_META_EXPORT
+  #define FLECS_META_EXPORT
 #endif
 
 #endif

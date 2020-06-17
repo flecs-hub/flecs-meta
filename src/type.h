@@ -1,5 +1,5 @@
-#ifndef FLECS_COMPONENTS_META_TYPE_H
-#define FLECS_COMPONENTS_META_TYPE_H
+#ifndef FLECS_META_TYPE_H
+#define FLECS_META_TYPE_H
 
 #include "parser.h"
 
