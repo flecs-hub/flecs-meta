@@ -474,6 +474,13 @@ void FlecsMetaImport(
         .descriptor = "{size_t size; size_t alignment;}"
     });
 
+    ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
+        .kind = EcsStructType, 
+        .size = sizeof(EcsSignatureExpr),
+        .alignment = ECS_ALIGNOF(EcsSignatureExpr),
+        .descriptor = "{const char *expr;}"
+    });
+
     /* Export components to public handles */
     ECS_EXPORT_COMPONENT(bool);
     ECS_EXPORT_COMPONENT(char);
