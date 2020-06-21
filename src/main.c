@@ -338,6 +338,38 @@ void EcsSetType(ecs_iter_t *it) {
     }
 }
 
+static
+void ctor_initialize_0(
+    ecs_world_t *world,
+    ecs_entity_t component,
+    const ecs_entity_t *entities,
+    void *ptr,
+    size_t size,
+    int32_t count,
+    void *ctx)
+{
+    (void)world;
+    (void)component;
+    (void)entities;
+    (void)ctx;
+    memset(ptr, 0, size * count);
+}
+
+void ecs_new_meta(
+    ecs_world_t *world,
+    ecs_entity_t component,
+    EcsMetaType *meta_type)
+{
+    ecs_entity_t ecs_entity(EcsMetaType) = 
+        ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+    ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
+
+    ecs_set_ptr(world, component, EcsMetaType, meta_type);\
+    ecs_set_component_actions(world, component, &(EcsComponentLifecycle){
+        .ctor = ctor_initialize_0
+    });
+}
+
 /* Utility macro to insert meta data for type with meta descriptor */
 #define ECS_COMPONENT_TYPE(world, type)\
     ecs_set_ptr(world, ecs_entity(type), EcsMetaType, &__##type##__)

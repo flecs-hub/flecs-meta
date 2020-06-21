@@ -189,6 +189,9 @@ ecs_entity_t ecs_meta_lookup(
         if (token->is_ptr && !strcmp(typename, "char")) {
             typename = "ecs_string_t";
         } else
+        if (token->is_ptr && !strcmp(typename, "void")) {
+            typename = "uintptr_t";
+        } else        
         if (!strcmp(typename, "char*") || !strcmp(typename, "flecs::string")) {
             typename = "ecs_string_t";
         }
