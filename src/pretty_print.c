@@ -82,7 +82,7 @@ void str_ser_primitive(
     case EcsString: {
         char *value = *(char**)base;
         if (value) {
-            int32_t length = ecs_stresc(NULL, 0, '"', value);
+            size_t length = ecs_stresc(NULL, 0, '"', value);
             if (length == strlen(value)) {
                 ecs_strbuf_appendstrn(str, "\"", 1);
                 ecs_strbuf_appendstr(str, value);
@@ -116,17 +116,19 @@ void str_ser_primitive(
 /* Serialize enumeration */
 static
 int str_ser_enum(
+    ecs_world_t *world,
     ecs_type_op_t *op, 
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    ecs_assert(op->is.constant != NULL, ECS_INVALID_PARAMETER, NULL);
+    const EcsEnum *enum_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    ecs_assert(enum_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     int32_t value = *(int32_t*)base;
     
     /* Enumeration constants are stored in a map that is keyed on the
      * enumeration value. */
-    char **constant = ecs_map_get(op->is.constant, char*, value);
+    char **constant = ecs_map_get(enum_type->constants, char*, value);
     if (!constant) {
         return -1;
     }
@@ -139,11 +141,13 @@ int str_ser_enum(
 /* Serialize bitmask */
 static
 int str_ser_bitmask(
+    ecs_world_t *world,
     ecs_type_op_t *op, 
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    ecs_assert(op->is.constant != NULL, ECS_INVALID_PARAMETER, NULL);
+    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     int32_t value = *(int32_t*)base;
     ecs_map_key_t key;
@@ -154,7 +158,7 @@ int str_ser_bitmask(
 
     /* Multiple flags can be set at a given time. Iterate through all the flags
      * and append the ones that are set. */
-    ecs_map_iter_t it = ecs_map_iter(op->is.constant);
+    ecs_map_iter_t it = ecs_map_iter(bitmask_type->constants);
     while ((constant = ecs_map_next(&it, char*, &key))) {
         if ((value & key) == key) {
             ecs_strbuf_list_appendstr(str, *constant);
@@ -207,8 +211,11 @@ int str_ser_array(
     const void *base, 
     ecs_strbuf_t *str) 
 {
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
     return str_ser_elements(
-        world, op->is.collection, base, op->count, op->size, str);
+        world, ser->ops, base, op->count, op->size, str);
 }
 
 /* Serialize vector */
@@ -225,9 +232,12 @@ int str_ser_vector(
         return 0;
     }
     
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
     int32_t count = ecs_vector_count(value);
     void *array = ecs_vector_first_t(value, op->size, op->alignment);
-    ecs_vector_t *elem_ops = op->is.collection;
+    ecs_vector_t *elem_ops = ser->ops;
     
     ecs_type_op_t *elem_op_hdr = (ecs_type_op_t*)ecs_vector_first(elem_ops, ecs_type_op_t);
     ecs_assert(elem_op_hdr != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -248,6 +258,19 @@ int str_ser_map(
 {
     ecs_map_t *value = *(ecs_map_t**)base;
 
+    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_entity(world, &op->is.map.key, 0, 0);
+    ecs_assert(key_ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_entity(world, &op->is.map.element, 0, 0);
+    ecs_assert(elem_ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+    /* 2 instructions, one for the header */
+    ecs_assert(ecs_vector_count(key_ser->ops) == 2, ECS_INTERNAL_ERROR, NULL);
+
+    ecs_type_op_t *key_op = ecs_vector_first(key_ser->ops, ecs_type_op_t);
+    ecs_assert(key_op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+    key_op = &key_op[1];
+
     ecs_map_iter_t it = ecs_map_iter(value);  
     ecs_map_key_t key; 
     void *ptr;
@@ -256,13 +279,13 @@ int str_ser_map(
 
     while ((ptr = _ecs_map_next(&it, 0, &key))) {
         ecs_strbuf_list_next(str);
-        if (str_ser_type_op(world, op->is.map.key_op, (void*)&key, str)) {
+        if (str_ser_type_op(world, key_op, (void*)&key, str)) {
             return -1;
         }
 
         ecs_strbuf_appendstr(str, " = ");
         
-        if (str_ser_type(world, op->is.map.element_ops, ptr, str)) {
+        if (str_ser_type(world, elem_ser->ops, ptr, str)) {
             return -1;
         }
 
@@ -293,12 +316,12 @@ int str_ser_type_op(
         str_ser_primitive(world, op, ECS_OFFSET(base, op->offset), str);
         break;
     case EcsOpEnum:
-        if (str_ser_enum(op, ECS_OFFSET(base, op->offset), str)) {
+        if (str_ser_enum(world, op, ECS_OFFSET(base, op->offset), str)) {
             return -1;
         }
         break;
     case EcsOpBitmask:
-        if (str_ser_bitmask(op, ECS_OFFSET(base, op->offset), str)) {
+        if (str_ser_bitmask(world, op, ECS_OFFSET(base, op->offset), str)) {
             return -1;
         }
         break;

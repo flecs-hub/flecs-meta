@@ -102,6 +102,8 @@ ecs_vector_t* serialize_enum(
     ecs_vector_t *ops,
     FlecsMeta *module)
 {    
+    FlecsMetaImportHandles(*module);
+
     ecs_type_op_t *op;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -114,12 +116,15 @@ ecs_vector_t* serialize_enum(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
 
+    ecs_ref_t ref = {0};
+    ecs_get_ref(world, &ref, entity, EcsEnum);
+
     *op = (ecs_type_op_t) {
         .kind = EcsOpEnum,
         .size = sizeof(int32_t),
         .alignment = ECS_ALIGNOF(int32_t),
         .count = 1,
-        .is.constant = type->constants
+        .is.constant = ref
     };
 
     return ops;
@@ -133,6 +138,8 @@ ecs_vector_t* serialize_bitmask(
     ecs_vector_t *ops,
     FlecsMeta *module)
 {    
+    FlecsMetaImportHandles(*module);
+
     ecs_type_op_t *op;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -145,12 +152,15 @@ ecs_vector_t* serialize_bitmask(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
 
+    ecs_ref_t ref = {0};
+    ecs_get_ref(world, &ref, entity, EcsBitmask);
+
     *op = (ecs_type_op_t) {
         .kind = EcsOpBitmask,
         .size = sizeof(int32_t),
         .alignment = ECS_ALIGNOF(int32_t),
         .count = 1,
-        .is.constant = type->constants
+        .is.constant = ref
     };
 
     return ops;
@@ -189,18 +199,18 @@ ecs_vector_t* serialize_struct(
         /* Add type operations of member to struct ops */
         int32_t prev_count = ecs_vector_count(ops);
         ops = serialize_type(world, members[i].type, ops, offset + size, module);
-        int32_t count = ecs_vector_count(ops);
+        int32_t op_count = ecs_vector_count(ops);
 
         /* At least one op should be added */
-        ecs_assert(prev_count != count, ECS_INTERNAL_ERROR, NULL);
+        ecs_assert(prev_count != op_count, ECS_INTERNAL_ERROR, NULL);
         ecs_assert(ops != NULL, ECS_INTERNAL_ERROR, NULL);
 
-        ecs_type_op_t *op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
+        op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
 
-        const EcsMetaType *type = ecs_get(world, members[i].type, EcsMetaType);
-        size_t member_size = type->size * op->count;
-        uint8_t member_alignment = type->alignment;
+        const EcsMetaType *meta_type = ecs_get(world, members[i].type, EcsMetaType);
+        size_t member_size = meta_type->size * op->count;
+        uint8_t member_alignment = meta_type->alignment;
 
         ecs_assert(member_size != 0, ECS_INTERNAL_ERROR, op->name);
         ecs_assert(member_alignment != 0, ECS_INTERNAL_ERROR, op->name);
@@ -299,9 +309,6 @@ ecs_vector_t* serialize_array(
 {
     FlecsMetaImportHandles(*handles);
 
-    const EcsMetaTypeSerializer *element_cache = ecs_get(world, type->element_type, EcsMetaTypeSerializer);
-    ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
-
     ecs_type_op_t *op_header = NULL;
     if (!ops) {
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
@@ -310,13 +317,16 @@ ecs_vector_t* serialize_array(
     const EcsMetaType *element_type = ecs_get(world, type->element_type, EcsMetaType);
     ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
+    ecs_ref_t ref = {0};
+    ecs_get_ref(world, &ref, type->element_type, EcsMetaTypeSerializer);
+
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
         .kind = EcsOpArray, 
         .count = type->count,
         .size = element_type->size,
         .alignment = element_type->alignment,
-        .is.collection = element_cache->ops
+        .is.collection = ref
     };
 
     if (op_header) {
@@ -354,8 +364,8 @@ ecs_vector_t* serialize_vector(
     const EcsMetaType *element_type = ecs_get(world, type->element_type, EcsMetaType);
     ecs_assert(element_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    const EcsMetaTypeSerializer *element_cache = ecs_get(world, type->element_type, EcsMetaTypeSerializer);
-    ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_ref_t ref = {0};
+    ecs_get_ref(world, &ref, type->element_type, EcsMetaTypeSerializer);
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
@@ -363,7 +373,7 @@ ecs_vector_t* serialize_vector(
         .count = 1,
         .size = element_type->size,
         .alignment = element_type->alignment,
-        .is.collection = element_cache->ops
+        .is.collection = ref
     };
 
     return ops;
@@ -425,8 +435,11 @@ ecs_vector_t* serialize_map(
         ecs_meta_error( &ctx, ctx.decl, "array type invalid for key type");
     }
 
-    const EcsMetaTypeSerializer *element_cache = ecs_get(world, type->element_type, EcsMetaTypeSerializer);
-    ecs_assert(element_cache != NULL, ECS_INTERNAL_ERROR, NULL);
+    ecs_ref_t key_ref = {0};
+    ecs_get_ref(world, &key_ref, type->key_type, EcsMetaTypeSerializer);
+
+    ecs_ref_t element_ref = {0};
+    ecs_get_ref(world, &element_ref, type->element_type, EcsMetaTypeSerializer);
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
@@ -435,8 +448,8 @@ ecs_vector_t* serialize_map(
         .size = sizeof(ecs_map_t*),
         .alignment = ECS_ALIGNOF(ecs_map_t*),
         .is.map = {
-            .key_op = key_op,
-            element_cache->ops
+            .key = key_ref,
+            .element = element_ref
         }
     };
 

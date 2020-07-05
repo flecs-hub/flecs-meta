@@ -185,7 +185,11 @@ int ecs_meta_push(
     case EcsOpArray:
     case EcsOpVector: {
         void *ptr = ECS_OFFSET(scope->base, op->offset);
-        ecs_vector_t *ops = op->is.collection;
+        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world, 
+            &op->is.collection, 0, 0);
+        ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
+
+        ecs_vector_t *ops = ser->ops;
 
         if (op->kind == EcsOpArray) {
             child_scope->base = ptr;
@@ -208,8 +212,8 @@ int ecs_meta_push(
         child_scope->ops = ops;
         child_scope->is_collection = true;
 #ifndef NDEBUG
-        ecs_type_op_t *op = ecs_vector_first(child_scope->ops, ecs_type_op_t);
-        ecs_assert(op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
+        ecs_type_op_t *hdr = ecs_vector_first(child_scope->ops, ecs_type_op_t);
+        ecs_assert(hdr->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
 #endif
         }
         break;

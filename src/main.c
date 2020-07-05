@@ -142,8 +142,8 @@ void ecs_set_constants(
                 "bitmask requires explicit value assignment");
         }
 
-        char *name = ecs_os_strdup(token.name);
-        ecs_map_set(constants, last_value, &name);
+        char *constant_name = ecs_os_strdup(token.name);
+        ecs_map_set(constants, last_value, &constant_name);
 
         last_value ++;
     }

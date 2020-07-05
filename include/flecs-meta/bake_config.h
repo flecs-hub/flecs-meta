@@ -21,21 +21,17 @@
 #include <flecs.h>
 
 /* Headers of private dependencies */
-#ifdef FLECS_META_IMPL
+#ifdef flecs_meta_EXPORT
 /* No dependencies */
 #endif
 
 /* Convenience macro for exporting symbols */
-#ifndef FLECS_META_STATIC
-  #if FLECS_META_IMPL && (defined(_MSC_VER) || defined(__MINGW32__))
-    #define FLECS_META_EXPORT __declspec(dllexport)
-  #elif FLECS_META_IMPL
-    #define FLECS_META_EXPORT __attribute__((__visibility__("default")))
-  #elif defined _MSC_VER
-    #define FLECS_META_EXPORT __declspec(dllimport)
-  #else
-    #define FLECS_META_EXPORT
-  #endif
+#if flecs_meta_EXPORTS && (defined(_MSC_VER) || defined(__MINGW32__))
+  #define FLECS_META_EXPORT __declspec(dllexport)
+#elif flecs_meta_EXPORTS
+  #define FLECS_META_EXPORT __attribute__((__visibility__("default")))
+#elif defined _MSC_VER
+  #define FLECS_META_EXPORT __declspec(dllimport)
 #else
   #define FLECS_META_EXPORT
 #endif

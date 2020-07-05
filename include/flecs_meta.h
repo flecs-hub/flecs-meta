@@ -44,7 +44,7 @@ static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(nam
 #define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 
 #define ECS_ARRAY(name, T, length)\
-typedef T *name;\
+typedef T name[length];\
 ECS_UNUSED \
 static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"};
 
@@ -180,7 +180,7 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
 ECS_STRUCT( EcsMetaType, {
     ecs_type_kind_t kind;
     size_t size;
-    int8_t alignment;
+    size_t alignment;
     const char *descriptor;
 });
 
@@ -286,24 +286,25 @@ typedef ecs_vector_t ecs_type_op_vector_t;
 typedef ecs_vector_t ecs_constant_vector_t;
 
 ECS_STRUCT_C( ecs_type_op_t, {
+    ecs_entity_t type;
     ecs_type_op_kind_t kind;
     uint16_t size;        /* Size of value or element type if array or vector */
     uint16_t count;       /* Number of elements (only used for arrays) */
     uint32_t offset;      /* Offset of value */
     uint8_t alignment;    /* Alignment of value */
-    
     const char *name;     /* Name of value (only used for struct members) */
 
 ECS_NON_SERIALIZABLE
 
     /* Instruction-specific data */
     union {
-        ecs_vector(ecs_type_op_t) collection;
         ecs_primitive_kind_t primitive;
-        ecs_map(int32_t, ecs_string_t) constant;
+        ecs_ref_t constant;
+        ecs_ref_t collection;
+
         struct {
-            struct ecs_type_op_t *key_op;
-            ecs_vector(ecs_type_op_t) element_ops;
+            ecs_ref_t key;
+            ecs_ref_t element;
         } map;
     } is;
 });
