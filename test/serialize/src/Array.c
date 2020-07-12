@@ -28,7 +28,7 @@ ECS_ARRAY(ArrayArrayLine, ArrayLine, 2);
 void Array_array_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayBool);
 
@@ -45,7 +45,7 @@ void Array_array_bool() {
 void Array_array_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayInt);
 
@@ -62,7 +62,7 @@ void Array_array_int() {
 void Array_array_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayString);
 
@@ -86,7 +86,7 @@ void Array_array_string() {
 void Array_array_entity() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayEntity);
 
@@ -106,7 +106,7 @@ void Array_array_entity() {
 void Array_struct_array_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Struct_w_array);
 
@@ -123,7 +123,7 @@ void Array_struct_array_int() {
 void Array_array_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, ArrayPoint);
@@ -141,7 +141,7 @@ void Array_array_struct() {
 void Array_array_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -160,7 +160,7 @@ void Array_array_nested_struct() {
 void Array_array_array_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayInt);
     ECS_META(world, ArrayArrayInt);
@@ -178,7 +178,7 @@ void Array_array_array_int() {
 void Array_array_array_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayString);
     ECS_META(world, ArrayArrayString);
@@ -196,7 +196,7 @@ void Array_array_array_string() {
 void Array_array_array_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, ArrayPoint);
@@ -215,7 +215,7 @@ void Array_array_array_struct() {
 void Array_array_array_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, Line);

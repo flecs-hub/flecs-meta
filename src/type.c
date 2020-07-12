@@ -21,7 +21,7 @@ ecs_entity_t ecs_meta_lookup_array(
         ecs_meta_error(ctx, params_decl, "invalid array size");
     }
 
-    ecs_entity_t element_type = ecs_lookup_fullpath(world, params.type.type);
+    ecs_entity_t element_type = ecs_lookup_symbol(world, params.type.type);
     if (!element_type) {
         ecs_meta_error(ctx, params_decl, "unknown element type '%s'", 
             params.type.type);
@@ -189,14 +189,14 @@ ecs_entity_t ecs_meta_lookup(
         if (token->is_ptr && !strcmp(typename, "char")) {
             typename = "ecs_string_t";
         } else
-        if (token->is_ptr && !strcmp(typename, "void")) {
+        if (token->is_ptr) {
             typename = "uintptr_t";
         } else        
         if (!strcmp(typename, "char*") || !strcmp(typename, "flecs::string")) {
             typename = "ecs_string_t";
         }
 
-        type = ecs_lookup_fullpath(world, typename);
+        type = ecs_lookup_symbol(world, typename);
         if (!type) {
             ecs_meta_error(ctx, ptr, "unknown type '%s'", typename);
             return 0;

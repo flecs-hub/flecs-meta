@@ -208,7 +208,7 @@ const char* ecs_meta_parse_type(
     /* Parse token, expect type identifier or ECS_PROPERTY */
     ptr = parse_identifier(ptr, token->type, token->params, ctx);
 
-    if (!strcmp(token->type, "ECS_NON_SERIALIZABLE")) {
+    if (!strcmp(token->type, "ECS_PRIVATE")) {
         /* Members from this point are not stored in metadata */
         return NULL;
     }

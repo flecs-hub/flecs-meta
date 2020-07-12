@@ -8,7 +8,7 @@ typedef struct Position {
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     /* Create new entity for our type. This type will describe Position. */
     ecs_entity_t position_type = ecs_set(world, 0, EcsName, {"Position"});

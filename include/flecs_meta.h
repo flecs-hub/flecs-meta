@@ -138,7 +138,7 @@ public:\
 #define ecs_map(K, T) ecs_map_t*
 
 // Indicate that members after this should not be serialized
-#define ECS_NON_SERIALIZABLE
+#define ECS_PRIVATE
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,7 +294,7 @@ ECS_STRUCT_C( ecs_type_op_t, {
     uint8_t alignment;    /* Alignment of value */
     const char *name;     /* Name of value (only used for struct members) */
 
-ECS_NON_SERIALIZABLE
+ECS_PRIVATE
 
     /* Instruction-specific data */
     union {
@@ -532,8 +532,7 @@ extern "C" {
 
 FLECS_META_EXPORT
 void FlecsMetaImport(
-    ecs_world_t *world,
-    int flags);
+    ecs_world_t *world);
 
 #define FlecsMetaImportHandles(handles)\
     ECS_IMPORT_COMPONENT(handles, bool);\
@@ -596,8 +595,8 @@ public:
         MapType = EcsMapType        
     };
 
-    meta(flecs::world& world, int flags) {
-        FlecsMetaImport(world.c_ptr(), flags);
+    meta(flecs::world& world) {
+        FlecsMetaImport(world.c_ptr());
 
         flecs::module<flecs::components::meta>(world, "flecs::components::meta");
 

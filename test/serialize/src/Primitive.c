@@ -3,7 +3,7 @@
 void Primitive_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     bool value = true;
@@ -24,7 +24,7 @@ void Primitive_bool() {
 void Primitive_byte() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     ecs_byte_t value = 0;
@@ -53,7 +53,7 @@ void Primitive_byte() {
 void Primitive_char() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     char value = 'a';
@@ -82,7 +82,7 @@ void Primitive_char() {
 void Primitive_i8() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     int8_t value = 0;
@@ -125,7 +125,7 @@ void Primitive_i8() {
 void Primitive_i16() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     int16_t value = 0;
@@ -168,7 +168,7 @@ void Primitive_i16() {
 void Primitive_i32() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     int32_t value = 0;
@@ -211,7 +211,7 @@ void Primitive_i32() {
 void Primitive_i64() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     int64_t value = 0;
@@ -254,7 +254,7 @@ void Primitive_i64() {
 void Primitive_iptr() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     intptr_t value = 0;
@@ -283,7 +283,7 @@ void Primitive_iptr() {
 void Primitive_u8() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     uint8_t value = 0;
@@ -312,7 +312,7 @@ void Primitive_u8() {
 void Primitive_u16() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     uint16_t value = 0;
@@ -341,7 +341,7 @@ void Primitive_u16() {
 void Primitive_u32() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     uint32_t value = 0;
@@ -370,7 +370,7 @@ void Primitive_u32() {
 void Primitive_u64() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     uint64_t value = 0;
@@ -399,7 +399,7 @@ void Primitive_u64() {
 void Primitive_uptr() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     uintptr_t value = 0;
@@ -421,7 +421,7 @@ void Primitive_uptr() {
 void Primitive_float() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     float value = 0;
@@ -458,7 +458,7 @@ void Primitive_float() {
 void Primitive_double() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     double value = 0;
@@ -494,7 +494,7 @@ void Primitive_double() {
 void Primitive_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     ecs_string_t value = "Hello World";
@@ -530,7 +530,7 @@ void Primitive_string() {
 void Primitive_entity() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     {
     ecs_entity_t value = 2000;

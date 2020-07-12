@@ -17,7 +17,7 @@ ECS_ENUM(Primes, {
 void Enum_enum() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Color);
 
@@ -48,7 +48,7 @@ void Enum_enum() {
 void Enum_enum_explicit_values() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Primes);
 
@@ -93,7 +93,7 @@ void Enum_enum_explicit_values() {
 void Enum_enum_invalid_value() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Color);
 

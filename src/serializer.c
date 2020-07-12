@@ -233,7 +233,7 @@ ecs_vector_t* serialize_struct(
      * The first exception is when an application defines a type by populating
      * the EcsStruct component directly and does not provide size and alignment
      * values for EcsMetaType. The second scenario is when the type definition 
-     * contains an ECS_NON_SERIALIZABLE, in which case the type may contain
+     * contains an ECS_PRIVATE, in which case the type may contain
      * members that are not described.
      *
      * In the first case the computed values should be set in EcsMetaType. In the

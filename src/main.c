@@ -365,7 +365,7 @@ void ecs_new_meta(
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
     ecs_set_ptr(world, component, EcsMetaType, meta_type);\
-    ecs_set_component_actions(world, component, &(EcsComponentLifecycle){
+    ecs_set_component_actions_w_entity(world, component, &(EcsComponentLifecycle){
         .ctor = ctor_initialize_0
     });
 }
@@ -381,8 +381,7 @@ void ecs_new_meta(
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
-    ecs_world_t *world,
-    int flags)
+    ecs_world_t *world)
 {
     ECS_MODULE(world, FlecsMeta);
 
@@ -403,22 +402,22 @@ void FlecsMetaImport(
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 
-    ecs_set_component_actions(world, ecs_entity(EcsStruct), &(EcsComponentLifecycle){
+    ecs_set_component_actions(world, EcsStruct, {
         .ctor = ecs_ctor(EcsStruct),
         .dtor = ecs_dtor(EcsStruct)
     });
 
-    ecs_set_component_actions(world, ecs_entity(EcsEnum), &(EcsComponentLifecycle){
+    ecs_set_component_actions(world, EcsEnum, {
         .ctor = ecs_ctor(EcsEnum),
         .dtor = ecs_dtor(EcsEnum)
     });    
 
-    ecs_set_component_actions(world, ecs_entity(EcsBitmask), &(EcsComponentLifecycle){
+    ecs_set_component_actions(world, EcsBitmask, {
         .ctor = ecs_ctor(EcsBitmask),
         .dtor = ecs_dtor(EcsBitmask)
     });
 
-    ecs_set_component_actions(world, ecs_entity(EcsMetaTypeSerializer), &(EcsComponentLifecycle){
+    ecs_set_component_actions(world, EcsMetaTypeSerializer, {
         .ctor = ecs_ctor(EcsMetaTypeSerializer),
         .dtor = ecs_dtor(EcsMetaTypeSerializer)
     });    
@@ -496,7 +495,7 @@ void FlecsMetaImport(
         .kind = EcsStructType, 
         .size = sizeof(EcsName),
         .alignment = ECS_ALIGNOF(EcsName),
-        .descriptor = "{ecs_string_t value; ECS_NON_SERIALIZABLE; }"
+        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }"
     });
 
     ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
