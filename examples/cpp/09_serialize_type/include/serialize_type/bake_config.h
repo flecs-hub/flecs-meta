@@ -19,7 +19,7 @@
 
 /* Headers of public dependencies */
 #include <flecs.h>
-#include <flecs_components_meta.h>
+#include <flecs_meta.h>
 
 /* Headers of private dependencies */
 #ifdef SERIALIZE_TYPE_IMPL

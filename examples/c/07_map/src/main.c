@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);
 
     /* Import meta module */
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     /* Insert the meta definitions for Toppings, Sandwich and Menu. Make sure 
      * that dependencies are registered before they are used. */

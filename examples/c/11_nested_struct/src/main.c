@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);
 
     /* Import meta module */
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     /* Insert the meta definitions for Position. This will also register the
      * Position type as a component */

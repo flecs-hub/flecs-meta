@@ -21,25 +21,25 @@ ecs_entity_t ecs_meta_lookup_array(
         ecs_meta_error(ctx, params_decl, "invalid array size");
     }
 
-    ecs_entity_t element_type = ecs_lookup(world, params.type.type);
+    ecs_entity_t element_type = ecs_lookup_symbol(world, params.type.type);
     if (!element_type) {
         ecs_meta_error(ctx, params_decl, "unknown element type '%s'", 
             params.type.type);
     }
 
     if (!e) {
-        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-        ecs_assert(ecs_entity(EcsType) != 0, ECS_INTERNAL_ERROR, NULL);
+        ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+        ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-        EcsType *elem_type = ecs_get_ptr(world, element_type, EcsType);
+        const EcsMetaType *elem_type = ecs_get(world, element_type, EcsMetaType);
         ecs_assert(elem_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-        e = ecs_set(world, 0, EcsType, {
+        e = ecs_set(world, 0, EcsMetaType, {
             EcsArrayType, elem_type->size * params.count, elem_type->alignment
         });
     }
 
-    ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
+    ecs_entity_t ecs_entity(EcsArray) = ecs_lookup_fullpath(world, "flecs.meta.Array");
     ecs_assert(ecs_entity(EcsArray) != 0, ECS_INTERNAL_ERROR, NULL);
 
     return ecs_set(world, e, EcsArray, { element_type, params.count });
@@ -67,13 +67,13 @@ ecs_entity_t ecs_meta_lookup_vector(
         world, &params.type, params_decl, 1, &param_ctx);
 
     if (!e) {
-        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-        ecs_assert(ecs_entity(EcsType) != 0, ECS_INTERNAL_ERROR, NULL);
+        ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+        ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-        e = ecs_set(world, 0, EcsType, {EcsVectorType});
+        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType});
     }
 
-    ecs_entity_t ecs_entity(EcsVector) = ecs_lookup(world, "EcsVector");
+    ecs_entity_t ecs_entity(EcsVector) = ecs_lookup_fullpath(world, "flecs.meta.Vector");
     ecs_assert(ecs_entity(EcsVector) != 0, ECS_INTERNAL_ERROR, NULL);
 
     return ecs_set(world, e, EcsVector, { element_type });
@@ -104,13 +104,13 @@ ecs_entity_t ecs_meta_lookup_map(
         world, &params.type, params_decl, 1, &param_ctx);
     
     if (!e) {
-        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-        ecs_assert(ecs_entity(EcsType) != 0, ECS_INTERNAL_ERROR, NULL);
+        ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+        ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
         
-        e = ecs_set(world, 0, EcsType, {EcsMapType});
+        e = ecs_set(world, 0, EcsMetaType, {EcsMapType});
     }
 
-    ecs_entity_t ecs_entity(EcsMap) = ecs_lookup(world, "EcsMap");
+    ecs_entity_t ecs_entity(EcsMap) = ecs_lookup_fullpath(world, "flecs.meta.Map");
     ecs_assert(ecs_entity(EcsMap) != 0, ECS_INTERNAL_ERROR, NULL);
 
     return ecs_set(world, e, EcsMap, { key_type, element_type });
@@ -144,10 +144,10 @@ ecs_entity_t ecs_meta_lookup_bitmask(
     ecs_assert(bitmask_type != 0, ECS_INVALID_PARAMETER, NULL);
 
     /* Make sure this is a bitmask type */
-    ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-    ecs_assert(ecs_entity(EcsType) != 0, ECS_INTERNAL_ERROR, NULL);
+    ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+    ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-    EcsType *type_ptr = ecs_get_ptr(world, bitmask_type, EcsType);
+    const EcsMetaType *type_ptr = ecs_get(world, bitmask_type, EcsMetaType);
     ecs_assert(type_ptr != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(type_ptr->kind == EcsBitmaskType, ECS_INVALID_PARAMETER, NULL);
 
@@ -189,11 +189,14 @@ ecs_entity_t ecs_meta_lookup(
         if (token->is_ptr && !strcmp(typename, "char")) {
             typename = "ecs_string_t";
         } else
+        if (token->is_ptr) {
+            typename = "uintptr_t";
+        } else        
         if (!strcmp(typename, "char*") || !strcmp(typename, "flecs::string")) {
             typename = "ecs_string_t";
         }
 
-        type = ecs_lookup(world, typename);
+        type = ecs_lookup_symbol(world, typename);
         if (!type) {
             ecs_meta_error(ctx, ptr, "unknown type '%s'", typename);
             return 0;
@@ -201,15 +204,15 @@ ecs_entity_t ecs_meta_lookup(
     }
 
     if (count != 1) {
-        /* If count is not 1, insert array type. First lookup EcsType of the
+        /* If count is not 1, insert array type. First lookup EcsMetaType of the
          * element type to get the size and alignment. Then create a new
          * entity for the array type, and assign it to the member type. */
-        ecs_entity_t ecs_entity(EcsType) = ecs_lookup(world, "EcsType");
-        ecs_entity_t ecs_entity(EcsArray) = ecs_lookup(world, "EcsArray");
-        EcsType *type_ptr = ecs_get_ptr(world, type, EcsType);
+        ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
+        ecs_entity_t ecs_entity(EcsArray) = ecs_lookup_fullpath(world, "flecs.meta.Array");
+        const EcsMetaType *type_ptr = ecs_get(world, type, EcsMetaType);
 
         type = ecs_set(world, ecs_set(world, 0, 
-            EcsType, {EcsArrayType, type_ptr->size, type_ptr->alignment}),
+            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment}),
             EcsArray, {type, count});       
     }
 

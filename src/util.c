@@ -1,4 +1,4 @@
-#include <flecs_components_meta.h>
+#include <flecs_meta.h>
 
 char* ecs_chresc(
     char *out, 

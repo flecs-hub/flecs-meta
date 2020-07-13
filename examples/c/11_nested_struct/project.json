@@ -7,7 +7,7 @@
         "public": false,
         "use": [
             "flecs",
-            "flecs.components.meta"
+            "flecs.meta"
         ]
     }
 }

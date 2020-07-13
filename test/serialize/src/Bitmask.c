@@ -9,7 +9,7 @@ ECS_BITMASK(Toppings, {
 void Bitmask_bitmask_1() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Toppings);
 
@@ -26,7 +26,7 @@ void Bitmask_bitmask_1() {
 void Bitmask_bitmask_2() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Toppings);
 
@@ -43,7 +43,7 @@ void Bitmask_bitmask_2() {
 void Bitmask_bitmask_3() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Toppings);
 
@@ -60,7 +60,7 @@ void Bitmask_bitmask_3() {
 void Bitmask_bitmask_0_value() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Toppings);
 

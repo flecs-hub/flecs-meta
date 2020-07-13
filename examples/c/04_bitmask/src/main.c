@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);
 
     /* Import meta module */
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     /* Insert the meta definitions. Make sure to define Toppings before 
      * Sandwich, as Sandwich uses Toppings. */

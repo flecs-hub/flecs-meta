@@ -41,7 +41,7 @@ ECS_MAP(MapIntMapIntBool, int32_t, MapIntBool);
 void Map_map_bool_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapBoolBool);
 
@@ -61,7 +61,7 @@ void Map_map_bool_bool() {
 void Map_map_int_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapIntBool);
 
@@ -69,6 +69,9 @@ void Map_map_int_bool() {
     ecs_map_t *value = ecs_map_new(bool, 0);
     ecs_map_set(value, 1, &(bool){false});
     ecs_map_set(value, 2, &(bool){true});
+
+    bool *tst = ecs_map_get(value, bool, 1);
+
     char *str = ecs_ptr_to_str(world, ecs_entity(MapIntBool), &value);
     test_str(str, "{1 = false, 2 = true}");
     ecs_os_free(str);
@@ -81,7 +84,7 @@ void Map_map_int_bool() {
 void Map_map_string_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapStringBool);
 
@@ -101,7 +104,7 @@ void Map_map_string_bool() {
 void Map_map_enum_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Color);
     ECS_META(world, MapColorBool);
@@ -122,7 +125,7 @@ void Map_map_enum_bool() {
 void Map_map_bitmask_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Toppings);
     ECS_META(world, MapToppingsBool);
@@ -143,7 +146,7 @@ void Map_map_bitmask_bool() {
 void Map_map_int_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapIntInt);
 
@@ -163,7 +166,7 @@ void Map_map_int_int() {
 void Map_map_int_string() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapIntString);
 
@@ -183,7 +186,7 @@ void Map_map_int_string() {
 void Map_map_int_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, MapIntPoint);
@@ -204,7 +207,7 @@ void Map_map_int_struct() {
 void Map_map_int_nested_struct() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, Point);
     ECS_META(world, Line);
@@ -226,7 +229,7 @@ void Map_map_int_nested_struct() {
 void Map_map_int_array_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayInt);
     ECS_META(world, MapIntArrayInt);
@@ -247,14 +250,14 @@ void Map_map_int_array_int() {
 void Map_map_int_vector_int() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, VectorInt);
     ECS_META(world, MapIntVectorInt);
 
     {
-    ecs_vector_t *v1 = ecs_vector_from_array(2, ((int32_t[]){10, 20}));
-    ecs_vector_t *v2 = ecs_vector_from_array(2, ((int32_t[]){30, 40}));
+    ecs_vector_t *v1 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){10, 20}));
+    ecs_vector_t *v2 = ecs_vector_from_array(int32_t, 2, ((int32_t[]){30, 40}));
     ecs_map_t *value = ecs_map_new(ArrayInt, 0);
     ecs_map_set(value, 1, &v1);
     ecs_map_set(value, 2, &v2);
@@ -272,7 +275,7 @@ void Map_map_int_vector_int() {
 void Map_map_int_map_int_bool() {
     ecs_world_t *world = ecs_init();
 
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, MapIntBool);
     ECS_META(world, MapIntMapIntBool);

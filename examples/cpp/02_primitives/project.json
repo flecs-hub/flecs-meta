@@ -6,7 +6,7 @@
         "description": "A simple hello world flecs application",
         "use": [
             "flecs",
-            "flecs.components.meta"
+            "flecs.meta"
         ],
         "language": "c++"
     }

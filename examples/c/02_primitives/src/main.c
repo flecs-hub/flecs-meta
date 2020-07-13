@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);
 
     /* Import meta module */
-    ECS_IMPORT(world, FlecsComponentsMeta, 0);
+    ECS_IMPORT(world, FlecsMeta);
 
     /* Insert the meta definitions for Primitives. This will also register the
      * Primitives type as a component */

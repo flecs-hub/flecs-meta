@@ -1,7 +1,7 @@
-#ifndef FLECS_COMPONENTS_META_PARSER_H
-#define FLECS_COMPONENTS_META_PARSER_H
+#ifndef FLECS_META_PARSER_H
+#define FLECS_META_PARSER_H
 
-#include "flecs_components_meta.h"
+#include "flecs_meta.h"
 
 #define ECS_META_IDENTIFIER_LENGTH (256)
 
