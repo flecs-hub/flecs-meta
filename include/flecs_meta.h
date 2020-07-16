@@ -9,16 +9,6 @@
 //// Utility macro's (do not use in code!)
 ////////////////////////////////////////////////////////////////////////////////
 
-#define ECS_UNUSED __attribute__((unused))
-
-#ifdef __cplusplus
-#define ECS_ALIGNOF(T) alignof(T)
-#else
-#define ECS_ALIGNOF(T) ((size_t)&((struct { char c; T d; } *)0)->d)
-#endif
-
-#define ECS_ALIGN(size, alignment) (((((size) - 1) / (alignment)) + 1) * (alignment))
-
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
