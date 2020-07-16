@@ -4,7 +4,7 @@
 /* This generated file contains includes for project dependencies */
 #include "flecs-meta/bake_config.h"
 
-
+#ifndef FLECS_LEGACY
 ////////////////////////////////////////////////////////////////////////////////
 //// Utility macro's (do not use in code!)
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +303,7 @@ ECS_STRUCT_C( EcsMetaTypeSerializer, {
     ecs_vector(ecs_type_op_t) ops;
 });
 
+#endif
 
 #ifdef __cplusplus
 extern "C" {
