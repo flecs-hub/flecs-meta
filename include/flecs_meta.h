@@ -304,6 +304,9 @@ ECS_STRUCT_C( EcsMetaTypeSerializer, {
 });
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 //// Pretty printer
 ////////////////////////////////////////////////////////////////////////////////
@@ -610,15 +613,19 @@ public:
 //// Macro for inserting metadata in C application
 ////////////////////////////////////////////////////////////////////////////////
 
+FLECS_META_EXPORT
 void ecs_new_meta(
     ecs_world_t *world,
     ecs_entity_t component,
-    EcsMetaType *meta_type);
+    struct EcsMetaType *meta_type);
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
     ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
+#ifdef __cplusplus
+}
+#endif
 #ifdef __cplusplus
 #ifndef FLECS_NO_CPP
 
