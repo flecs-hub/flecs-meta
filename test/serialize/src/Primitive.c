@@ -5,6 +5,9 @@ void Primitive_bool() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(bool) = ecs_lookup_fullpath(world, "flecs.core.bool");
+    test_assert(ecs_entity(bool) != 0);
+
     {
     bool value = true;
     char *str = ecs_ptr_to_str(world, ecs_entity(bool), &value);
@@ -25,6 +28,8 @@ void Primitive_byte() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+    ecs_entity_t ecs_entity(ecs_byte_t) = ecs_lookup_fullpath(world, "flecs.core.ecs_byte_t");
+    test_assert(ecs_entity(ecs_byte_t) != 0);
 
     {
     ecs_byte_t value = 0;
@@ -55,6 +60,9 @@ void Primitive_char() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(char) = ecs_lookup_fullpath(world, "flecs.core.char");
+    test_assert(ecs_entity(char) != 0);
+
     {
     char value = 'a';
     char *str = ecs_ptr_to_str(world, ecs_entity(char), &value);
@@ -83,6 +91,9 @@ void Primitive_i8() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(int8_t) = ecs_lookup_fullpath(world, "flecs.core.int8_t");
+    test_assert(ecs_entity(int8_t) != 0);
 
     {
     int8_t value = 0;
@@ -127,6 +138,9 @@ void Primitive_i16() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(int16_t) = ecs_lookup_fullpath(world, "flecs.core.int16_t");
+    test_assert(ecs_entity(int16_t) != 0);
+
     {
     int16_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(int16_t), &value);
@@ -169,6 +183,9 @@ void Primitive_i32() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(int32_t) = ecs_lookup_fullpath(world, "flecs.core.int32_t");
+    test_assert(ecs_entity(int32_t) != 0);
 
     {
     int32_t value = 0;
@@ -213,6 +230,9 @@ void Primitive_i64() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(int64_t) = ecs_lookup_fullpath(world, "flecs.core.int64_t");
+    test_assert(ecs_entity(int64_t) != 0);
+
     {
     int64_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(int64_t), &value);
@@ -256,6 +276,9 @@ void Primitive_iptr() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(intptr_t) = ecs_lookup_fullpath(world, "flecs.core.intptr_t");
+    test_assert(ecs_entity(intptr_t) != 0);
+
     {
     intptr_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(intptr_t), &value);
@@ -284,6 +307,9 @@ void Primitive_u8() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(uint8_t) = ecs_lookup_fullpath(world, "flecs.core.uint8_t");
+    test_assert(ecs_entity(uint8_t) != 0);
 
     {
     uint8_t value = 0;
@@ -314,6 +340,9 @@ void Primitive_u16() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(uint16_t) = ecs_lookup_fullpath(world, "flecs.core.uint16_t");
+    test_assert(ecs_entity(uint16_t) != 0);
+
     {
     uint16_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(uint16_t), &value);
@@ -342,6 +371,9 @@ void Primitive_u32() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(uint32_t) = ecs_lookup_fullpath(world, "flecs.core.uint32_t");
+    test_assert(ecs_entity(uint32_t) != 0);
 
     {
     uint32_t value = 0;
@@ -372,6 +404,9 @@ void Primitive_u64() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(uint64_t) = ecs_lookup_fullpath(world, "flecs.core.uint64_t");
+    test_assert(ecs_entity(uint64_t) != 0);
+
     {
     uint64_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(uint64_t), &value);
@@ -401,6 +436,9 @@ void Primitive_uptr() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(uintptr_t) = ecs_lookup_fullpath(world, "flecs.core.uintptr_t");
+    test_assert(ecs_entity(uintptr_t) != 0);
+
     {
     uintptr_t value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(uintptr_t), &value);
@@ -422,6 +460,9 @@ void Primitive_float() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(float) = ecs_lookup_fullpath(world, "flecs.core.float");
+    test_assert(ecs_entity(float) != 0);
 
     {
     float value = 0;
@@ -460,6 +501,9 @@ void Primitive_double() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(double) = ecs_lookup_fullpath(world, "flecs.core.double");
+    test_assert(ecs_entity(double) != 0);
+
     {
     double value = 0;
     char *str = ecs_ptr_to_str(world, ecs_entity(double), &value);
@@ -496,6 +540,9 @@ void Primitive_string() {
 
     ECS_IMPORT(world, FlecsMeta);
 
+    ecs_entity_t ecs_entity(ecs_string_t) = ecs_lookup_fullpath(world, "flecs.core.ecs_string_t");
+    test_assert(ecs_entity(ecs_string_t) != 0);
+
     {
     ecs_string_t value = "Hello World";
     char *str = ecs_ptr_to_str(world, ecs_entity(ecs_string_t), &value);
@@ -531,6 +578,9 @@ void Primitive_entity() {
     ecs_world_t *world = ecs_init();
 
     ECS_IMPORT(world, FlecsMeta);
+
+    ecs_entity_t ecs_entity(ecs_entity_t) = ecs_lookup_fullpath(world, "flecs.core.ecs_entity_t");
+    test_assert(ecs_entity(ecs_entity_t) != 0);
 
     {
     ecs_entity_t value = 2000;

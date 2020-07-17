@@ -511,24 +511,4 @@ void FlecsMetaImport(
         .alignment = ECS_ALIGNOF(EcsSignatureExpr),
         .descriptor = "{const char *expr;}"
     });
-
-    /* Export components to public handles */
-    ECS_EXPORT_COMPONENT(bool);
-    ECS_EXPORT_COMPONENT(char);
-    ECS_EXPORT_COMPONENT(ecs_byte_t);
-    ECS_EXPORT_COMPONENT(uint8_t);
-    ECS_EXPORT_COMPONENT(uint16_t);
-    ECS_EXPORT_COMPONENT(uint32_t);
-    ECS_EXPORT_COMPONENT(uint64_t);
-    ECS_EXPORT_COMPONENT(uintptr_t);
-    ECS_EXPORT_COMPONENT(int8_t);
-    ECS_EXPORT_COMPONENT(int16_t);
-    ECS_EXPORT_COMPONENT(int32_t);
-    ECS_EXPORT_COMPONENT(int64_t);
-    ECS_EXPORT_COMPONENT(intptr_t);
-    ECS_EXPORT_COMPONENT(size_t);
-    ECS_EXPORT_COMPONENT(float);
-    ECS_EXPORT_COMPONENT(double);
-    ECS_EXPORT_COMPONENT(ecs_string_t);
-    ECS_EXPORT_COMPONENT(ecs_entity_t);
 }

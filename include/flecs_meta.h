@@ -497,24 +497,6 @@ int ecs_meta_set_null(
 ////////////////////////////////////////////////////////////////////////////////
 
 typedef struct FlecsMeta {
-    ECS_DECLARE_COMPONENT(bool);
-    ECS_DECLARE_COMPONENT(char);
-    ECS_DECLARE_COMPONENT(ecs_byte_t);
-    ECS_DECLARE_COMPONENT(uint8_t);
-    ECS_DECLARE_COMPONENT(uint16_t);
-    ECS_DECLARE_COMPONENT(uint32_t);
-    ECS_DECLARE_COMPONENT(uint64_t);
-    ECS_DECLARE_COMPONENT(uintptr_t);
-    ECS_DECLARE_COMPONENT(int8_t);
-    ECS_DECLARE_COMPONENT(int16_t);
-    ECS_DECLARE_COMPONENT(int32_t);
-    ECS_DECLARE_COMPONENT(int64_t);
-    ECS_DECLARE_COMPONENT(intptr_t);
-    ECS_DECLARE_COMPONENT(size_t);
-    ECS_DECLARE_COMPONENT(float);
-    ECS_DECLARE_COMPONENT(double);
-    ECS_DECLARE_COMPONENT(ecs_string_t);
-    ECS_DECLARE_COMPONENT(ecs_entity_t);
     ECS_DECLARE_COMPONENT(EcsPrimitive);
     ECS_DECLARE_COMPONENT(EcsEnum);
     ECS_DECLARE_COMPONENT(EcsBitmask);
@@ -535,24 +517,6 @@ void FlecsMetaImport(
     ecs_world_t *world);
 
 #define FlecsMetaImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, bool);\
-    ECS_IMPORT_COMPONENT(handles, char);\
-    ECS_IMPORT_COMPONENT(handles, ecs_byte_t);\
-    ECS_IMPORT_COMPONENT(handles, uint8_t);\
-    ECS_IMPORT_COMPONENT(handles, uint16_t);\
-    ECS_IMPORT_COMPONENT(handles, uint32_t);\
-    ECS_IMPORT_COMPONENT(handles, uint64_t);\
-    ECS_IMPORT_COMPONENT(handles, uintptr_t);\
-    ECS_IMPORT_COMPONENT(handles, int8_t);\
-    ECS_IMPORT_COMPONENT(handles, int16_t);\
-    ECS_IMPORT_COMPONENT(handles, int32_t);\
-    ECS_IMPORT_COMPONENT(handles, int64_t);\
-    ECS_IMPORT_COMPONENT(handles, intptr_t);\
-    ECS_IMPORT_COMPONENT(handles, size_t);\
-    ECS_IMPORT_COMPONENT(handles, float);\
-    ECS_IMPORT_COMPONENT(handles, double);\
-    ECS_IMPORT_COMPONENT(handles, ecs_string_t);\
-    ECS_IMPORT_COMPONENT(handles, ecs_entity_t);\
     ECS_IMPORT_COMPONENT(handles, EcsPrimitive);\
     ECS_IMPORT_COMPONENT(handles, EcsEnum);\
     ECS_IMPORT_COMPONENT(handles, EcsBitmask);\

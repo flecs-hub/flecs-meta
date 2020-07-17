@@ -25,21 +25,5 @@
 #endif
 #include <bake_test.h>
 
-/* Headers of private dependencies */
-#ifdef test_EXPORT
-/* No dependencies */
-#endif
-
-/* Convenience macro for exporting symbols */
-#if test_EXPORTS && (defined(_MSC_VER) || defined(__MINGW32__))
-  #define TEST_EXPORT __declspec(dllexport)
-#elif test_EXPORTS
-  #define TEST_EXPORT __attribute__((__visibility__("default")))
-#elif defined _MSC_VER
-  #define TEST_EXPORT __declspec(dllimport)
-#else
-  #define TEST_EXPORT
-#endif
-
 #endif
 
