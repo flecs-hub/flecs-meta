@@ -4,20 +4,10 @@
 /* This generated file contains includes for project dependencies */
 #include "flecs-meta/bake_config.h"
 
-
+#ifndef FLECS_LEGACY
 ////////////////////////////////////////////////////////////////////////////////
 //// Utility macro's (do not use in code!)
 ////////////////////////////////////////////////////////////////////////////////
-
-#define ECS_UNUSED __attribute__((unused))
-
-#ifdef __cplusplus
-#define ECS_ALIGNOF(T) alignof(T)
-#else
-#define ECS_ALIGNOF(T) ((size_t)&((struct { char c; T d; } *)0)->d)
-#endif
-
-#define ECS_ALIGN(size, alignment) (((((size) - 1) / (alignment)) + 1) * (alignment))
 
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
@@ -313,7 +303,11 @@ ECS_STRUCT_C( EcsMetaTypeSerializer, {
     ecs_vector(ecs_type_op_t) ops;
 });
 
+#endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 //// Pretty printer
 ////////////////////////////////////////////////////////////////////////////////
@@ -584,15 +578,19 @@ public:
 //// Macro for inserting metadata in C application
 ////////////////////////////////////////////////////////////////////////////////
 
+FLECS_META_EXPORT
 void ecs_new_meta(
     ecs_world_t *world,
     ecs_entity_t component,
-    EcsMetaType *meta_type);
+    struct EcsMetaType *meta_type);
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
     ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
+#ifdef __cplusplus
+}
+#endif
 #ifdef __cplusplus
 #ifndef FLECS_NO_CPP
 
