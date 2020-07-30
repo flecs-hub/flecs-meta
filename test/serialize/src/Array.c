@@ -14,6 +14,8 @@ ECS_STRUCT(Struct_w_array, {
     int32_t ints[2];
 });
 
+typedef int extern_array[2];
+
 ECS_ARRAY(ArrayBool, bool, 2);
 ECS_ARRAY(ArrayInt, int32_t, 2);
 ECS_ARRAY(ArrayString, ecs_string_t, 2);
@@ -24,6 +26,7 @@ ECS_ARRAY(ArrayArrayInt, ArrayInt, 2);
 ECS_ARRAY(ArrayArrayString, ArrayString, 2);
 ECS_ARRAY(ArrayArrayPoint, ArrayPoint, 2);
 ECS_ARRAY(ArrayArrayLine, ArrayLine, 2);
+ECS_ARRAY_EXTERN(extern_array, int32_t, 2);
 
 void Array_array_bool() {
     ecs_world_t *world = ecs_init();
@@ -48,6 +51,7 @@ void Array_array_int() {
     ECS_IMPORT(world, FlecsMeta);
 
     ECS_META(world, ArrayInt);
+    ECS_META(world, extern_array);
 
     {
     int32_t value[] = {10, -20};
@@ -55,6 +59,14 @@ void Array_array_int() {
     test_str(str, "[10, -20]");
     ecs_os_free(str);
     }
+
+    {
+    extern_array value = {10, -20};
+    char *str = ecs_ptr_to_str(world, ecs_entity(extern_array), value);
+    test_str(str, "[10, -20]");
+    ecs_os_free(str);
+    }
+
 
     ecs_fini(world);
 }
