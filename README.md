@@ -1,6 +1,4 @@
 # flecs.meta
-**NOTE: This library currently only works with the bleeding_edge branch of Flecs!**
-
 This is a reflection library for C/C++ that uses Flecs to store the meta definitions. The library uses a combination of macro and template wizardry to directly parse the C/C++ type defintions. No code generation or APIs to describe the types are needed. 
 
 The library does not require compile time knowledge of a type. This lets applications define types at runtime, and enables for the creation of tools that are type unaware.
@@ -39,6 +37,9 @@ void main() {
     std::cout << flecs::pretty_print(world, p) << std::endl;
 }
 ```
+
+## Building
+Add `flecs_meta.c` and `flecs_meta.h` to your project, in addition to `flecs.c` and `flecs.h` from https://github.com/SanderMertens/flecs.
 
 ## Examples
 
