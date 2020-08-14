@@ -1,10 +1,6 @@
 # flecs.meta
 This is a reflection library for C/C++ that uses Flecs to store the meta definitions. The library uses a combination of macro and template wizardry to directly parse the C/C++ type defintions. No code generation or APIs to describe the types are needed. 
 
-The library does not require compile time knowledge of a type. This lets applications define types at runtime, and enables for the creation of tools that are type unaware.
-
-Type definitions are converted to a virtual-machine like opcode format which allows applications to write extremely fast serializers.
-
 The library supports:
  - Lots of primitive types
  - Enumerations
@@ -13,9 +9,10 @@ The library supports:
  - Arrays
  - Vectors
  - Maps
-
-A simple example:
-
+ 
+Also check the JSON serializer written with flecs.meta: https://github.com/flecs-hub/flecs-json
+ 
+A simple example in C++:
 ```c++
 ECS_STRUCT(Position, {
     float x;
@@ -40,6 +37,9 @@ void main() {
 
 ## Building
 Add `flecs_meta.c` and `flecs_meta.h` to your project, in addition to `flecs.c` and `flecs.h` from https://github.com/SanderMertens/flecs.
+
+## Caveats
+The libary works by computing offsets & alignment of types based on a stringified type definition, which does not work for non-trivial C++ types (for more information on what those are, see: http://www.cplusplus.com/reference/type_traits/is_trivial/)
 
 ## Examples
 
