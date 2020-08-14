@@ -502,7 +502,7 @@ void FlecsMetaImport(
         .kind = EcsStructType, 
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
-        .descriptor = "{size_t size; size_t alignment;}"
+        .descriptor = "{int32_t size; int32_t alignment;}"
     });
 
     ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {

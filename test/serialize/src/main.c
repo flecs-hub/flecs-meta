@@ -86,304 +86,332 @@ void Map_map_int_array_int(void);
 void Map_map_int_vector_int(void);
 void Map_map_int_map_int_bool(void);
 
+bake_test_case Primitive_testcases[] = {
+    {
+        "bool",
+        Primitive_bool
+    },
+    {
+        "byte",
+        Primitive_byte
+    },
+    {
+        "char",
+        Primitive_char
+    },
+    {
+        "i8",
+        Primitive_i8
+    },
+    {
+        "i16",
+        Primitive_i16
+    },
+    {
+        "i32",
+        Primitive_i32
+    },
+    {
+        "i64",
+        Primitive_i64
+    },
+    {
+        "iptr",
+        Primitive_iptr
+    },
+    {
+        "u8",
+        Primitive_u8
+    },
+    {
+        "u16",
+        Primitive_u16
+    },
+    {
+        "u32",
+        Primitive_u32
+    },
+    {
+        "u64",
+        Primitive_u64
+    },
+    {
+        "uptr",
+        Primitive_uptr
+    },
+    {
+        "float",
+        Primitive_float
+    },
+    {
+        "double",
+        Primitive_double
+    },
+    {
+        "string",
+        Primitive_string
+    },
+    {
+        "entity",
+        Primitive_entity
+    }
+};
+
+bake_test_case Struct_testcases[] = {
+    {
+        "struct",
+        Struct_struct
+    },
+    {
+        "nested_struct",
+        Struct_nested_struct
+    },
+    {
+        "struct_bool_i32",
+        Struct_struct_bool_i32
+    },
+    {
+        "struct_i32_bool",
+        Struct_struct_i32_bool
+    }
+};
+
+bake_test_case Enum_testcases[] = {
+    {
+        "enum",
+        Enum_enum
+    },
+    {
+        "enum_explicit_values",
+        Enum_enum_explicit_values
+    },
+    {
+        "enum_invalid_value",
+        Enum_enum_invalid_value
+    }
+};
+
+bake_test_case Bitmask_testcases[] = {
+    {
+        "bitmask_1",
+        Bitmask_bitmask_1
+    },
+    {
+        "bitmask_2",
+        Bitmask_bitmask_2
+    },
+    {
+        "bitmask_3",
+        Bitmask_bitmask_3
+    },
+    {
+        "bitmask_0_value",
+        Bitmask_bitmask_0_value
+    }
+};
+
+bake_test_case Array_testcases[] = {
+    {
+        "array_bool",
+        Array_array_bool
+    },
+    {
+        "array_int",
+        Array_array_int
+    },
+    {
+        "array_string",
+        Array_array_string
+    },
+    {
+        "array_entity",
+        Array_array_entity
+    },
+    {
+        "struct_array_int",
+        Array_struct_array_int
+    },
+    {
+        "array_struct",
+        Array_array_struct
+    },
+    {
+        "array_nested_struct",
+        Array_array_nested_struct
+    },
+    {
+        "array_array_int",
+        Array_array_array_int
+    },
+    {
+        "array_array_string",
+        Array_array_array_string
+    },
+    {
+        "array_array_struct",
+        Array_array_array_struct
+    },
+    {
+        "array_array_nested_struct",
+        Array_array_array_nested_struct
+    }
+};
+
+bake_test_case Vector_testcases[] = {
+    {
+        "vector_bool",
+        Vector_vector_bool
+    },
+    {
+        "vector_int",
+        Vector_vector_int
+    },
+    {
+        "vector_string",
+        Vector_vector_string
+    },
+    {
+        "vector_entity",
+        Vector_vector_entity
+    },
+    {
+        "vector_struct",
+        Vector_vector_struct
+    },
+    {
+        "vector_nested_struct",
+        Vector_vector_nested_struct
+    },
+    {
+        "vector_vector_int",
+        Vector_vector_vector_int
+    },
+    {
+        "vector_vector_struct",
+        Vector_vector_vector_struct
+    },
+    {
+        "vector_vector_nested_struct",
+        Vector_vector_vector_nested_struct
+    },
+    {
+        "vector_empty",
+        Vector_vector_empty
+    },
+    {
+        "vector_vector_empty",
+        Vector_vector_vector_empty
+    },
+    {
+        "vector_null",
+        Vector_vector_null
+    },
+    {
+        "vector_vector_null",
+        Vector_vector_vector_null
+    }
+};
+
+bake_test_case Map_testcases[] = {
+    {
+        "map_bool_bool",
+        Map_map_bool_bool
+    },
+    {
+        "map_int_bool",
+        Map_map_int_bool
+    },
+    {
+        "map_string_bool",
+        Map_map_string_bool
+    },
+    {
+        "map_enum_bool",
+        Map_map_enum_bool
+    },
+    {
+        "map_bitmask_bool",
+        Map_map_bitmask_bool
+    },
+    {
+        "map_int_int",
+        Map_map_int_int
+    },
+    {
+        "map_int_string",
+        Map_map_int_string
+    },
+    {
+        "map_int_struct",
+        Map_map_int_struct
+    },
+    {
+        "map_int_nested_struct",
+        Map_map_int_nested_struct
+    },
+    {
+        "map_int_array_int",
+        Map_map_int_array_int
+    },
+    {
+        "map_int_vector_int",
+        Map_map_int_vector_int
+    },
+    {
+        "map_int_map_int_bool",
+        Map_map_int_map_int_bool
+    }
+};
+
 static bake_test_suite suites[] = {
     {
-        .id = "Primitive",
-        .testcase_count = 17,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "bool",
-                .function = Primitive_bool
-            },
-            {
-                .id = "byte",
-                .function = Primitive_byte
-            },
-            {
-                .id = "char",
-                .function = Primitive_char
-            },
-            {
-                .id = "i8",
-                .function = Primitive_i8
-            },
-            {
-                .id = "i16",
-                .function = Primitive_i16
-            },
-            {
-                .id = "i32",
-                .function = Primitive_i32
-            },
-            {
-                .id = "i64",
-                .function = Primitive_i64
-            },
-            {
-                .id = "iptr",
-                .function = Primitive_iptr
-            },
-            {
-                .id = "u8",
-                .function = Primitive_u8
-            },
-            {
-                .id = "u16",
-                .function = Primitive_u16
-            },
-            {
-                .id = "u32",
-                .function = Primitive_u32
-            },
-            {
-                .id = "u64",
-                .function = Primitive_u64
-            },
-            {
-                .id = "uptr",
-                .function = Primitive_uptr
-            },
-            {
-                .id = "float",
-                .function = Primitive_float
-            },
-            {
-                .id = "double",
-                .function = Primitive_double
-            },
-            {
-                .id = "string",
-                .function = Primitive_string
-            },
-            {
-                .id = "entity",
-                .function = Primitive_entity
-            }
-        }
+        "Primitive",
+        NULL,
+        NULL,
+        17,
+        Primitive_testcases
     },
     {
-        .id = "Struct",
-        .testcase_count = 4,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "struct",
-                .function = Struct_struct
-            },
-            {
-                .id = "nested_struct",
-                .function = Struct_nested_struct
-            },
-            {
-                .id = "struct_bool_i32",
-                .function = Struct_struct_bool_i32
-            },
-            {
-                .id = "struct_i32_bool",
-                .function = Struct_struct_i32_bool
-            }
-        }
+        "Struct",
+        NULL,
+        NULL,
+        4,
+        Struct_testcases
     },
     {
-        .id = "Enum",
-        .testcase_count = 3,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "enum",
-                .function = Enum_enum
-            },
-            {
-                .id = "enum_explicit_values",
-                .function = Enum_enum_explicit_values
-            },
-            {
-                .id = "enum_invalid_value",
-                .function = Enum_enum_invalid_value
-            }
-        }
+        "Enum",
+        NULL,
+        NULL,
+        3,
+        Enum_testcases
     },
     {
-        .id = "Bitmask",
-        .testcase_count = 4,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "bitmask_1",
-                .function = Bitmask_bitmask_1
-            },
-            {
-                .id = "bitmask_2",
-                .function = Bitmask_bitmask_2
-            },
-            {
-                .id = "bitmask_3",
-                .function = Bitmask_bitmask_3
-            },
-            {
-                .id = "bitmask_0_value",
-                .function = Bitmask_bitmask_0_value
-            }
-        }
+        "Bitmask",
+        NULL,
+        NULL,
+        4,
+        Bitmask_testcases
     },
     {
-        .id = "Array",
-        .testcase_count = 11,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "array_bool",
-                .function = Array_array_bool
-            },
-            {
-                .id = "array_int",
-                .function = Array_array_int
-            },
-            {
-                .id = "array_string",
-                .function = Array_array_string
-            },
-            {
-                .id = "array_entity",
-                .function = Array_array_entity
-            },
-            {
-                .id = "struct_array_int",
-                .function = Array_struct_array_int
-            },
-            {
-                .id = "array_struct",
-                .function = Array_array_struct
-            },
-            {
-                .id = "array_nested_struct",
-                .function = Array_array_nested_struct
-            },
-            {
-                .id = "array_array_int",
-                .function = Array_array_array_int
-            },
-            {
-                .id = "array_array_string",
-                .function = Array_array_array_string
-            },
-            {
-                .id = "array_array_struct",
-                .function = Array_array_array_struct
-            },
-            {
-                .id = "array_array_nested_struct",
-                .function = Array_array_array_nested_struct
-            }
-        }
+        "Array",
+        NULL,
+        NULL,
+        11,
+        Array_testcases
     },
     {
-        .id = "Vector",
-        .testcase_count = 13,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "vector_bool",
-                .function = Vector_vector_bool
-            },
-            {
-                .id = "vector_int",
-                .function = Vector_vector_int
-            },
-            {
-                .id = "vector_string",
-                .function = Vector_vector_string
-            },
-            {
-                .id = "vector_entity",
-                .function = Vector_vector_entity
-            },
-            {
-                .id = "vector_struct",
-                .function = Vector_vector_struct
-            },
-            {
-                .id = "vector_nested_struct",
-                .function = Vector_vector_nested_struct
-            },
-            {
-                .id = "vector_vector_int",
-                .function = Vector_vector_vector_int
-            },
-            {
-                .id = "vector_vector_struct",
-                .function = Vector_vector_vector_struct
-            },
-            {
-                .id = "vector_vector_nested_struct",
-                .function = Vector_vector_vector_nested_struct
-            },
-            {
-                .id = "vector_empty",
-                .function = Vector_vector_empty
-            },
-            {
-                .id = "vector_vector_empty",
-                .function = Vector_vector_vector_empty
-            },
-            {
-                .id = "vector_null",
-                .function = Vector_vector_null
-            },
-            {
-                .id = "vector_vector_null",
-                .function = Vector_vector_vector_null
-            }
-        }
+        "Vector",
+        NULL,
+        NULL,
+        13,
+        Vector_testcases
     },
     {
-        .id = "Map",
-        .testcase_count = 12,
-        .testcases = (bake_test_case[]){
-            {
-                .id = "map_bool_bool",
-                .function = Map_map_bool_bool
-            },
-            {
-                .id = "map_int_bool",
-                .function = Map_map_int_bool
-            },
-            {
-                .id = "map_string_bool",
-                .function = Map_map_string_bool
-            },
-            {
-                .id = "map_enum_bool",
-                .function = Map_map_enum_bool
-            },
-            {
-                .id = "map_bitmask_bool",
-                .function = Map_map_bitmask_bool
-            },
-            {
-                .id = "map_int_int",
-                .function = Map_map_int_int
-            },
-            {
-                .id = "map_int_string",
-                .function = Map_map_int_string
-            },
-            {
-                .id = "map_int_struct",
-                .function = Map_map_int_struct
-            },
-            {
-                .id = "map_int_nested_struct",
-                .function = Map_map_int_nested_struct
-            },
-            {
-                .id = "map_int_array_int",
-                .function = Map_map_int_array_int
-            },
-            {
-                .id = "map_int_vector_int",
-                .function = Map_map_int_vector_int
-            },
-            {
-                .id = "map_int_map_int_bool",
-                .function = Map_map_int_map_int_bool
-            }
-        }
+        "Map",
+        NULL,
+        NULL,
+        12,
+        Map_testcases
     }
 };
 

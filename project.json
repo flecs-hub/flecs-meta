@@ -4,6 +4,7 @@
     "value": {
         "author": "Sander Mertens",
         "description": "Flecs module package",
+        "amalgamate": true,
         "use": [
             "flecs"
         ]
