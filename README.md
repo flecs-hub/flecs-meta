@@ -24,7 +24,7 @@ ECS_STRUCT(Position, {
 
 void main() {
     // The world that will store the reflection data
-    flecs::world world();
+    flecs::world world;
 
     // Import the reflection module
     flecs::import<flecs::components::meta>(world);
