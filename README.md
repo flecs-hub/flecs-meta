@@ -19,7 +19,7 @@ ECS_STRUCT(Position, {
     float y;
 });
 
-void main() {
+int main(int argc, char *argv[]) {
     // The world that will store the reflection data
     flecs::world world;
 
