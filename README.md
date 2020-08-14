@@ -38,8 +38,15 @@ void main() {
 ## Building
 Add `flecs_meta.c` and `flecs_meta.h` to your project, in addition to `flecs.c` and `flecs.h` from https://github.com/SanderMertens/flecs.
 
-## Caveats
-The libary works by computing offsets & alignment of types based on a stringified type definition, which does not work for non-trivial C++ types (for more information on what those are, see: http://www.cplusplus.com/reference/type_traits/is_trivial/)
+## FAQ
+**Does the library work for any C/C++ type?**
+No. If you are using the library with C++, you can only use it for trivial types (for more information, see: http://www.cplusplus.com/reference/type_traits/is_trivial/)
+
+**Can I use the library if I am not using Flecs?**
+Yes, the library stores the type inforation in a Flecs world, but your application does not need to be written for Flecs.
+
+**I am using types from another library that doesn't use flecs.meta, does this work?**
+Yes, but you will have to explicitly register the types with flecs.meta first. An example of how to do this can be found at the bottom of the `main.c` file which registers external types from the Flecs core.
 
 ## Examples
 
