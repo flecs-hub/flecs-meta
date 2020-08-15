@@ -1,11 +1,5 @@
 # flecs.meta
-**NOTE: This library currently only works with the bleeding_edge branch of Flecs!**
-
 This is a reflection library for C/C++ that uses Flecs to store the meta definitions. The library uses a combination of macro and template wizardry to directly parse the C/C++ type defintions. No code generation or APIs to describe the types are needed. 
-
-The library does not require compile time knowledge of a type. This lets applications define types at runtime, and enables for the creation of tools that are type unaware.
-
-Type definitions are converted to a virtual-machine like opcode format which allows applications to write extremely fast serializers.
 
 The library supports:
  - Lots of primitive types
@@ -15,18 +9,19 @@ The library supports:
  - Arrays
  - Vectors
  - Maps
-
-A simple example:
-
+ 
+Also check the JSON serializer written with flecs.meta: https://github.com/flecs-hub/flecs-json
+ 
+A simple example in C++:
 ```c++
 ECS_STRUCT(Position, {
     float x;
     float y;
 });
 
-void main() {
+int main(int argc, char *argv[]) {
     // The world that will store the reflection data
-    flecs::world world();
+    flecs::world world;
 
     // Import the reflection module
     flecs::import<flecs::components::meta>(world);
@@ -39,6 +34,22 @@ void main() {
     std::cout << flecs::pretty_print(world, p) << std::endl;
 }
 ```
+
+## Building
+Add `flecs_meta.c` and `flecs_meta.h` to your project, in addition to `flecs.c` and `flecs.h` from https://github.com/SanderMertens/flecs.
+
+## FAQ
+**Does the library work for any C/C++ type?**
+
+No. If you are using the library with C++, you can only use it for trivial types (for more information, see: http://www.cplusplus.com/reference/type_traits/is_trivial/)
+
+**Can I use the library if I am not using Flecs?**
+
+Yes, the library stores the type inforation in a Flecs world, but your application does not need to be written for Flecs.
+
+**I am using types from another library that doesn't use flecs.meta, does this work?**
+
+Yes, but you will have to explicitly register the types with flecs.meta first. An example of how to do this can be found at the bottom of the `main.c` file which registers external types from the Flecs core.
 
 ## Examples
 
