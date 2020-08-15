@@ -21,25 +21,5 @@
 #include <flecs.h>
 #include <flecs_meta.h>
 
-/* Headers of private dependencies */
-#ifdef PRIMITIVES_IMPL
-/* No dependencies */
-#endif
-
-/* Convenience macro for exporting symbols */
-#ifndef PRIMITIVES_STATIC
-  #if PRIMITIVES_IMPL && (defined(_MSC_VER) || defined(__MINGW32__))
-    #define PRIMITIVES_EXPORT __declspec(dllexport)
-  #elif PRIMITIVES_IMPL
-    #define PRIMITIVES_EXPORT __attribute__((__visibility__("default")))
-  #elif defined _MSC_VER
-    #define PRIMITIVES_EXPORT __declspec(dllimport)
-  #else
-    #define PRIMITIVES_EXPORT
-  #endif
-#else
-  #define PRIMITIVES_EXPORT
-#endif
-
 #endif
 

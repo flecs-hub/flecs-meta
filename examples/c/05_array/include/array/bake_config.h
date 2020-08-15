@@ -21,25 +21,5 @@
 #include <flecs.h>
 #include <flecs_meta.h>
 
-/* Headers of private dependencies */
-#ifdef ARRAY_IMPL
-/* No dependencies */
-#endif
-
-/* Convenience macro for exporting symbols */
-#ifndef ARRAY_STATIC
-  #if ARRAY_IMPL && (defined(_MSC_VER) || defined(__MINGW32__))
-    #define ARRAY_EXPORT __declspec(dllexport)
-  #elif ARRAY_IMPL
-    #define ARRAY_EXPORT __attribute__((__visibility__("default")))
-  #elif defined _MSC_VER
-    #define ARRAY_EXPORT __declspec(dllimport)
-  #else
-    #define ARRAY_EXPORT
-  #endif
-#else
-  #define ARRAY_EXPORT
-#endif
-
 #endif
 

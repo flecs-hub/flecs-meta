@@ -521,6 +521,9 @@ void FlecsMetaImport(
     ECS_IMPORT_COMPONENT(handles, EcsMetaType);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaTypeSerializer);
 
+#ifdef __cplusplus
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //// C++ Module implementation
@@ -578,6 +581,10 @@ public:
 //// Macro for inserting metadata in C application
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 FLECS_META_EXPORT
 void ecs_new_meta(
     ecs_world_t *world,
@@ -630,7 +637,7 @@ std::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
 
 template <typename T>
 std::string pretty_print(flecs::world& world, T& data) {
-    entity_t type = component_base<T>::s_entity;
+    entity_t type = _::component_info<T>::id();
     return flecs::pretty_print(world, type, data);
 }
 
