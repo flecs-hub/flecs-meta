@@ -1,4 +1,6 @@
 #include "parser.h"
+#include <stdio.h>
+#include <ctype.h>
 
 static
 const char* skip_ws(const char *ptr) {
