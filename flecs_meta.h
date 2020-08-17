@@ -347,6 +347,8 @@ ECS_STRUCT_C( EcsMetaTypeSerializer, {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Pretty printer
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,9 +562,24 @@ void FlecsMetaImport(
     ECS_IMPORT_COMPONENT(handles, EcsMetaType);\
     ECS_IMPORT_COMPONENT(handles, EcsMetaTypeSerializer);
 
+////////////////////////////////////////////////////////////////////////////////
+//// Macro for inserting metadata in C application
+////////////////////////////////////////////////////////////////////////////////
+
+FLECS_META_EXPORT
+void ecs_new_meta(
+    ecs_world_t *world,
+    ecs_entity_t component,
+    struct EcsMetaType *meta_type);
+
+#define ECS_META(world, T)\
+    ECS_COMPONENT(world, T);\
+    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+
 #ifdef __cplusplus
 }
 #endif
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //// C++ Module implementation
@@ -612,35 +629,6 @@ public:
 };
 }
 
-#endif
-#endif
-
-
-////////////////////////////////////////////////////////////////////////////////
-//// Macro for inserting metadata in C application
-////////////////////////////////////////////////////////////////////////////////
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-FLECS_META_EXPORT
-void ecs_new_meta(
-    ecs_world_t *world,
-    ecs_entity_t component,
-    struct EcsMetaType *meta_type);
-
-#define ECS_META(world, T)\
-    ECS_COMPONENT(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &__##T##__);
-
-#ifdef __cplusplus
-}
-#endif
-#ifdef __cplusplus
-#ifndef FLECS_NO_CPP
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //// Functions for inserting metadata in C++ applications
 ////////////////////////////////////////////////////////////////////////////////
@@ -652,14 +640,11 @@ flecs::entity meta(flecs::world& world) {
     e.set<EcsMetaType>({ flecs::__meta__<T>::descriptor() });
     return e;
 }
-}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Serialize values to string
 ////////////////////////////////////////////////////////////////////////////////
-
-namespace flecs {
 
 template <typename T>
 std::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
@@ -681,7 +666,7 @@ std::string pretty_print(flecs::world& world, T& data) {
 }
 
 template <>
-std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
+inline std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
     char *str = ecs_entity_to_str(world.c_ptr(), entity.id());
     std::string result = std::string(str);
     free(str);
@@ -690,7 +675,7 @@ std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& enti
 
 }
 
-#endif
-#endif
+#endif // FLECS_NO_CPP
+#endif // __cplusplus
 
-#endif
+#endif // FLECS_META_H

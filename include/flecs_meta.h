@@ -590,7 +590,6 @@ public:
 };
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 //// Functions for inserting metadata in C++ applications
 ////////////////////////////////////////////////////////////////////////////////
@@ -628,7 +627,7 @@ std::string pretty_print(flecs::world& world, T& data) {
 }
 
 template <>
-std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
+inline std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
     char *str = ecs_entity_to_str(world.c_ptr(), entity.id());
     std::string result = std::string(str);
     free(str);

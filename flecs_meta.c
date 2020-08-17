@@ -696,6 +696,7 @@ void EcsSetMap(ecs_iter_t *it) {
     }
 }
 
+
 char* ecs_chresc(
     char *out, 
     char in, 
@@ -2573,6 +2574,8 @@ int ecs_meta_set_null(
 
     return 0;
 }
+#include <stdio.h>
+#include <ctype.h>
 
 static
 const char* skip_ws(const char *ptr) {
