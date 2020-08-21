@@ -23,19 +23,23 @@ meta_src = files(
 meta_lib = library('flecs-meta', 
     meta_src,
     dependencies : flecs_dep,
+    include_directories : meta_inc,
     c_args : [ '-Dflecs_meta_EXPORTS', meta_args ],
-    include_directories : meta_inc)
+    implicit_include_directories : false
+)
 
 meta_dep = declare_dependency(
     link_with : meta_lib,
     compile_args : meta_args,
     dependencies : flecs_dep,
-    include_directories : meta_inc)
+    include_directories : meta_inc
+)
 
 executable('struct',
     'examples/c/01_struct/src/main.c',
     include_directories : 'examples/c/01_struct/include',
-    dependencies : meta_dep)
+    dependencies : meta_dep
+)
 
 if meson.version().version_compare('>= 0.54.0')
     meson.override_dependency('flecs-meta', meta_dep)
