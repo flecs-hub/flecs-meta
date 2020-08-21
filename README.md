@@ -81,6 +81,22 @@ Output:
 {name = "Foobar", value = 10, is_active = true}
 ```
 
+### Aliases
+
+Aliases are simple typedef's
+
+```c
+ECS_STRUCT(Vector3, {
+    float x;
+    float y;
+    float z;
+});
+
+ECS_ALIAS(Vector3, EcsVelocity3);
+ECS_ALIAS(Vector3, EcsPosition3);
+```
+
+
 ### Enumerations
 Enumerations can be used in a way that is similar to structs: 
 
