@@ -38,7 +38,8 @@ meta_dep = declare_dependency(
 executable('struct',
     'examples/c/01_struct/src/main.c',
     include_directories : 'examples/c/01_struct/include',
-    dependencies : meta_dep
+    dependencies : meta_dep,
+    implicit_include_directories : false
 )
 
 if meson.version().version_compare('>= 0.54.0')
