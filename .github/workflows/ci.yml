@@ -1,0 +1,95 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install bake
+      run: |
+        git clone https://github.com/SanderMertens/bake
+        make -C bake/build-$(uname)
+        bake/bake setup
+        
+    - name: Install flecs
+      run: |
+        git clone https://github.com/SanderMertens/flecs
+        bake flecs
+
+    - name: Build flecs-meta
+      run: bake --strict
+
+    - name: Build flecs-meta (release)
+      run: bake --strict --cfg release
+
+    - name: Build examples
+      run: |
+        bake examples/c
+        bake examples/cpp
+         
+    - name: Run tests
+      run: |
+        bake test
+
+  macos:
+    timeout-minutes: 20
+    runs-on: macOS-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install bake
+      run: |
+        git clone https://github.com/SanderMertens/bake
+        make -C bake/build-$(uname)
+        bake/bake setup
+
+    - name: Install flecs
+      run: |
+        git clone https://github.com/SanderMertens/flecs
+        bake flecs
+
+    - name: Build flecs-meta
+      run: bake --strict
+
+    - name: Build flecs-meta (release)
+      run: bake --strict --cfg release
+         
+    - name: Run tests
+      run: |
+        bake test
+
+  windows:
+    timeout-minutes: 10
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Install bake
+      run: |
+        git clone https://github.com/SanderMertens/bake
+        cd bake\build-Windows
+        nmake
+        cd ..
+        ./bake setup --local
+
+    - name: Install flecs
+      run: |
+        git clone https://github.com/SanderMertens/flecs
+        bake/bake flecs
+
+    - name: Build flecs-meta
+      run: bake/bake --strict
+
+    - name: Run tests
+      run: |
+        bake/bake run test\serializer
+        bake/bake run test\deserializer
