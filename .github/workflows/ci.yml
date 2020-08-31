@@ -32,12 +32,12 @@ jobs:
 
     - name: Build examples
       run: |
-        bake examples/c
-        bake examples/cpp
+        bake examples
          
     - name: Run tests
       run: |
-        bake test
+        bake run test/serializer
+        bake run test/deserializer
 
   macos:
     timeout-minutes: 20
@@ -64,7 +64,8 @@ jobs:
          
     - name: Run tests
       run: |
-        bake test
+        bake run test/serializer
+        bake run test/deserializer
 
   windows:
     timeout-minutes: 10
