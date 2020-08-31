@@ -51,22 +51,22 @@
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static const char * __##name##__ = #__VA_ARGS__;
+static const char * __##name##__ = #__VA_ARGS__
 
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor};\
+static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor}\
 
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor};
+static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor}
 
 #define ECS_BITMASK_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor};
+static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor}
 
 #define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
@@ -75,17 +75,17 @@ static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(nam
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"};
+static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"}
 
 #define ECS_VECTOR(name, T)\
 typedef ecs_vector_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")"};
+static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")"}
 
 #define ECS_MAP(name, K, T)\
 typedef ecs_map_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")"};
+static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")"}
 
 #ifdef __cplusplus
 
@@ -125,7 +125,7 @@ public:\
 // Define a struct
 #define ECS_STRUCT(T, ...)\
     ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
-    ECS_META_CPP(T, EcsStructType, #__VA_ARGS__);
+    ECS_META_CPP(T, EcsStructType, #__VA_ARGS__)
 
 // Define an enumeration
 #define ECS_ENUM(T, ...)\
@@ -135,7 +135,7 @@ public:\
 // Define a bitmask
 #define ECS_BITMASK(T, ...)\
     ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
-    ECS_META_CPP(T, EcsBitmaskType, #__VA_ARGS__);
+    ECS_META_CPP(T, EcsBitmaskType, #__VA_ARGS__)
 
 #else
 
@@ -208,8 +208,8 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
 
 ECS_STRUCT( EcsMetaType, {
     ecs_type_kind_t kind;
-    size_t size;
-    size_t alignment;
+    ecs_size_t size;
+    int16_t alignment;
     const char *descriptor;
 });
 
@@ -317,10 +317,10 @@ typedef ecs_vector_t ecs_constant_vector_t;
 ECS_STRUCT_C( ecs_type_op_t, {
     ecs_entity_t type;
     ecs_type_op_kind_t kind;
-    uint16_t size;        /* Size of value or element type if array or vector */
-    uint16_t count;       /* Number of elements (only used for arrays) */
-    uint32_t offset;      /* Offset of value */
-    uint8_t alignment;    /* Alignment of value */
+    ecs_size_t size;      /* Size of value or element type if array or vector */
+    int16_t alignment; /* Alignment of value */
+    int32_t count;        /* Number of elements (only used for arrays) */
+    int32_t offset;       /* Offset of value */
     const char *name;     /* Name of value (only used for struct members) */
 
 ECS_PRIVATE
@@ -420,9 +420,9 @@ const char* ecs_chrparse(
 
 /** Escape a string */
 FLECS_META_EXPORT
-size_t ecs_stresc(
+ecs_size_t ecs_stresc(
     char *out, 
-    size_t n, 
+    ecs_size_t n, 
     char delimiter, 
     const char *in);
 

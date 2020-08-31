@@ -309,19 +309,34 @@ int ecs_meta_set_int(
 
         switch(op->is.primitive) {
         case EcsI8:
-            *(int8_t*)ptr = value;
+            if (value > INT8_MAX) {
+                return -1;
+            }
+            *(int8_t*)ptr = (int8_t)value;
             break;
         case EcsI16:
-            *(int16_t*)ptr = value;
+            if (value > INT16_MAX) {
+                return -1;
+            }
+            *(int16_t*)ptr = (int16_t)value;
             break;
         case EcsI32:
-            *(int32_t*)ptr = value;
+            if (value > INT32_MAX) {
+                return -1;
+            }
+            *(int32_t*)ptr = (int32_t)value;
             break;
         case EcsI64:
-            *(int64_t*)ptr = value;
+            if (value > INT64_MAX) {
+                return -1;
+            }
+            *(int64_t*)ptr = (int64_t)value;
             break;
         case EcsIPtr:
-            *(intptr_t*)ptr = value;
+            if (value > INTPTR_MAX) {
+                return -1;
+            }
+            *(intptr_t*)ptr = (intptr_t)value;
             break;
         default:
             return -1;
@@ -347,19 +362,34 @@ int ecs_meta_set_uint(
         switch(op->is.primitive) {
         case EcsU8:
         case EcsByte:
-            *(uint8_t*)ptr = value;
+            if (value > UINT8_MAX) {
+                return -1;
+            }
+            *(uint8_t*)ptr = (uint8_t)value;
             break;
         case EcsU16:
-            *(uint16_t*)ptr = value;
+            if (value > UINT16_MAX) {
+                return -1;
+            }
+            *(uint16_t*)ptr = (uint16_t)value;
             break;
         case EcsU32:
-            *(uint32_t*)ptr = value;
+            if (value > UINT32_MAX) {
+                return -1;
+            }
+            *(uint32_t*)ptr = (uint32_t)value;
             break;
         case EcsU64:
-            *(uint64_t*)ptr = value;
+            if (value > UINT64_MAX) {
+                return -1;
+            }
+            *(uint64_t*)ptr = (uint64_t)value;
             break;
         case EcsUPtr:
-            *(uintptr_t*)ptr = value;
+            if (value > UINTPTR_MAX) {
+                return -1;
+            }
+            *(uintptr_t*)ptr = (uintptr_t)value;
             break;
         default:
             return -1;
@@ -384,7 +414,7 @@ int ecs_meta_set_float(
 
         switch(op->is.primitive) {
         case EcsF32:
-            *(float*)ptr = value;
+            *(float*)ptr = (float)value;
             break;
         case EcsF64:
             *(double*)ptr = value;

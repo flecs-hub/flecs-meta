@@ -82,8 +82,8 @@ void str_ser_primitive(
     case EcsString: {
         char *value = *(char**)base;
         if (value) {
-            size_t length = ecs_stresc(NULL, 0, '"', value);
-            if (length == strlen(value)) {
+            ecs_size_t length = ecs_stresc(NULL, 0, '"', value);
+            if (length == ecs_os_strlen(value)) {
                 ecs_strbuf_appendstrn(str, "\"", 1);
                 ecs_strbuf_appendstr(str, value);
                 ecs_strbuf_appendstrn(str, "\"", 1);
@@ -149,7 +149,7 @@ int str_ser_bitmask(
     const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
     ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
-    int32_t value = *(int32_t*)base;
+    uint32_t value = *(uint32_t*)base;
     ecs_map_key_t key;
     char **constant;
     int count = 0;
@@ -242,7 +242,7 @@ int str_ser_vector(
     ecs_type_op_t *elem_op_hdr = (ecs_type_op_t*)ecs_vector_first(elem_ops, ecs_type_op_t);
     ecs_assert(elem_op_hdr != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(elem_op_hdr->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
-    size_t elem_size = elem_op_hdr->size;
+    ecs_size_t elem_size = elem_op_hdr->size;
 
     /* Serialize contiguous buffer of vector */
     return str_ser_elements(world, elem_ops, array, count, elem_size, str);

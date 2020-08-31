@@ -34,15 +34,21 @@ ecs_entity_t ecs_meta_lookup_array(
         const EcsMetaType *elem_type = ecs_get(world, element_type, EcsMetaType);
         ecs_assert(elem_type != NULL, ECS_INTERNAL_ERROR, NULL);
 
+        ecs_assert(elem_type->size * params.count <= INT32_MAX, 
+            ECS_INVALID_PARAMETER, NULL);
+
         e = ecs_set(world, 0, EcsMetaType, {
-            EcsArrayType, elem_type->size * params.count, elem_type->alignment
+            EcsArrayType, (int32_t)(elem_type->size * params.count), 
+            elem_type->alignment, NULL
         });
     }
 
     ecs_entity_t ecs_entity(EcsArray) = ecs_lookup_fullpath(world, "flecs.meta.Array");
     ecs_assert(ecs_entity(EcsArray) != 0, ECS_INTERNAL_ERROR, NULL);
 
-    return ecs_set(world, e, EcsArray, { element_type, params.count });
+    ecs_assert(params.count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
+
+    return ecs_set(world, e, EcsArray, { element_type, (int32_t)params.count });
 }
 
 ecs_entity_t ecs_meta_lookup_vector(
@@ -70,7 +76,7 @@ ecs_entity_t ecs_meta_lookup_vector(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType});
+        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsVector) = ecs_lookup_fullpath(world, "flecs.meta.Vector");
@@ -107,7 +113,7 @@ ecs_entity_t ecs_meta_lookup_map(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
         
-        e = ecs_set(world, 0, EcsMetaType, {EcsMapType});
+        e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsMap) = ecs_lookup_fullpath(world, "flecs.meta.Map");
@@ -122,6 +128,8 @@ ecs_entity_t ecs_meta_lookup_bitmask(
     const char *params_decl,
     ecs_meta_parse_ctx_t *ctx)
 {
+    (void)e;
+
     ecs_meta_parse_ctx_t param_ctx = {
         .name = ctx->name,
         .decl = params_decl
@@ -158,7 +166,7 @@ ecs_entity_t ecs_meta_lookup(
     ecs_world_t *world,
     ecs_meta_type_t *token,
     const char *ptr,
-    int32_t count,
+    int64_t count,
     ecs_meta_parse_ctx_t *ctx)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
@@ -211,9 +219,11 @@ ecs_entity_t ecs_meta_lookup(
         ecs_entity_t ecs_entity(EcsArray) = ecs_lookup_fullpath(world, "flecs.meta.Array");
         const EcsMetaType *type_ptr = ecs_get(world, type, EcsMetaType);
 
+        ecs_assert(count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
+
         type = ecs_set(world, ecs_set(world, 0, 
-            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment}),
-            EcsArray, {type, count});       
+            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL}),
+            EcsArray, {type, (int32_t)count});
     }
 
     return type;

@@ -10,7 +10,7 @@ ecs_vector_t* serialize_type(
     FlecsMeta *module);
 
 static
-size_t ecs_get_primitive_size(
+ecs_size_t ecs_get_primitive_size(
     ecs_primitive_kind_t kind) 
 {
     switch(kind) {
@@ -37,7 +37,7 @@ size_t ecs_get_primitive_size(
 }
 
 static
-size_t ecs_get_primitive_alignment(
+int16_t ecs_get_primitive_alignment(
     ecs_primitive_kind_t kind) 
 {
     switch(kind) {
@@ -71,6 +71,10 @@ ecs_vector_t* serialize_primitive(
     ecs_vector_t *ops,
     FlecsMeta *module)
 {
+    (void)world;
+    (void)entity;
+    (void)module;
+
     ecs_type_op_t *op;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -102,6 +106,8 @@ ecs_vector_t* serialize_enum(
     ecs_vector_t *ops,
     FlecsMeta *module)
 {    
+    (void)type;
+
     FlecsMetaImportHandles(*module);
 
     ecs_type_op_t *op;
@@ -138,6 +144,8 @@ ecs_vector_t* serialize_bitmask(
     ecs_vector_t *ops,
     FlecsMeta *module)
 {    
+    (void)type;
+
     FlecsMetaImportHandles(*module);
 
     ecs_type_op_t *op;
@@ -189,8 +197,8 @@ ecs_vector_t* serialize_struct(
         .kind = EcsOpPush
     };
 
-    size_t size = 0;
-    size_t alignment = 0;
+    ecs_size_t size = 0;
+    int16_t alignment = 0;
 
     EcsMember *members = ecs_vector_first(type->members, EcsMember);
     int32_t i, count = ecs_vector_count(type->members);
@@ -209,8 +217,8 @@ ecs_vector_t* serialize_struct(
         op->name = members[i].name;
 
         const EcsMetaType *meta_type = ecs_get(world, members[i].type, EcsMetaType);
-        size_t member_size = meta_type->size * op->count;
-        uint8_t member_alignment = meta_type->alignment;
+        ecs_size_t member_size = meta_type->size * op->count;
+        int16_t member_alignment = meta_type->alignment;
 
         ecs_assert(member_size != 0, ECS_INTERNAL_ERROR, op->name);
         ecs_assert(member_alignment != 0, ECS_INTERNAL_ERROR, op->name);
@@ -218,7 +226,7 @@ ecs_vector_t* serialize_struct(
         size = ECS_ALIGN(size, member_alignment);
         op->offset = offset + size;
 
-        size += member_size;      
+        size += member_size;
 
         if (member_alignment > alignment) {
             alignment = member_alignment;
@@ -307,6 +315,8 @@ ecs_vector_t* serialize_array(
     ecs_vector_t *ops,
     FlecsMeta *handles)
 {
+    (void)entity;
+
     FlecsMetaImportHandles(*handles);
 
     ecs_type_op_t *op_header = NULL;
@@ -349,6 +359,8 @@ ecs_vector_t* serialize_vector(
     ecs_vector_t *ops,
     FlecsMeta *handles)
 {
+    (void)entity;
+
     FlecsMetaImportHandles(*handles);
 
     ecs_type_op_t *op = NULL;

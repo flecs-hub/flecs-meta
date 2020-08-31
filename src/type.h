@@ -25,7 +25,7 @@ ecs_entity_t ecs_meta_lookup(
     ecs_world_t *world,
     ecs_meta_type_t *token,
     const char *ptr,
-    int32_t count,
+    int64_t count,
     ecs_meta_parse_ctx_t *ctx);
 
 #endif

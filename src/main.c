@@ -6,44 +6,44 @@
 ECS_CTOR(EcsStruct, ptr, {
     ptr->members = NULL;
     ptr->is_partial = false;
-});
+})
 
 ECS_DTOR(EcsStruct, ptr, {
     ecs_vector_each(ptr->members, EcsMember, m, {
         ecs_os_free(m->name);
     });
     ecs_vector_free(ptr->members);
-});
+})
 
 ECS_CTOR(EcsEnum, ptr, {
     ptr->constants = NULL;
-});
+})
 
 ECS_DTOR(EcsEnum, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
-});
+})
 
 ECS_CTOR(EcsBitmask, ptr, {
     ptr->constants = NULL;
-});
+})
 
 ECS_DTOR(EcsBitmask, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
     })    
     ecs_map_free(ptr->constants);
-});
+})
 
 ECS_CTOR(EcsMetaTypeSerializer, ptr, {
     ptr->ops = NULL;
-});
+})
 
 ECS_DTOR(EcsMetaTypeSerializer, ptr, {
     ecs_vector_free(ptr->ops);
-});
+})
 
 static
 void ecs_set_primitive(
@@ -132,7 +132,7 @@ void ecs_set_constants(
 
     ecs_map_t *constants = ecs_map_new(char*, 1);
     ecs_meta_constant_t token;
-    int32_t last_value = 0;
+    int64_t last_value = 0;
 
     while ((ptr = ecs_meta_parse_constant(ptr, &token, &ctx))) {
         if (token.is_value_set) {
@@ -352,7 +352,7 @@ void ctor_initialize_0(
     (void)component;
     (void)entities;
     (void)ctx;
-    memset(ptr, 0, size * count);
+    memset(ptr, 0, size * (size_t)count);
 }
 
 void ecs_new_meta(
@@ -377,7 +377,7 @@ void ecs_new_meta(
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType});\
+    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL});\
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
@@ -458,17 +458,18 @@ void FlecsMetaImport(
     ECS_COMPONENT_PRIMITIVE(world, size_t, EcsUPtr);
     ECS_COMPONENT_PRIMITIVE(world, float, EcsF32);
     ECS_COMPONENT_PRIMITIVE(world, double, EcsF64);
+    ECS_COMPONENT_PRIMITIVE(world, ecs_size_t, EcsI32);
     ECS_COMPONENT_PRIMITIVE(world, ecs_string_t, EcsString);
     ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);
     ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
-        EcsName, {"ecs_primitive_kind_t"}),
+        EcsName, {"ecs_primitive_kind_t", NULL, NULL}),
         EcsMetaType, &__ecs_primitive_kind_t__);
 
     ecs_set(world, ecs_set(world, 0,
-        EcsName, {"ecs_type_kind_t"}),
+        EcsName, {"ecs_type_kind_t", NULL, NULL}),
         EcsMetaType, {
             EcsEnumType, 
             sizeof(ecs_type_kind_t), 

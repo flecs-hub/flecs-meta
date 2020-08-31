@@ -117,17 +117,17 @@ error:
     return NULL;
 }
 
-size_t ecs_stresc(
+ecs_size_t ecs_stresc(
     char *out, 
-    size_t n, 
+    ecs_size_t n, 
     char delimiter, 
     const char *in) 
 {
     const char *ptr = in;
     char ch, *bptr = out, buff[3];
-    size_t written = 0;
+    ecs_size_t written = 0;
     while ((ch = *ptr++)) {
-        if ((written += (ecs_chresc(buff, ch, delimiter) - buff)) <= n) {
+        if ((written += (ecs_size_t)(ecs_chresc(buff, ch, delimiter) - buff)) <= n) {
             *bptr++ = buff[0];
             if ((ch = buff[1])) {
                 *bptr = ch;

@@ -104,7 +104,7 @@ const char* parse_identifier(
             }
 
             const char *end = skip_scope(ptr, ctx);
-            strncpy(params, ptr, end - ptr);
+            ecs_os_strncpy(params, ptr, (ecs_size_t)(end - ptr));
             params[end - ptr] = '\0';
 
             ptr = end;

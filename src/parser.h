@@ -25,20 +25,20 @@ typedef struct ecs_meta_type_t {
 typedef struct ecs_meta_member_t {
     ecs_meta_type_t type;
     ecs_meta_token_t name;
-    int32_t count;
+    int64_t count;
     bool is_partial;
 } ecs_meta_member_t;
 
 typedef struct ecs_meta_constant_t {
     ecs_meta_token_t name;
-    int32_t value;
+    int64_t value;
     bool is_value_set;
 } ecs_meta_constant_t;
 
 typedef struct ecs_meta_params_t {
     ecs_meta_type_t key_type;
     ecs_meta_type_t type;
-    int32_t count;
+    int64_t count;
     bool is_key_value;
     bool is_fixed_size;
 } ecs_meta_params_t;
