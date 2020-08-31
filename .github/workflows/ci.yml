@@ -36,7 +36,7 @@ jobs:
          
     - name: Run tests
       run: |
-        bake run test/serializer
+        bake run test/serialize
         bake run test/deserializer
 
   macos:
@@ -64,7 +64,7 @@ jobs:
          
     - name: Run tests
       run: |
-        bake run test/serializer
+        bake run test/serialize
         bake run test/deserializer
 
   windows:
@@ -92,5 +92,5 @@ jobs:
 
     - name: Run tests
       run: |
-        bake/bake run test\serializer
+        bake/bake run test\serialize
         bake/bake run test\deserializer
