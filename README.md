@@ -1,4 +1,6 @@
 # flecs.meta
+![CI](https://github.com/flecs-hub/flecs-meta/workflows/CI/badge.svg)
+
 This is a reflection library for C/C++ that uses Flecs to store the meta definitions. The library uses a combination of macro and template wizardry to directly parse the C/C++ type defintions. No code generation or APIs to describe the types are needed. 
 
 The library supports:
