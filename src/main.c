@@ -461,7 +461,6 @@ void FlecsMetaImport(
     ECS_COMPONENT_PRIMITIVE(world, ecs_size_t, EcsI32);
     ECS_COMPONENT_PRIMITIVE(world, ecs_string_t, EcsString);
     ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);
-    ecs_set_scope(world, old_scope);
 
     /* If stdbool is included, the above bool declaration will have been
      * registered with the name _Bool. To make sure meta also knows the type by
@@ -473,6 +472,8 @@ void FlecsMetaImport(
             EcsPrimitiveType, 0, 0, NULL});
         ecs_set(world, type, EcsPrimitive, {EcsBool});
     }
+
+    ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
