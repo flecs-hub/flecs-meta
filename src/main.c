@@ -463,6 +463,17 @@ void FlecsMetaImport(
     ECS_COMPONENT_PRIMITIVE(world, ecs_entity_t, EcsEntity);
     ecs_set_scope(world, old_scope);
 
+    /* If stdbool is included, the above bool declaration will have been
+     * registered with the name _Bool. To make sure meta also knows the type by
+     * its regular name, check and register if necessary */
+    if (!ecs_lookup(world, "bool")) {
+        ecs_entity_t type = ecs_new_component(
+            world, 0, "bool", sizeof(bool), ECS_ALIGNOF(bool));
+        ecs_set(world, type, EcsMetaType, {
+            EcsPrimitiveType, 0, 0, NULL});
+        ecs_set(world, type, EcsPrimitive, {EcsBool});
+    }
+
     /* -- Initialize builtin meta components -- */
     ecs_set_ptr(world, ecs_set(world, 0,
         EcsName, {"ecs_primitive_kind_t", NULL, NULL}),
