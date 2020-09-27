@@ -311,7 +311,7 @@ int ecs_meta_set_int(
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
 
-    int primitive = op->is.primitive;
+    ecs_primitive_kind_t primitive = op->is.primitive;
 
     if (op->kind != EcsOpPrimitive) {
         if (op->kind == EcsOpEnum || op->kind == EcsOpBitmask) {
@@ -325,14 +325,14 @@ int ecs_meta_set_int(
 
     switch(primitive) {
     case EcsBool:
-        if(value > 1 || value < 0) {
+        if (value > 1 || value < 0) {
             return -1;
         }
         *(bool*)ptr = (bool)value;
         break;
     case EcsI8:
     case EcsChar:
-        if (value > INT8_MAX) {
+        if (value > INT8_MAX || value < INT8_MIN) {
             return -1;
         }
         *(int8_t*)ptr = (int8_t)value;
@@ -345,7 +345,7 @@ int ecs_meta_set_int(
         *(uint8_t*)ptr = (uint8_t)value;
         break;
     case EcsI16:
-        if (value > INT16_MAX) {
+        if (value > INT16_MAX || value < INT16_MIN) {
             return -1;
         }
         *(int16_t*)ptr = (int16_t)value;
@@ -357,7 +357,7 @@ int ecs_meta_set_int(
         *(uint16_t*)ptr = (uint16_t)value;
         break;
     case EcsI32:
-        if (value > INT32_MAX) {
+        if (value > INT32_MAX || value < INT32_MIN) {
             return -1;
         }
         *(int32_t*)ptr = (int32_t)value;
@@ -375,9 +375,6 @@ int ecs_meta_set_int(
         *(int64_t*)ptr = (int64_t)value;
         break;
     case EcsU64:
-        if (value < 0) {
-            return -1;
-        }
         *(uint64_t*)ptr = (uint64_t)value;
         break;
     case EcsEntity:
