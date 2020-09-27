@@ -395,11 +395,11 @@ int ecs_meta_set_int(
             *(uintptr_t*)ptr = (uintptr_t)value;
             break;
         default:
-            if(op->kind != EcsOpEnum) {
+            if (op->kind != EcsOpEnum) {
                 return -1;
             }
 
-            if( value > INT32_MAX) {
+            if (value > INT32_MAX) {
                 return -1;
             }
 
