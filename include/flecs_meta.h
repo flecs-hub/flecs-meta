@@ -114,6 +114,12 @@ public:\
 #define ECS_BITMASK(name, ...)\
     ECS_BITMASK_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
+// Define a type alias
+#define ECS_ALIAS(type, name)\
+    typedef type name;\
+    ECS_UNUSED \
+    static EcsMetaType __##name##__ = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &__##type##__};\
+
 #endif
 
 
@@ -172,6 +178,7 @@ ECS_STRUCT( EcsMetaType, {
     ecs_size_t size;
     int16_t alignment;
     const char *descriptor;
+    void *alias;
 });
 
 ECS_ENUM( ecs_primitive_kind_t, {

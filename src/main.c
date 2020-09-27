@@ -364,6 +364,12 @@ void ecs_new_meta(
         ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
+    if (meta_type->alias) {
+        EcsMetaType *alias = meta_type->alias;
+        meta_type->kind = alias->kind;
+        meta_type->descriptor = alias->descriptor;
+    }
+
     ecs_set_ptr(world, component, EcsMetaType, meta_type);\
     ecs_set_component_actions_w_entity(world, component, &(EcsComponentLifecycle){
         .ctor = ctor_initialize_0
