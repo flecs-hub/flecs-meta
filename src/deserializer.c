@@ -311,106 +311,104 @@ int ecs_meta_set_int(
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
 
-    if (op->kind != EcsOpPrimitive && op->kind != EcsOpEnum) {
-        return -1;
-    } else {
-        void *ptr = get_ptr(scope);
+    int primitive = op->is.primitive;
 
-        switch(op->is.primitive) {
-        case EcsBool:
-            if(value > 1 || value < 0) {
-                return -1;
-            }
-            *(bool*)ptr = (bool)value;
-            break;
-        case EcsI8:
-        case EcsChar:
-            if (value > INT8_MAX) {
-                return -1;
-            }
-            *(int8_t*)ptr = (int8_t)value;
-            break;
-        case EcsU8:
-        case EcsByte:
-            if (value > UINT8_MAX || value < 0) {
-                return -1;
-            }
-            *(uint8_t*)ptr = (uint8_t)value;
-            break;
-        case EcsI16:
-            if (value > INT16_MAX) {
-                return -1;
-            }
-            *(int16_t*)ptr = (int16_t)value;
-            break;
-        case EcsU16:
-            if (value > UINT16_MAX || value < 0) {
-                return -1;
-            }
-            *(uint16_t*)ptr = (uint16_t)value;
-            break;
-        case EcsI32:
-            if (value > INT32_MAX) {
-                return -1;
-            }
-            *(int32_t*)ptr = (int32_t)value;
-            break;
-        case EcsU32:
-            if (value > UINT32_MAX || value < 0) {
-                return -1;
-            }
-            *(uint32_t*)ptr = (uint32_t)value;
-            break;
-        case EcsI64:
-            if (value > INT64_MAX) {
-                return -1;
-            }
-            *(int64_t*)ptr = (int64_t)value;
-            break;
-        case EcsU64:
-            if (value < 0) {
-                return -1;
-            }
-            *(uint64_t*)ptr = (uint64_t)value;
-            break;
-        case EcsEntity:
-            *(ecs_entity_t*)ptr = (ecs_entity_t)value;
-            break;
-        case EcsF32:
-            if (value > ((1 << 24)-1) || value < (-(1 << 24)-1)) {
-                return -1;
-            }
-            *(float*)ptr = (float)value;
-            break;
-        case EcsF64:
-            if (value > ((1LL << 53)-1) || value < (-(1LL << 53)-1)) {
-                return -1;
-            }
-            *(double*)ptr = (double)value;
-            break;
-        case EcsIPtr:
-            if (value > INTPTR_MAX) {
-                return -1;
-            }
-            *(intptr_t*)ptr = (intptr_t)value;
-            break;
-        case EcsUPtr:
-            *(uintptr_t*)ptr = (uintptr_t)value;
-            break;
-        default:
-            if (op->kind != EcsOpEnum) {
-                return -1;
-            }
-
-            if (value > INT32_MAX) {
-                return -1;
-            }
-
-            *(int32_t*)ptr = (int32_t)value;
+    if (op->kind != EcsOpPrimitive) {
+        if (op->kind == EcsOpEnum || op->kind == EcsOpBitmask) {
+            primitive = EcsI32;
+        } else {
+            return -1;
         }
-
-        return 0;
     }
+    
+    void *ptr = get_ptr(scope);
+
+    switch(primitive) {
+    case EcsBool:
+        if(value > 1 || value < 0) {
+            return -1;
+        }
+        *(bool*)ptr = (bool)value;
+        break;
+    case EcsI8:
+    case EcsChar:
+        if (value > INT8_MAX) {
+            return -1;
+        }
+        *(int8_t*)ptr = (int8_t)value;
+        break;
+    case EcsU8:
+    case EcsByte:
+        if (value > UINT8_MAX || value < 0) {
+            return -1;
+        }
+        *(uint8_t*)ptr = (uint8_t)value;
+        break;
+    case EcsI16:
+        if (value > INT16_MAX) {
+            return -1;
+        }
+        *(int16_t*)ptr = (int16_t)value;
+        break;
+    case EcsU16:
+        if (value > UINT16_MAX || value < 0) {
+            return -1;
+        }
+        *(uint16_t*)ptr = (uint16_t)value;
+        break;
+    case EcsI32:
+        if (value > INT32_MAX) {
+            return -1;
+        }
+        *(int32_t*)ptr = (int32_t)value;
+        break;
+    case EcsU32:
+        if (value > UINT32_MAX || value < 0) {
+            return -1;
+        }
+        *(uint32_t*)ptr = (uint32_t)value;
+        break;
+    case EcsI64:
+        if (value > INT64_MAX) {
+            return -1;
+        }
+        *(int64_t*)ptr = (int64_t)value;
+        break;
+    case EcsU64:
+        if (value < 0) {
+            return -1;
+        }
+        *(uint64_t*)ptr = (uint64_t)value;
+        break;
+    case EcsEntity:
+        *(ecs_entity_t*)ptr = (ecs_entity_t)value;
+        break;
+    case EcsF32:
+        if (value > ((1 << 24)-1) || value < (-(1 << 24)-1)) {
+            return -1;
+        }
+        *(float*)ptr = (float)value;
+        break;
+    case EcsF64:
+        if (value > ((1LL << 53)-1) || value < (-(1LL << 53)-1)) {
+            return -1;
+        }
+        *(double*)ptr = (double)value;
+        break;
+    case EcsIPtr:
+        if (value > INTPTR_MAX) {
+            return -1;
+        }
+        *(intptr_t*)ptr = (intptr_t)value;
+        break;
+    case EcsUPtr:
+        *(uintptr_t*)ptr = (uintptr_t)value;
+        break;
+    default:
+        return -1;
+    }
+
+    return 0;
 }
 
 int ecs_meta_set_uint(
