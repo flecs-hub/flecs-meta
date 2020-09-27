@@ -317,6 +317,12 @@ int ecs_meta_set_int(
         void *ptr = get_ptr(scope);
 
         switch(op->is.primitive) {
+        case EcsBool:
+            if(value > 1 || value < 0) {
+                return -1;
+            }
+            *(bool*)ptr = (bool)value;
+            break;
         case EcsI8:
         case EcsChar:
             if (value > INT8_MAX) {
@@ -389,7 +395,7 @@ int ecs_meta_set_int(
             *(intptr_t*)ptr = (intptr_t)value;
             break;
         case EcsUPtr:
-            if (value < 0) {
+             if (value > UINTPTR_MAX) {
                 return -1;
             }
             *(uintptr_t*)ptr = (uintptr_t)value;
