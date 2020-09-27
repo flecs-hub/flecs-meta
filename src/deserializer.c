@@ -395,9 +395,6 @@ int ecs_meta_set_int(
             *(intptr_t*)ptr = (intptr_t)value;
             break;
         case EcsUPtr:
-             if (value > UINTPTR_MAX) {
-                return -1;
-            }
             *(uintptr_t*)ptr = (uintptr_t)value;
             break;
         default:
