@@ -362,13 +362,13 @@ int ecs_meta_set_int(
             *(int64_t*)ptr = (int64_t)value;
             break;
         case EcsU64:
-            if (value > UINT64_MAX || value < 0) {
+            if (value < 0) {
                 return -1;
             }
             *(uint64_t*)ptr = (uint64_t)value;
             break;
         case EcsEntity:
-            *(ecs_entity_t*)ptr = value;
+            *(ecs_entity_t*)ptr = (ecs_entity_t)value;
             break;
         case EcsF32:
             if (value > ((1 << 24)-1) || value < (-(1 << 24)-1)) {
@@ -389,7 +389,7 @@ int ecs_meta_set_int(
             *(intptr_t*)ptr = (intptr_t)value;
             break;
         case EcsUPtr:
-            if (value > UINTPTR_MAX || value < 0) {
+            if (value < 0) {
                 return -1;
             }
             *(uintptr_t*)ptr = (uintptr_t)value;
