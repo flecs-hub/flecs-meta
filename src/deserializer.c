@@ -381,13 +381,13 @@ int ecs_meta_set_int(
         *(ecs_entity_t*)ptr = (ecs_entity_t)value;
         break;
     case EcsF32:
-        if (value > ((1 << 24)-1) || value < (-(1 << 24)-1)) {
+        if (value > ((1 << 24)-1) || value < -(1 << 24)) {
             return -1;
         }
         *(float*)ptr = (float)value;
         break;
     case EcsF64:
-        if (value > ((1LL << 53)-1) || value < (-(1LL << 53)-1)) {
+        if (value > ((1LL << 53)-1) || value < -(1LL << 53)) {
             return -1;
         }
         *(double*)ptr = (double)value;
