@@ -339,7 +339,7 @@ int ecs_meta_set_int(
         break;
     case EcsU8:
     case EcsByte:
-        if (value > UINT8_MAX || value < 0) {
+        if (value > UINT8_MAX || value < INT8_MIN) {
             return -1;
         }
         *(uint8_t*)ptr = (uint8_t)value;
@@ -351,7 +351,7 @@ int ecs_meta_set_int(
         *(int16_t*)ptr = (int16_t)value;
         break;
     case EcsU16:
-        if (value > UINT16_MAX || value < 0) {
+        if (value > UINT16_MAX || value < INT16_MIN) {
             return -1;
         }
         *(uint16_t*)ptr = (uint16_t)value;
@@ -363,7 +363,7 @@ int ecs_meta_set_int(
         *(int32_t*)ptr = (int32_t)value;
         break;
     case EcsU32:
-        if (value > UINT32_MAX || value < 0) {
+        if (value > UINT32_MAX || value < INT32_MIN) {
             return -1;
         }
         *(uint32_t*)ptr = (uint32_t)value;
