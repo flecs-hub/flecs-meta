@@ -514,20 +514,23 @@ void FlecsMetaImport(
         .kind = EcsStructType, 
         .size = sizeof(EcsName),
         .alignment = ECS_ALIGNOF(EcsName),
-        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }"
+        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
         .kind = EcsStructType, 
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
-        .descriptor = "{int32_t size; int32_t alignment;}"
+        .descriptor = "{int32_t size; int32_t alignment;}",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
         .kind = EcsStructType, 
         .size = sizeof(EcsSignatureExpr),
         .alignment = ECS_ALIGNOF(EcsSignatureExpr),
-        .descriptor = "{const char *expr;}"
+        .descriptor = "{const char *expr;}",
+        .alias = NULL
     });
 }
