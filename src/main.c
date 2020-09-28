@@ -475,7 +475,7 @@ void FlecsMetaImport(
         ecs_entity_t type = ecs_new_component(
             world, 0, "bool", sizeof(bool), ECS_ALIGNOF(bool));
         ecs_set(world, type, EcsMetaType, {
-            EcsPrimitiveType, 0, 0, NULL});
+            EcsPrimitiveType, 0, 0, NULL, NULL});
         ecs_set(world, type, EcsPrimitive, {EcsBool});
     }
 
