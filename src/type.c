@@ -222,7 +222,7 @@ ecs_entity_t ecs_meta_lookup(
         ecs_assert(count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
 
         type = ecs_set(world, ecs_set(world, 0, 
-            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL}),
+            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL, NULL}),
             EcsArray, {type, (int32_t)count});
     }
 
