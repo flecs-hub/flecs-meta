@@ -383,7 +383,7 @@ void ecs_new_meta(
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL});\
+    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL, NULL});\
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
@@ -492,8 +492,9 @@ void FlecsMetaImport(
             EcsEnumType, 
             sizeof(ecs_type_kind_t), 
             ECS_ALIGNOF(ecs_type_kind_t), 
-            __ecs_type_kind_t__
-        });
+            __ecs_type_kind_t__,
+            NULL
+        }); 
 
     /* Insert meta definitions for other types */
     ECS_COMPONENT_TYPE(world, EcsPrimitive);
