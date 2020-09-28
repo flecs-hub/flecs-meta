@@ -275,9 +275,10 @@ ecs_vector_t* serialize_struct(
             alignment = base_type->alignment;
         }
     } else {
-        /* If EcsMetaType was not set yet, initialize descriptor to NULL since it
-         * it won't be used here */
+        /* If EcsMetaType was not set yet, initialize descriptor, alias to NULL
+         * since it won't be used here */
         base_type->descriptor = NULL;
+        base_type->alias = NULL;
     }
 
     base_type->kind = EcsStructType;
