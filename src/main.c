@@ -364,6 +364,12 @@ void ecs_new_meta(
         ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
+    if (meta_type->alias) {
+        EcsMetaType *alias = meta_type->alias;
+        meta_type->kind = alias->kind;
+        meta_type->descriptor = alias->descriptor;
+    }
+
     ecs_set_ptr(world, component, EcsMetaType, meta_type);\
     ecs_set_component_actions_w_entity(world, component, &(EcsComponentLifecycle){
         .ctor = ctor_initialize_0
@@ -377,7 +383,7 @@ void ecs_new_meta(
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL});\
+    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL, NULL});\
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
@@ -469,7 +475,7 @@ void FlecsMetaImport(
         ecs_entity_t type = ecs_new_component(
             world, 0, "bool", sizeof(bool), ECS_ALIGNOF(bool));
         ecs_set(world, type, EcsMetaType, {
-            EcsPrimitiveType, 0, 0, NULL});
+            EcsPrimitiveType, 0, 0, NULL, NULL});
         ecs_set(world, type, EcsPrimitive, {EcsBool});
     }
 
@@ -486,8 +492,9 @@ void FlecsMetaImport(
             EcsEnumType, 
             sizeof(ecs_type_kind_t), 
             ECS_ALIGNOF(ecs_type_kind_t), 
-            __ecs_type_kind_t__
-        });
+            __ecs_type_kind_t__,
+            NULL
+        }); 
 
     /* Insert meta definitions for other types */
     ECS_COMPONENT_TYPE(world, EcsPrimitive);
@@ -508,20 +515,23 @@ void FlecsMetaImport(
         .kind = EcsStructType, 
         .size = sizeof(EcsName),
         .alignment = ECS_ALIGNOF(EcsName),
-        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }"
+        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
         .kind = EcsStructType, 
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
-        .descriptor = "{int32_t size; int32_t alignment;}"
+        .descriptor = "{int32_t size; int32_t alignment;}",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
         .kind = EcsStructType, 
         .size = sizeof(EcsSignatureExpr),
         .alignment = ECS_ALIGNOF(EcsSignatureExpr),
-        .descriptor = "{const char *expr;}"
+        .descriptor = "{const char *expr;}",
+        .alias = NULL
     });
 }

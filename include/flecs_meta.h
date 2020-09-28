@@ -17,17 +17,17 @@ static const char * __##name##__ = #__VA_ARGS__
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor}\
+static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}\
 
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor}
+static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
 
 #define ECS_BITMASK_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor}
+static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
 
 #define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
@@ -36,17 +36,17 @@ static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(nam
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"}
+static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")", NULL}
 
 #define ECS_VECTOR(name, T)\
 typedef ecs_vector_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")"}
+static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")", NULL}
 
 #define ECS_MAP(name, K, T)\
 typedef ecs_map_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")"}
+static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")", NULL}
 
 #ifdef __cplusplus
 
@@ -114,6 +114,12 @@ public:\
 #define ECS_BITMASK(name, ...)\
     ECS_BITMASK_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
+// Define a type alias
+#define ECS_ALIAS(type, name)\
+    typedef type name;\
+    ECS_UNUSED \
+    static EcsMetaType __##name##__ = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &__##type##__};\
+
 #endif
 
 
@@ -172,6 +178,7 @@ ECS_STRUCT( EcsMetaType, {
     ecs_size_t size;
     int16_t alignment;
     const char *descriptor;
+    void *alias;
 });
 
 ECS_ENUM( ecs_primitive_kind_t, {

@@ -39,7 +39,7 @@ ecs_entity_t ecs_meta_lookup_array(
 
         e = ecs_set(world, 0, EcsMetaType, {
             EcsArrayType, (int32_t)(elem_type->size * params.count), 
-            elem_type->alignment, NULL
+            elem_type->alignment, NULL, NULL
         });
     }
 
@@ -76,7 +76,7 @@ ecs_entity_t ecs_meta_lookup_vector(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL});
+        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsVector) = ecs_lookup_fullpath(world, "flecs.meta.Vector");
@@ -113,7 +113,7 @@ ecs_entity_t ecs_meta_lookup_map(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
         
-        e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL});
+        e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsMap) = ecs_lookup_fullpath(world, "flecs.meta.Map");
@@ -222,7 +222,7 @@ ecs_entity_t ecs_meta_lookup(
         ecs_assert(count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
 
         type = ecs_set(world, ecs_set(world, 0, 
-            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL}),
+            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL, NULL}),
             EcsArray, {type, (int32_t)count});
     }
 
