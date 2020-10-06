@@ -1369,6 +1369,7 @@ ECS_CTOR(EcsMetaType, ptr, {
 
 ECS_DTOR(EcsMetaType, ptr, {
     ecs_os_free(ptr->descriptor);
+    ptr->descriptor = NULL;
     ptr->alias = NULL;
 })
 
