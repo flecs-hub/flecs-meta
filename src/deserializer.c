@@ -33,15 +33,15 @@ ecs_type_op_t* get_ptr(
 
 ecs_meta_cursor_t ecs_meta_cursor(
     ecs_world_t *world,
-    ecs_entity_t type, 
+    ecs_entity_t type,
     void *base)
 {
     ecs_assert(world != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(type != 0, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
-    
+
     ecs_meta_cursor_t result;
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = 
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) =
         ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
 
@@ -97,7 +97,7 @@ int ecs_meta_next(
             if (scope->cur_elem >= scope->count) {
                 return -1;
             }
-        }        
+        }
     } else {
         scope->cur_op ++;
     }
@@ -112,11 +112,21 @@ int ecs_meta_move(
     ecs_meta_scope_t *scope = get_scope(cursor);
     int32_t ops_count = ecs_vector_count(scope->ops);
 
-    if (pos >= ops_count) {
-        return -1;
-    }
+    if (scope->is_collection) {
+        if (scope->count) {
+            if (pos >= scope->count) {
+                return -1;
+            }
 
-    scope->cur_op = pos;
+            scope->cur_op = 1;
+            scope->cur_elem = pos;
+        }
+    } else {
+        if (pos >= ops_count) {
+            return -1;
+        }
+        scope->cur_op = pos;
+    }
 
     return 0;
 }
@@ -165,7 +175,7 @@ int ecs_meta_push(
         /* This makes sure the vector has enough space for the pushed element */
         get_ptr(scope);
     }
-    
+
     scope->cur_op ++;
     cursor->depth ++;
     ecs_meta_scope_t *child_scope = get_scope(cursor);
@@ -185,7 +195,7 @@ int ecs_meta_push(
     case EcsOpArray:
     case EcsOpVector: {
         void *ptr = ECS_OFFSET(scope->base, op->offset);
-        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world, 
+        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world,
             &op->is.collection, 0, 0);
         ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
@@ -202,7 +212,7 @@ int ecs_meta_push(
             } else {
                 ecs_vector_set_count_t(&v, op->size, op->alignment, 0);
             }
-            
+
             child_scope->base = ecs_vector_first_t(v, op->size, op->alignment);
             child_scope->count = 0;
             child_scope->vector = v;
@@ -240,19 +250,19 @@ int ecs_meta_pop(
             void *ptr = get_ptr(parent_scope);
             *(ecs_vector_t**)ptr = scope->vector;
             parent_scope->cur_op ++;
-        }         
+        }
         return 0;
     } else {
         for (i = scope->cur_op; i < ops_count; i ++) {
             ecs_type_op_t *op = &ops[i];
             if (op->kind == EcsOpPop) {
-                cursor->depth -- ;                
+                cursor->depth -- ;
                 ecs_meta_scope_t *parent_scope = get_scope(cursor);
                 if (parent_scope->is_collection) {
                     parent_scope->cur_op = 1;
                     parent_scope->cur_elem ++;
                 } else {
-                    parent_scope->cur_op = i;                   
+                    parent_scope->cur_op = i;
                 }
                 return 0;
             }
@@ -268,7 +278,7 @@ int ecs_meta_set_bool(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive || op->is.primitive != EcsBool) {
         return -1;
     } else {
@@ -284,7 +294,7 @@ int ecs_meta_set_char(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive || op->is.primitive != EcsChar) {
         return -1;
     } else {
@@ -301,50 +311,101 @@ int ecs_meta_set_int(
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
 
-    
+    ecs_primitive_kind_t primitive = op->is.primitive;
+
     if (op->kind != EcsOpPrimitive) {
-        return -1;
-    } else {
-        void *ptr = get_ptr(scope);
-
-        switch(op->is.primitive) {
-        case EcsI8:
-            if (value > INT8_MAX) {
-                return -1;
-            }
-            *(int8_t*)ptr = (int8_t)value;
-            break;
-        case EcsI16:
-            if (value > INT16_MAX) {
-                return -1;
-            }
-            *(int16_t*)ptr = (int16_t)value;
-            break;
-        case EcsI32:
-            if (value > INT32_MAX) {
-                return -1;
-            }
-            *(int32_t*)ptr = (int32_t)value;
-            break;
-        case EcsI64:
-            if (value > INT64_MAX) {
-                return -1;
-            }
-            *(int64_t*)ptr = (int64_t)value;
-            break;
-        case EcsIPtr:
-            if (value > INTPTR_MAX) {
-                return -1;
-            }
-            *(intptr_t*)ptr = (intptr_t)value;
-            break;
-        default:
+        if (op->kind == EcsOpEnum || op->kind == EcsOpBitmask) {
+            primitive = EcsI32;
+        } else {
             return -1;
-            break;
         }
-
-        return 0;
     }
+    
+    void *ptr = get_ptr(scope);
+
+    switch(primitive) {
+    case EcsBool:
+        if (value > 1 || value < 0) {
+            return -1;
+        }
+        *(bool*)ptr = (bool)value;
+        break;
+    case EcsI8:
+    case EcsChar:
+        if (value > INT8_MAX || value < INT8_MIN) {
+            return -1;
+        }
+        *(int8_t*)ptr = (int8_t)value;
+        break;
+    case EcsU8:
+    case EcsByte:
+        if (value > UINT8_MAX || value < INT8_MIN) {
+            return -1;
+        }
+        *(uint8_t*)ptr = (uint8_t)value;
+        break;
+    case EcsI16:
+        if (value > INT16_MAX || value < INT16_MIN) {
+            return -1;
+        }
+        *(int16_t*)ptr = (int16_t)value;
+        break;
+    case EcsU16:
+        if (value > UINT16_MAX || value < INT16_MIN) {
+            return -1;
+        }
+        *(uint16_t*)ptr = (uint16_t)value;
+        break;
+    case EcsI32:
+        if (value > INT32_MAX || value < INT32_MIN) {
+            return -1;
+        }
+        *(int32_t*)ptr = (int32_t)value;
+        break;
+    case EcsU32:
+        if (value > UINT32_MAX || value < INT32_MIN) {
+            return -1;
+        }
+        *(uint32_t*)ptr = (uint32_t)value;
+        break;
+    case EcsI64:
+        if (value > INT64_MAX) {
+            return -1;
+        }
+        *(int64_t*)ptr = (int64_t)value;
+        break;
+    case EcsU64:
+        *(uint64_t*)ptr = (uint64_t)value;
+        break;
+    case EcsEntity:
+        *(ecs_entity_t*)ptr = (ecs_entity_t)value;
+        break;
+    case EcsF32:
+        if (value > ((1 << 24)-1) || value < -(1 << 24)) {
+            return -1;
+        }
+        *(float*)ptr = (float)value;
+        break;
+    case EcsF64:
+        if (value > ((1LL << 53)-1) || value < -(1LL << 53)) {
+            return -1;
+        }
+        *(double*)ptr = (double)value;
+        break;
+    case EcsIPtr:
+        if (value > INTPTR_MAX) {
+            return -1;
+        }
+        *(intptr_t*)ptr = (intptr_t)value;
+        break;
+    case EcsUPtr:
+        *(uintptr_t*)ptr = (uintptr_t)value;
+        break;
+    default:
+        return -1;
+    }
+
+    return 0;
 }
 
 int ecs_meta_set_uint(
@@ -353,7 +414,7 @@ int ecs_meta_set_uint(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -391,6 +452,9 @@ int ecs_meta_set_uint(
             }
             *(uintptr_t*)ptr = (uintptr_t)value;
             break;
+        case EcsEntity:
+            *(ecs_entity_t*)ptr = value;
+            break;
         default:
             return -1;
             break;
@@ -406,7 +470,7 @@ int ecs_meta_set_float(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -434,7 +498,7 @@ int ecs_meta_set_string(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -466,7 +530,7 @@ int ecs_meta_set_entity(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
