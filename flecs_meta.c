@@ -1362,6 +1362,45 @@ ecs_entity_t ecs_meta_lookup(
 
 #endif
 
+ECS_CTOR(EcsMetaType, ptr, {
+    ptr->descriptor = NULL;
+    ptr->alias = NULL;
+})
+
+ECS_DTOR(EcsMetaType, ptr, {
+    ecs_os_free(ptr->descriptor);
+    ptr->descriptor = NULL;
+    ptr->alias = NULL;
+})
+
+ECS_COPY(EcsMetaType, dst, src, {
+    if (dst->descriptor) {
+        ecs_os_free(dst->descriptor);
+        dst->descriptor = NULL;
+    }
+    
+    if (src->descriptor) {
+        dst->descriptor = ecs_os_strdup(src->descriptor);
+    } else {
+        dst->descriptor = NULL;
+    }
+
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->alias = src->alias;
+})
+
+ECS_MOVE(EcsMetaType, dst, src, {
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->alias = src->alias;
+
+    src->descriptor = NULL;
+    src->alias = NULL;
+})
+
 ECS_CTOR(EcsStruct, ptr, {
     ptr->members = NULL;
     ptr->is_partial = false;
@@ -1760,6 +1799,13 @@ void FlecsMetaImport(
     ECS_COMPONENT(world, EcsMetaTypeSerializer);
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
+
+    ecs_set_component_actions(world, EcsMetaType, {
+        .ctor = ecs_ctor(EcsMetaType),
+        .dtor = ecs_dtor(EcsMetaType),
+        .copy = ecs_copy(EcsMetaType),
+        .move = ecs_move(EcsMetaType)
+    });
 
     ecs_set_component_actions(world, EcsStruct, {
         .ctor = ecs_ctor(EcsStruct),
