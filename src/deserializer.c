@@ -125,7 +125,7 @@ int ecs_meta_move(
         if (pos >= ops_count) {
             return -1;
         }
-        scope->cur_op = pos;
+        scope->cur_op = scope->start + pos;
     }
 
     return 0;
@@ -320,7 +320,7 @@ int ecs_meta_set_int(
             return -1;
         }
     }
-    
+
     void *ptr = get_ptr(scope);
 
     switch(primitive) {
