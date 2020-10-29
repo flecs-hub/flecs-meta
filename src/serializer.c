@@ -11,7 +11,7 @@ ecs_vector_t* serialize_type(
 
 static
 ecs_size_t ecs_get_primitive_size(
-    ecs_primitive_kind_t kind) 
+    ecs_primitive_kind_t kind)
 {
     switch(kind) {
     case EcsBool: return sizeof(bool);
@@ -38,7 +38,7 @@ ecs_size_t ecs_get_primitive_size(
 
 static
 int16_t ecs_get_primitive_alignment(
-    ecs_primitive_kind_t kind) 
+    ecs_primitive_kind_t kind)
 {
     switch(kind) {
     case EcsBool: return ECS_ALIGNOF(bool);
@@ -105,7 +105,7 @@ ecs_vector_t* serialize_enum(
     const EcsEnum *type,
     ecs_vector_t *ops,
     FlecsMeta *module)
-{    
+{
     (void)type;
 
     FlecsMetaImportHandles(*module);
@@ -143,7 +143,7 @@ ecs_vector_t* serialize_bitmask(
     const EcsBitmask *type,
     ecs_vector_t *ops,
     FlecsMeta *module)
-{    
+{
     (void)type;
 
     FlecsMetaImportHandles(*module);
@@ -240,7 +240,7 @@ ecs_vector_t* serialize_struct(
      * the same as the values computed here. However, there are two exceptions.
      * The first exception is when an application defines a type by populating
      * the EcsStruct component directly and does not provide size and alignment
-     * values for EcsMetaType. The second scenario is when the type definition 
+     * values for EcsMetaType. The second scenario is when the type definition
      * contains an ECS_PRIVATE, in which case the type may contain
      * members that are not described.
      *
@@ -333,7 +333,7 @@ ecs_vector_t* serialize_array(
 
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpArray, 
+        .kind = EcsOpArray,
         .count = type->count,
         .size = element_type->size,
         .alignment = element_type->alignment,
@@ -346,8 +346,15 @@ ecs_vector_t* serialize_array(
             .kind = EcsOpHeader,
             .size = op->size,
             .alignment = op->alignment
-        };            
-    }        
+        };
+    }
+
+    EcsMetaType *meta = ecs_get_mut(world, entity, EcsMetaType, NULL);
+
+    if(!meta->size || !meta->alignment) {
+        meta->size = type->count * element_type->size;
+        meta->alignment = element_type->alignment;
+    }
 
     return ops;
 }
@@ -371,7 +378,7 @@ ecs_vector_t* serialize_vector(
             .kind = EcsOpHeader,
             .size = sizeof(ecs_vector_t*),
             .alignment = ECS_ALIGNOF(ecs_vector_t*)
-        };         
+        };
     }
 
     const EcsMetaType *element_type = ecs_get(world, type->element_type, EcsMetaType);
@@ -382,7 +389,7 @@ ecs_vector_t* serialize_vector(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpVector, 
+        .kind = EcsOpVector,
         .count = 1,
         .size = element_type->size,
         .alignment = element_type->alignment,
@@ -409,7 +416,7 @@ ecs_vector_t* serialize_map(
             .kind = EcsOpHeader,
             .size = sizeof(ecs_map_t*),
             .alignment = ECS_ALIGNOF(ecs_map_t*)
-        };         
+        };
     }
 
     const EcsMetaTypeSerializer *key_cache = ecs_get(world, type->key_type, EcsMetaTypeSerializer);
@@ -430,7 +437,7 @@ ecs_vector_t* serialize_map(
             .decl = ptr->descriptor
         };
 
-        ecs_meta_error( &ctx, ctx.decl, 
+        ecs_meta_error( &ctx, ctx.decl,
             "invalid key type '%s' for map", ecs_get_name(world, type->key_type));
     }
 
@@ -444,7 +451,7 @@ ecs_vector_t* serialize_map(
         ecs_meta_parse_ctx_t ctx = {
             .name = ecs_get_name(world, entity),
             .decl = ptr->descriptor
-        };        
+        };
         ecs_meta_error( &ctx, ctx.decl, "array type invalid for key type");
     }
 
@@ -456,7 +463,7 @@ ecs_vector_t* serialize_map(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpMap, 
+        .kind = EcsOpMap,
         .count = 1,
         .size = sizeof(ecs_map_t*),
         .alignment = ECS_ALIGNOF(ecs_map_t*),
@@ -499,13 +506,13 @@ ecs_vector_t* serialize_type(
         const EcsBitmask *t = ecs_get(world, entity, EcsBitmask);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_bitmask(world, entity, t, ops, module);
-    }    
+    }
 
     case EcsStructType: {
         const EcsStruct *t = ecs_get(world, entity, EcsStruct);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_struct(world, entity, t, ops, offset, module);
-    }    
+    }
 
     case EcsArrayType: {
         const EcsArray *t = ecs_get(world, entity, EcsArray);
@@ -517,7 +524,7 @@ ecs_vector_t* serialize_type(
         const EcsVector *t = ecs_get(world, entity, EcsVector);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_vector(world, entity, t, ops, module);
-    }    
+    }
 
     case EcsMapType: {
         const EcsMap *t = ecs_get(world, entity, EcsMap);
@@ -548,7 +555,7 @@ void EcsSetPrimitive(ecs_iter_t *it) {
         bool is_added;
         EcsMetaType *base_type = ecs_get_mut(world, e, EcsMetaType, &is_added);
         ecs_assert(base_type != NULL, ECS_INTERNAL_ERROR, NULL);
-        
+
         base_type->size = ecs_get_primitive_size(type[i].kind);
         base_type->alignment = ecs_get_primitive_alignment(type[i].kind);
 
@@ -569,7 +576,7 @@ void EcsSetEnum(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
 
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_enum(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -584,7 +591,7 @@ void EcsSetBitmask(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_bitmask(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -599,7 +606,7 @@ void EcsSetStruct(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_struct(world, e, &type[i], NULL, 0, &ecs_module(FlecsMeta))
         });
     }
@@ -614,7 +621,7 @@ void EcsSetArray(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_array(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -629,7 +636,7 @@ void EcsSetVector(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_vector(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -644,7 +651,7 @@ void EcsSetMap(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
