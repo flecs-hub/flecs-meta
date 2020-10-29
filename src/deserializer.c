@@ -112,6 +112,8 @@ int ecs_meta_move(
     ecs_meta_scope_t *scope = get_scope(cursor);
     int32_t ops_count = ecs_vector_count(scope->ops);
 
+    if(pos < 0) return -1;
+
     if (scope->is_collection) {
         if (scope->count) {
             if (pos >= scope->count) {
