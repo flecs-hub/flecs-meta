@@ -207,11 +207,14 @@ ecs_vector_t* serialize_struct(
         /* Add type operations of member to struct ops */
         int32_t prev_count = ecs_vector_count(ops);
         ops = serialize_type(world, members[i].type, ops, offset + size, module);
+
+#ifndef NDEBUG
         int32_t op_count = ecs_vector_count(ops);
 
         /* At least one op should be added */
         ecs_assert(prev_count != op_count, ECS_INTERNAL_ERROR, NULL);
         ecs_assert(ops != NULL, ECS_INTERNAL_ERROR, NULL);
+#endif
 
         op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
