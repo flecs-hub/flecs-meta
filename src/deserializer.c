@@ -406,6 +406,7 @@ int ecs_meta_set_int(
         *(uintptr_t*)ptr = (uintptr_t)value;
         break;
     default:
+        if(!value) return ecs_meta_set_null(cursor);
         return -1;
     }
 
@@ -460,8 +461,8 @@ int ecs_meta_set_uint(
             *(ecs_entity_t*)ptr = value;
             break;
         default:
+            if(!value) return ecs_meta_set_null(cursor);
             return -1;
-            break;
         }
 
         return 0;
