@@ -153,7 +153,7 @@ ecs_entity_t ecs_meta_lookup_bitmask(
 
 #ifndef NDEBUG
     #undef ecs_assert
-    #define ecs_assert(cond, error, param) (cond)
+    #define ecs_assert(cond, error, param) (void)(cond)
 #endif
 
     /* Make sure this is a bitmask type */
