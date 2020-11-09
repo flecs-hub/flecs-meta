@@ -3,6 +3,45 @@
 #include "serializer.h"
 #include "type.h"
 
+ECS_CTOR(EcsMetaType, ptr, {
+    ptr->descriptor = NULL;
+    ptr->alias = NULL;
+})
+
+ECS_DTOR(EcsMetaType, ptr, {
+    ecs_os_free((char*)ptr->descriptor);
+    ptr->descriptor = NULL;
+    ptr->alias = NULL;
+})
+
+ECS_COPY(EcsMetaType, dst, src, {
+    if (dst->descriptor) {
+        ecs_os_free((char*)dst->descriptor);
+        dst->descriptor = NULL;
+    }
+
+    if (src->descriptor) {
+        dst->descriptor = ecs_os_strdup(src->descriptor);
+    } else {
+        dst->descriptor = NULL;
+    }
+
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->alias = src->alias;
+})
+
+ECS_MOVE(EcsMetaType, dst, src, {
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->alias = src->alias;
+
+    src->descriptor = NULL;
+    src->alias = NULL;
+})
+
 ECS_CTOR(EcsStruct, ptr, {
     ptr->members = NULL;
     ptr->is_partial = false;
@@ -33,7 +72,7 @@ ECS_CTOR(EcsBitmask, ptr, {
 ECS_DTOR(EcsBitmask, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
-    })    
+    })
     ecs_map_free(ptr->constants);
 })
 
@@ -47,9 +86,9 @@ ECS_DTOR(EcsMetaTypeSerializer, ptr, {
 
 static
 void ecs_set_primitive(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -65,7 +104,7 @@ void ecs_set_primitive(
     } else
     if (!strcmp(descr, "char")) {
         ecs_set(world, e, EcsPrimitive, {EcsChar});
-    } else    
+    } else
     if (!strcmp(descr, "u8")) {
         ecs_set(world, e, EcsPrimitive, {EcsU8});
     } else
@@ -98,7 +137,7 @@ void ecs_set_primitive(
     } else
     if (!strcmp(descr, "iptr")) {
         ecs_set(world, e, EcsPrimitive, {EcsIPtr});
-    } else    
+    } else
     if (!strcmp(descr, "uptr")) {
         ecs_set(world, e, EcsPrimitive, {EcsUPtr});
     } else
@@ -112,11 +151,11 @@ void ecs_set_primitive(
 
 static
 void ecs_set_constants(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
+    ecs_world_t *world,
+    ecs_entity_t e,
     ecs_entity_t comp,
     bool is_bitmask,
-    EcsMetaType *type) 
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -138,7 +177,7 @@ void ecs_set_constants(
         if (token.is_value_set) {
             last_value = token.value;
         } else if (is_bitmask) {
-            ecs_meta_error(&ctx, ptr, 
+            ecs_meta_error(&ctx, ptr,
                 "bitmask requires explicit value assignment");
         }
 
@@ -155,9 +194,9 @@ void ecs_set_constants(
 
 static
 void ecs_set_bitmask(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Bitmask");
     ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
@@ -166,20 +205,20 @@ void ecs_set_bitmask(
 
 static
 void ecs_set_enum(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Enum");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);    
+    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set_constants(world, e, comp, false, type);
 }
 
 static
 void ecs_set_struct(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -213,9 +252,9 @@ void ecs_set_struct(
 
 static
 void ecs_set_array(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -234,9 +273,9 @@ void ecs_set_array(
 
 static
 void ecs_set_vector(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -255,9 +294,9 @@ void ecs_set_vector(
 
 static
 void ecs_set_map(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -303,7 +342,7 @@ void EcsSetType(ecs_iter_t *it) {
                 case EcsMapType:
                     type[i].size = sizeof(ecs_map_t*);
                     type[i].alignment = ECS_ALIGNOF(ecs_map_t*);
-                    break;                    
+                    break;
                 default:
                     break;
                 }
@@ -343,7 +382,7 @@ void ecs_new_meta(
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_entity_t ecs_entity(EcsMetaType) = 
+    ecs_entity_t ecs_entity(EcsMetaType) =
         ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
@@ -388,6 +427,13 @@ void FlecsMetaImport(
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 
+    ecs_set_component_actions(world, EcsMetaType, {
+        .ctor = ecs_ctor(EcsMetaType),
+        .dtor = ecs_dtor(EcsMetaType),
+        .copy = ecs_copy(EcsMetaType),
+        .move = ecs_move(EcsMetaType)
+    });
+
     ecs_set_component_actions(world, EcsStruct, {
         .ctor = ecs_ctor(EcsStruct),
         .dtor = ecs_dtor(EcsStruct)
@@ -396,7 +442,7 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsEnum, {
         .ctor = ecs_ctor(EcsEnum),
         .dtor = ecs_dtor(EcsEnum)
-    });    
+    });
 
     ecs_set_component_actions(world, EcsBitmask, {
         .ctor = ecs_ctor(EcsBitmask),
@@ -406,7 +452,7 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsMetaTypeSerializer, {
         .ctor = ecs_ctor(EcsMetaTypeSerializer),
         .dtor = ecs_dtor(EcsMetaTypeSerializer)
-    });    
+    });
 
     ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
     ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
@@ -424,7 +470,7 @@ void FlecsMetaImport(
     ECS_EXPORT_COMPONENT(EcsVector);
     ECS_EXPORT_COMPONENT(EcsMap);
     ECS_EXPORT_COMPONENT(EcsMetaType);
-    ECS_EXPORT_COMPONENT(EcsMetaTypeSerializer);  
+    ECS_EXPORT_COMPONENT(EcsMetaTypeSerializer);
 
     /* -- Initialize builtin primitive types -- */
     ecs_entity_t old_scope = ecs_set_scope(world, EcsFlecsCore);
@@ -469,12 +515,12 @@ void FlecsMetaImport(
     ecs_set(world, ecs_set(world, 0,
         EcsName, {"ecs_type_kind_t", NULL, NULL}),
         EcsMetaType, {
-            EcsEnumType, 
-            sizeof(ecs_type_kind_t), 
-            ECS_ALIGNOF(ecs_type_kind_t), 
+            EcsEnumType,
+            sizeof(ecs_type_kind_t),
+            ECS_ALIGNOF(ecs_type_kind_t),
             __ecs_type_kind_t__,
             NULL
-        }); 
+        });
 
     /* Insert meta definitions for other types */
     ECS_COMPONENT_TYPE(world, EcsPrimitive);
@@ -492,7 +538,7 @@ void FlecsMetaImport(
 
     /* -- Initialize metadata for public Flecs core components -- */
     ecs_set(world, ecs_entity(EcsName), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsName),
         .alignment = ECS_ALIGNOF(EcsName),
         .descriptor = "{ecs_string_t value; ECS_PRIVATE; }",
@@ -500,7 +546,7 @@ void FlecsMetaImport(
     });
 
     ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
         .descriptor = "{int32_t size; int32_t alignment;}",
@@ -508,7 +554,7 @@ void FlecsMetaImport(
     });
 
     ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsSignatureExpr),
         .alignment = ECS_ALIGNOF(EcsSignatureExpr),
         .descriptor = "{const char *expr;}",
