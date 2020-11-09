@@ -151,6 +151,11 @@ ecs_entity_t ecs_meta_lookup_bitmask(
         world, &params.type, params_decl, 1, &param_ctx);
     ecs_assert(bitmask_type != 0, ECS_INVALID_PARAMETER, NULL);
 
+#ifndef NDEBUG
+    #undef ecs_assert
+    #define ecs_assert(cond, error, param) (cond)
+#endif
+
     /* Make sure this is a bitmask type */
     ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
