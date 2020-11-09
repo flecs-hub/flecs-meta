@@ -48,9 +48,11 @@ ecs_meta_cursor_t ecs_meta_cursor(
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
+#ifndef NDEBUG
     ecs_type_op_t *ops = ecs_vector_first(ser->ops, ecs_type_op_t);
     ecs_assert(ops != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(ops[0].kind == EcsOpHeader, ECS_INVALID_PARAMETER, NULL);
+#endif
 
     result.world = world;
     result.depth = 0;
