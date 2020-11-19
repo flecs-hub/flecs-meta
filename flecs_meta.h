@@ -28,16 +28,16 @@
 /* Convenience macro for exporting symbols */
 #ifndef flecs_meta_STATIC
 #if flecs_meta_EXPORTS && (defined(_MSC_VER) || defined(__MINGW32__))
-  #define FLECS_META_EXPORT __declspec(dllexport)
+  #define FLECS_META_API __declspec(dllexport)
 #elif flecs_meta_EXPORTS
-  #define FLECS_META_EXPORT __attribute__((__visibility__("default")))
+  #define FLECS_META_API __attribute__((__visibility__("default")))
 #elif defined _MSC_VER
-  #define FLECS_META_EXPORT __declspec(dllimport)
+  #define FLECS_META_API __declspec(dllimport)
 #else
-  #define FLECS_META_EXPORT
+  #define FLECS_META_API
 #endif
 #else
-  #define FLECS_META_EXPORT
+  #define FLECS_META_API
 #endif
 
 #endif
@@ -56,17 +56,17 @@ static const char * __##name##__ = #__VA_ARGS__
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor}\
+static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}\
 
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor}
+static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
 
 #define ECS_BITMASK_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor}
+static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
 
 #define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
@@ -75,17 +75,17 @@ static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(nam
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")"}
+static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")", NULL}
 
 #define ECS_VECTOR(name, T)\
 typedef ecs_vector_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")"}
+static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")", NULL}
 
 #define ECS_MAP(name, K, T)\
 typedef ecs_map_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")"}
+static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")", NULL}
 
 #ifdef __cplusplus
 
@@ -153,6 +153,12 @@ public:\
 #define ECS_BITMASK(name, ...)\
     ECS_BITMASK_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
 
+// Define a type alias
+#define ECS_ALIAS(type, name)\
+    typedef type name;\
+    ECS_UNUSED \
+    static EcsMetaType __##name##__ = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &__##type##__};\
+
 #endif
 
 
@@ -211,6 +217,7 @@ ECS_STRUCT( EcsMetaType, {
     ecs_size_t size;
     int16_t alignment;
     const char *descriptor;
+    void *alias;
 });
 
 ECS_ENUM( ecs_primitive_kind_t, {
@@ -354,14 +361,14 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 
 /** Convert value to a string. */
-FLECS_META_EXPORT
+FLECS_META_API
 char* ecs_ptr_to_str(
     ecs_world_t *world, 
     ecs_entity_t type, 
     void* ptr);
 
 /** Convert value to a string. */
-FLECS_META_EXPORT
+FLECS_META_API
 char* ecs_entity_to_str(
     ecs_world_t *world, 
     ecs_entity_t entity);
@@ -406,20 +413,20 @@ char* ecs_entity_to_str(
 #define ECS_MAX_U64_STR "18446744073709551615"
 
 /** Escape a character */
-FLECS_META_EXPORT
+FLECS_META_API
 char* ecs_chresc(
     char *out, 
     char in, 
     char delimiter);
 
 /** Parse an escaped character */
-FLECS_META_EXPORT
+FLECS_META_API
 const char* ecs_chrparse(
     const char *in, 
     char *out);
 
 /** Escape a string */
-FLECS_META_EXPORT
+FLECS_META_API
 ecs_size_t ecs_stresc(
     char *out, 
     ecs_size_t n, 
@@ -455,74 +462,74 @@ typedef struct ecs_meta_cursor_t {
     int32_t depth;
 } ecs_meta_cursor_t;
 
-FLECS_META_EXPORT
+FLECS_META_API
 ecs_meta_cursor_t ecs_meta_cursor(
     ecs_world_t *world,
     ecs_entity_t type, 
     void *base);
 
-FLECS_META_EXPORT
+FLECS_META_API
 void* ecs_meta_get_ptr(
     ecs_meta_cursor_t *cursor);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_next(
     ecs_meta_cursor_t *cursor);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_move(
     ecs_meta_cursor_t *cursor,
     int32_t pos);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_move_name(
     ecs_meta_cursor_t *cursor,
     const char *name);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_push(
     ecs_meta_cursor_t *cursor);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_pop(
     ecs_meta_cursor_t *cursor);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_bool(
     ecs_meta_cursor_t *cursor,
     bool value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_char(
     ecs_meta_cursor_t *cursor,
     char value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_int(
     ecs_meta_cursor_t *cursor,
     int64_t value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_uint(
     ecs_meta_cursor_t *cursor,
     uint64_t value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_float(
     ecs_meta_cursor_t *cursor,
     double value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_string(
     ecs_meta_cursor_t *cursor,
     const char *value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_entity(
     ecs_meta_cursor_t *cursor,
     ecs_entity_t value);
 
-FLECS_META_EXPORT
+FLECS_META_API
 int ecs_meta_set_null(
     ecs_meta_cursor_t *cursor);
 
@@ -547,7 +554,7 @@ typedef struct FlecsMeta {
 extern "C" {
 #endif
 
-FLECS_META_EXPORT
+FLECS_META_API
 void FlecsMetaImport(
     ecs_world_t *world);
 
@@ -566,7 +573,7 @@ void FlecsMetaImport(
 //// Macro for inserting metadata in C application
 ////////////////////////////////////////////////////////////////////////////////
 
-FLECS_META_EXPORT
+FLECS_META_API
 void ecs_new_meta(
     ecs_world_t *world,
     ecs_entity_t component,

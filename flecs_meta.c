@@ -70,7 +70,7 @@ ecs_vector_t* serialize_type(
 
 static
 ecs_size_t ecs_get_primitive_size(
-    ecs_primitive_kind_t kind) 
+    ecs_primitive_kind_t kind)
 {
     switch(kind) {
     case EcsBool: return sizeof(bool);
@@ -97,7 +97,7 @@ ecs_size_t ecs_get_primitive_size(
 
 static
 int16_t ecs_get_primitive_alignment(
-    ecs_primitive_kind_t kind) 
+    ecs_primitive_kind_t kind)
 {
     switch(kind) {
     case EcsBool: return ECS_ALIGNOF(bool);
@@ -164,7 +164,7 @@ ecs_vector_t* serialize_enum(
     const EcsEnum *type,
     ecs_vector_t *ops,
     FlecsMeta *module)
-{    
+{
     (void)type;
 
     FlecsMetaImportHandles(*module);
@@ -202,7 +202,7 @@ ecs_vector_t* serialize_bitmask(
     const EcsBitmask *type,
     ecs_vector_t *ops,
     FlecsMeta *module)
-{    
+{
     (void)type;
 
     FlecsMetaImportHandles(*module);
@@ -266,11 +266,14 @@ ecs_vector_t* serialize_struct(
         /* Add type operations of member to struct ops */
         int32_t prev_count = ecs_vector_count(ops);
         ops = serialize_type(world, members[i].type, ops, offset + size, module);
+
+#ifndef NDEBUG
         int32_t op_count = ecs_vector_count(ops);
 
         /* At least one op should be added */
         ecs_assert(prev_count != op_count, ECS_INTERNAL_ERROR, NULL);
         ecs_assert(ops != NULL, ECS_INTERNAL_ERROR, NULL);
+#endif
 
         op = ecs_vector_get(ops, ecs_type_op_t, prev_count);
         op->name = members[i].name;
@@ -299,7 +302,7 @@ ecs_vector_t* serialize_struct(
      * the same as the values computed here. However, there are two exceptions.
      * The first exception is when an application defines a type by populating
      * the EcsStruct component directly and does not provide size and alignment
-     * values for EcsMetaType. The second scenario is when the type definition 
+     * values for EcsMetaType. The second scenario is when the type definition
      * contains an ECS_PRIVATE, in which case the type may contain
      * members that are not described.
      *
@@ -334,9 +337,10 @@ ecs_vector_t* serialize_struct(
             alignment = base_type->alignment;
         }
     } else {
-        /* If EcsMetaType was not set yet, initialize descriptor to NULL since it
-         * it won't be used here */
+        /* If EcsMetaType was not set yet, initialize descriptor, alias to NULL
+         * since it won't be used here */
         base_type->descriptor = NULL;
+        base_type->alias = NULL;
     }
 
     base_type->kind = EcsStructType;
@@ -391,7 +395,7 @@ ecs_vector_t* serialize_array(
 
     ecs_type_op_t *op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpArray, 
+        .kind = EcsOpArray,
         .count = type->count,
         .size = element_type->size,
         .alignment = element_type->alignment,
@@ -404,8 +408,15 @@ ecs_vector_t* serialize_array(
             .kind = EcsOpHeader,
             .size = op->size,
             .alignment = op->alignment
-        };            
-    }        
+        };
+    }
+
+    EcsMetaType *meta = ecs_get_mut(world, entity, EcsMetaType, NULL);
+
+    if(!meta->size || !meta->alignment) {
+        meta->size = type->count * element_type->size;
+        meta->alignment = element_type->alignment;
+    }
 
     return ops;
 }
@@ -429,7 +440,7 @@ ecs_vector_t* serialize_vector(
             .kind = EcsOpHeader,
             .size = sizeof(ecs_vector_t*),
             .alignment = ECS_ALIGNOF(ecs_vector_t*)
-        };         
+        };
     }
 
     const EcsMetaType *element_type = ecs_get(world, type->element_type, EcsMetaType);
@@ -440,7 +451,7 @@ ecs_vector_t* serialize_vector(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpVector, 
+        .kind = EcsOpVector,
         .count = 1,
         .size = element_type->size,
         .alignment = element_type->alignment,
@@ -467,7 +478,7 @@ ecs_vector_t* serialize_map(
             .kind = EcsOpHeader,
             .size = sizeof(ecs_map_t*),
             .alignment = ECS_ALIGNOF(ecs_map_t*)
-        };         
+        };
     }
 
     const EcsMetaTypeSerializer *key_cache = ecs_get(world, type->key_type, EcsMetaTypeSerializer);
@@ -488,7 +499,7 @@ ecs_vector_t* serialize_map(
             .decl = ptr->descriptor
         };
 
-        ecs_meta_error( &ctx, ctx.decl, 
+        ecs_meta_error( &ctx, ctx.decl,
             "invalid key type '%s' for map", ecs_get_name(world, type->key_type));
     }
 
@@ -502,7 +513,7 @@ ecs_vector_t* serialize_map(
         ecs_meta_parse_ctx_t ctx = {
             .name = ecs_get_name(world, entity),
             .decl = ptr->descriptor
-        };        
+        };
         ecs_meta_error( &ctx, ctx.decl, "array type invalid for key type");
     }
 
@@ -514,7 +525,7 @@ ecs_vector_t* serialize_map(
 
     op = ecs_vector_add(&ops, ecs_type_op_t);
     *op = (ecs_type_op_t){
-        .kind = EcsOpMap, 
+        .kind = EcsOpMap,
         .count = 1,
         .size = sizeof(ecs_map_t*),
         .alignment = ECS_ALIGNOF(ecs_map_t*),
@@ -557,13 +568,13 @@ ecs_vector_t* serialize_type(
         const EcsBitmask *t = ecs_get(world, entity, EcsBitmask);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_bitmask(world, entity, t, ops, module);
-    }    
+    }
 
     case EcsStructType: {
         const EcsStruct *t = ecs_get(world, entity, EcsStruct);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_struct(world, entity, t, ops, offset, module);
-    }    
+    }
 
     case EcsArrayType: {
         const EcsArray *t = ecs_get(world, entity, EcsArray);
@@ -575,7 +586,7 @@ ecs_vector_t* serialize_type(
         const EcsVector *t = ecs_get(world, entity, EcsVector);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
         return serialize_vector(world, entity, t, ops, module);
-    }    
+    }
 
     case EcsMapType: {
         const EcsMap *t = ecs_get(world, entity, EcsMap);
@@ -606,7 +617,7 @@ void EcsSetPrimitive(ecs_iter_t *it) {
         bool is_added;
         EcsMetaType *base_type = ecs_get_mut(world, e, EcsMetaType, &is_added);
         ecs_assert(base_type != NULL, ECS_INTERNAL_ERROR, NULL);
-        
+
         base_type->size = ecs_get_primitive_size(type[i].kind);
         base_type->alignment = ecs_get_primitive_alignment(type[i].kind);
 
@@ -627,7 +638,7 @@ void EcsSetEnum(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
 
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_enum(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -642,7 +653,7 @@ void EcsSetBitmask(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_bitmask(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -657,7 +668,7 @@ void EcsSetStruct(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_struct(world, e, &type[i], NULL, 0, &ecs_module(FlecsMeta))
         });
     }
@@ -672,7 +683,7 @@ void EcsSetArray(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_array(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -687,7 +698,7 @@ void EcsSetVector(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_vector(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -702,7 +713,7 @@ void EcsSetMap(ecs_iter_t *it) {
     int i;
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
-        ecs_set(it->world, e, EcsMetaTypeSerializer, { 
+        ecs_set(it->world, e, EcsMetaTypeSerializer, {
             serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
         });
     }
@@ -1368,17 +1379,17 @@ ECS_CTOR(EcsMetaType, ptr, {
 })
 
 ECS_DTOR(EcsMetaType, ptr, {
-    ecs_os_free(ptr->descriptor);
+    ecs_os_free((char*)ptr->descriptor);
     ptr->descriptor = NULL;
     ptr->alias = NULL;
 })
 
 ECS_COPY(EcsMetaType, dst, src, {
     if (dst->descriptor) {
-        ecs_os_free(dst->descriptor);
+        ecs_os_free((char*)dst->descriptor);
         dst->descriptor = NULL;
     }
-    
+
     if (src->descriptor) {
         dst->descriptor = ecs_os_strdup(src->descriptor);
     } else {
@@ -1431,7 +1442,7 @@ ECS_CTOR(EcsBitmask, ptr, {
 ECS_DTOR(EcsBitmask, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
-    })    
+    })
     ecs_map_free(ptr->constants);
 })
 
@@ -1445,9 +1456,9 @@ ECS_DTOR(EcsMetaTypeSerializer, ptr, {
 
 static
 void ecs_set_primitive(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1463,7 +1474,7 @@ void ecs_set_primitive(
     } else
     if (!strcmp(descr, "char")) {
         ecs_set(world, e, EcsPrimitive, {EcsChar});
-    } else    
+    } else
     if (!strcmp(descr, "u8")) {
         ecs_set(world, e, EcsPrimitive, {EcsU8});
     } else
@@ -1496,7 +1507,7 @@ void ecs_set_primitive(
     } else
     if (!strcmp(descr, "iptr")) {
         ecs_set(world, e, EcsPrimitive, {EcsIPtr});
-    } else    
+    } else
     if (!strcmp(descr, "uptr")) {
         ecs_set(world, e, EcsPrimitive, {EcsUPtr});
     } else
@@ -1510,11 +1521,11 @@ void ecs_set_primitive(
 
 static
 void ecs_set_constants(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
+    ecs_world_t *world,
+    ecs_entity_t e,
     ecs_entity_t comp,
     bool is_bitmask,
-    EcsMetaType *type) 
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1536,7 +1547,7 @@ void ecs_set_constants(
         if (token.is_value_set) {
             last_value = token.value;
         } else if (is_bitmask) {
-            ecs_meta_error(&ctx, ptr, 
+            ecs_meta_error(&ctx, ptr,
                 "bitmask requires explicit value assignment");
         }
 
@@ -1553,9 +1564,9 @@ void ecs_set_constants(
 
 static
 void ecs_set_bitmask(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Bitmask");
     ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1564,20 +1575,20 @@ void ecs_set_bitmask(
 
 static
 void ecs_set_enum(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Enum");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);    
+    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set_constants(world, e, comp, false, type);
 }
 
 static
 void ecs_set_struct(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1611,9 +1622,9 @@ void ecs_set_struct(
 
 static
 void ecs_set_array(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1632,9 +1643,9 @@ void ecs_set_array(
 
 static
 void ecs_set_vector(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1653,9 +1664,9 @@ void ecs_set_vector(
 
 static
 void ecs_set_map(
-    ecs_world_t *world, 
-    ecs_entity_t e, 
-    EcsMetaType *type) 
+    ecs_world_t *world,
+    ecs_entity_t e,
+    EcsMetaType *type)
 {
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
@@ -1701,7 +1712,7 @@ void EcsSetType(ecs_iter_t *it) {
                 case EcsMapType:
                     type[i].size = sizeof(ecs_map_t*);
                     type[i].alignment = ECS_ALIGNOF(ecs_map_t*);
-                    break;                    
+                    break;
                 default:
                     break;
                 }
@@ -1736,36 +1747,22 @@ void EcsSetType(ecs_iter_t *it) {
     }
 }
 
-static
-void ctor_initialize_0(
-    ecs_world_t *world,
-    ecs_entity_t component,
-    const ecs_entity_t *entities,
-    void *ptr,
-    size_t size,
-    int32_t count,
-    void *ctx)
-{
-    (void)world;
-    (void)component;
-    (void)entities;
-    (void)ctx;
-    memset(ptr, 0, size * (size_t)count);
-}
-
 void ecs_new_meta(
     ecs_world_t *world,
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_entity_t ecs_entity(EcsMetaType) = 
+    ecs_entity_t ecs_entity(EcsMetaType) =
         ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
-    ecs_set_ptr(world, component, EcsMetaType, meta_type);\
-    ecs_set_component_actions_w_entity(world, component, &(EcsComponentLifecycle){
-        .ctor = ctor_initialize_0
-    });
+    if (meta_type->alias) {
+        EcsMetaType *alias = meta_type->alias;
+        meta_type->kind = alias->kind;
+        meta_type->descriptor = alias->descriptor;
+    }
+
+    ecs_set_ptr(world, component, EcsMetaType, meta_type);
 }
 
 /* Utility macro to insert meta data for type with meta descriptor */
@@ -1775,7 +1772,7 @@ void ecs_new_meta(
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL});\
+    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL, NULL});\
     ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
@@ -1815,7 +1812,7 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsEnum, {
         .ctor = ecs_ctor(EcsEnum),
         .dtor = ecs_dtor(EcsEnum)
-    });    
+    });
 
     ecs_set_component_actions(world, EcsBitmask, {
         .ctor = ecs_ctor(EcsBitmask),
@@ -1825,7 +1822,7 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsMetaTypeSerializer, {
         .ctor = ecs_ctor(EcsMetaTypeSerializer),
         .dtor = ecs_dtor(EcsMetaTypeSerializer)
-    });    
+    });
 
     ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
     ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
@@ -1843,7 +1840,7 @@ void FlecsMetaImport(
     ECS_EXPORT_COMPONENT(EcsVector);
     ECS_EXPORT_COMPONENT(EcsMap);
     ECS_EXPORT_COMPONENT(EcsMetaType);
-    ECS_EXPORT_COMPONENT(EcsMetaTypeSerializer);  
+    ECS_EXPORT_COMPONENT(EcsMetaTypeSerializer);
 
     /* -- Initialize builtin primitive types -- */
     ecs_entity_t old_scope = ecs_set_scope(world, EcsFlecsCore);
@@ -1874,7 +1871,7 @@ void FlecsMetaImport(
         ecs_entity_t type = ecs_new_component(
             world, 0, "bool", sizeof(bool), ECS_ALIGNOF(bool));
         ecs_set(world, type, EcsMetaType, {
-            EcsPrimitiveType, 0, 0, NULL});
+            EcsPrimitiveType, 0, 0, NULL, NULL});
         ecs_set(world, type, EcsPrimitive, {EcsBool});
     }
 
@@ -1888,10 +1885,11 @@ void FlecsMetaImport(
     ecs_set(world, ecs_set(world, 0,
         EcsName, {"ecs_type_kind_t", NULL, NULL}),
         EcsMetaType, {
-            EcsEnumType, 
-            sizeof(ecs_type_kind_t), 
-            ECS_ALIGNOF(ecs_type_kind_t), 
-            __ecs_type_kind_t__
+            EcsEnumType,
+            sizeof(ecs_type_kind_t),
+            ECS_ALIGNOF(ecs_type_kind_t),
+            __ecs_type_kind_t__,
+            NULL
         });
 
     /* Insert meta definitions for other types */
@@ -1910,24 +1908,27 @@ void FlecsMetaImport(
 
     /* -- Initialize metadata for public Flecs core components -- */
     ecs_set(world, ecs_entity(EcsName), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsName),
         .alignment = ECS_ALIGNOF(EcsName),
-        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }"
+        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
-        .descriptor = "{int32_t size; int32_t alignment;}"
+        .descriptor = "{int32_t size; int32_t alignment;}",
+        .alias = NULL
     });
 
     ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
-        .kind = EcsStructType, 
+        .kind = EcsStructType,
         .size = sizeof(EcsSignatureExpr),
         .alignment = ECS_ALIGNOF(EcsSignatureExpr),
-        .descriptor = "{const char *expr;}"
+        .descriptor = "{const char *expr;}",
+        .alias = NULL
     });
 }
 
@@ -1970,7 +1971,7 @@ ecs_entity_t ecs_meta_lookup_array(
 
         e = ecs_set(world, 0, EcsMetaType, {
             EcsArrayType, (int32_t)(elem_type->size * params.count), 
-            elem_type->alignment, NULL
+            elem_type->alignment, NULL, NULL
         });
     }
 
@@ -2007,7 +2008,7 @@ ecs_entity_t ecs_meta_lookup_vector(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
 
-        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL});
+        e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsVector) = ecs_lookup_fullpath(world, "flecs.meta.Vector");
@@ -2044,7 +2045,7 @@ ecs_entity_t ecs_meta_lookup_map(
         ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
         ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
         
-        e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL});
+        e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL, NULL});
     }
 
     ecs_entity_t ecs_entity(EcsMap) = ecs_lookup_fullpath(world, "flecs.meta.Map");
@@ -2082,6 +2083,7 @@ ecs_entity_t ecs_meta_lookup_bitmask(
         world, &params.type, params_decl, 1, &param_ctx);
     ecs_assert(bitmask_type != 0, ECS_INVALID_PARAMETER, NULL);
 
+#ifndef NDEBUG
     /* Make sure this is a bitmask type */
     ecs_entity_t ecs_entity(EcsMetaType) = ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_INTERNAL_ERROR, NULL);
@@ -2089,6 +2091,7 @@ ecs_entity_t ecs_meta_lookup_bitmask(
     const EcsMetaType *type_ptr = ecs_get(world, bitmask_type, EcsMetaType);
     ecs_assert(type_ptr != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(type_ptr->kind == EcsBitmaskType, ECS_INVALID_PARAMETER, NULL);
+#endif
 
     return bitmask_type;
 }
@@ -2153,7 +2156,7 @@ ecs_entity_t ecs_meta_lookup(
         ecs_assert(count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
 
         type = ecs_set(world, ecs_set(world, 0, 
-            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL}),
+            EcsMetaType, {EcsArrayType, type_ptr->size, type_ptr->alignment, NULL, NULL}),
             EcsArray, {type, (int32_t)count});
     }
 
@@ -2193,24 +2196,26 @@ ecs_type_op_t* get_ptr(
 
 ecs_meta_cursor_t ecs_meta_cursor(
     ecs_world_t *world,
-    ecs_entity_t type, 
+    ecs_entity_t type,
     void *base)
 {
     ecs_assert(world != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(type != 0, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
-    
+
     ecs_meta_cursor_t result;
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = 
+    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) =
         ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
 
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
+#ifndef NDEBUG
     ecs_type_op_t *ops = ecs_vector_first(ser->ops, ecs_type_op_t);
     ecs_assert(ops != NULL, ECS_INVALID_PARAMETER, NULL);
     ecs_assert(ops[0].kind == EcsOpHeader, ECS_INVALID_PARAMETER, NULL);
+#endif
 
     result.world = world;
     result.depth = 0;
@@ -2257,7 +2262,7 @@ int ecs_meta_next(
             if (scope->cur_elem >= scope->count) {
                 return -1;
             }
-        }        
+        }
     } else {
         scope->cur_op ++;
     }
@@ -2272,11 +2277,23 @@ int ecs_meta_move(
     ecs_meta_scope_t *scope = get_scope(cursor);
     int32_t ops_count = ecs_vector_count(scope->ops);
 
-    if (pos >= ops_count) {
-        return -1;
-    }
+    if(pos < 0) return -1;
 
-    scope->cur_op = pos;
+    if (scope->is_collection) {
+        if (scope->count) {
+            if (pos >= scope->count) {
+                return -1;
+            }
+
+            scope->cur_op = 1;
+            scope->cur_elem = pos;
+        }
+    } else {
+        if (pos >= ops_count) {
+            return -1;
+        }
+        scope->cur_op = scope->start + pos;
+    }
 
     return 0;
 }
@@ -2325,7 +2342,7 @@ int ecs_meta_push(
         /* This makes sure the vector has enough space for the pushed element */
         get_ptr(scope);
     }
-    
+
     scope->cur_op ++;
     cursor->depth ++;
     ecs_meta_scope_t *child_scope = get_scope(cursor);
@@ -2345,7 +2362,7 @@ int ecs_meta_push(
     case EcsOpArray:
     case EcsOpVector: {
         void *ptr = ECS_OFFSET(scope->base, op->offset);
-        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world, 
+        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world,
             &op->is.collection, 0, 0);
         ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
@@ -2362,7 +2379,7 @@ int ecs_meta_push(
             } else {
                 ecs_vector_set_count_t(&v, op->size, op->alignment, 0);
             }
-            
+
             child_scope->base = ecs_vector_first_t(v, op->size, op->alignment);
             child_scope->count = 0;
             child_scope->vector = v;
@@ -2400,19 +2417,19 @@ int ecs_meta_pop(
             void *ptr = get_ptr(parent_scope);
             *(ecs_vector_t**)ptr = scope->vector;
             parent_scope->cur_op ++;
-        }         
+        }
         return 0;
     } else {
         for (i = scope->cur_op; i < ops_count; i ++) {
             ecs_type_op_t *op = &ops[i];
             if (op->kind == EcsOpPop) {
-                cursor->depth -- ;                
+                cursor->depth -- ;
                 ecs_meta_scope_t *parent_scope = get_scope(cursor);
                 if (parent_scope->is_collection) {
                     parent_scope->cur_op = 1;
                     parent_scope->cur_elem ++;
                 } else {
-                    parent_scope->cur_op = i;                   
+                    parent_scope->cur_op = i;
                 }
                 return 0;
             }
@@ -2428,7 +2445,7 @@ int ecs_meta_set_bool(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive || op->is.primitive != EcsBool) {
         return -1;
     } else {
@@ -2444,7 +2461,7 @@ int ecs_meta_set_char(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive || op->is.primitive != EcsChar) {
         return -1;
     } else {
@@ -2461,50 +2478,102 @@ int ecs_meta_set_int(
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
 
-    
+    ecs_primitive_kind_t primitive = op->is.primitive;
+
     if (op->kind != EcsOpPrimitive) {
-        return -1;
-    } else {
-        void *ptr = get_ptr(scope);
-
-        switch(op->is.primitive) {
-        case EcsI8:
-            if (value > INT8_MAX) {
-                return -1;
-            }
-            *(int8_t*)ptr = (int8_t)value;
-            break;
-        case EcsI16:
-            if (value > INT16_MAX) {
-                return -1;
-            }
-            *(int16_t*)ptr = (int16_t)value;
-            break;
-        case EcsI32:
-            if (value > INT32_MAX) {
-                return -1;
-            }
-            *(int32_t*)ptr = (int32_t)value;
-            break;
-        case EcsI64:
-            if (value > INT64_MAX) {
-                return -1;
-            }
-            *(int64_t*)ptr = (int64_t)value;
-            break;
-        case EcsIPtr:
-            if (value > INTPTR_MAX) {
-                return -1;
-            }
-            *(intptr_t*)ptr = (intptr_t)value;
-            break;
-        default:
+        if (op->kind == EcsOpEnum || op->kind == EcsOpBitmask) {
+            primitive = EcsI32;
+        } else {
             return -1;
-            break;
         }
-
-        return 0;
     }
+
+    void *ptr = get_ptr(scope);
+
+    switch(primitive) {
+    case EcsBool:
+        if (value > 1 || value < 0) {
+            return -1;
+        }
+        *(bool*)ptr = (bool)value;
+        break;
+    case EcsI8:
+    case EcsChar:
+        if (value > INT8_MAX || value < INT8_MIN) {
+            return -1;
+        }
+        *(int8_t*)ptr = (int8_t)value;
+        break;
+    case EcsU8:
+    case EcsByte:
+        if (value > UINT8_MAX || value < INT8_MIN) {
+            return -1;
+        }
+        *(uint8_t*)ptr = (uint8_t)value;
+        break;
+    case EcsI16:
+        if (value > INT16_MAX || value < INT16_MIN) {
+            return -1;
+        }
+        *(int16_t*)ptr = (int16_t)value;
+        break;
+    case EcsU16:
+        if (value > UINT16_MAX || value < INT16_MIN) {
+            return -1;
+        }
+        *(uint16_t*)ptr = (uint16_t)value;
+        break;
+    case EcsI32:
+        if (value > INT32_MAX || value < INT32_MIN) {
+            return -1;
+        }
+        *(int32_t*)ptr = (int32_t)value;
+        break;
+    case EcsU32:
+        if (value > UINT32_MAX || value < INT32_MIN) {
+            return -1;
+        }
+        *(uint32_t*)ptr = (uint32_t)value;
+        break;
+    case EcsI64:
+        if (value > INT64_MAX) {
+            return -1;
+        }
+        *(int64_t*)ptr = (int64_t)value;
+        break;
+    case EcsU64:
+        *(uint64_t*)ptr = (uint64_t)value;
+        break;
+    case EcsEntity:
+        *(ecs_entity_t*)ptr = (ecs_entity_t)value;
+        break;
+    case EcsF32:
+        if (value > ((1 << 24)-1) || value < -(1 << 24)) {
+            return -1;
+        }
+        *(float*)ptr = (float)value;
+        break;
+    case EcsF64:
+        if (value > ((1LL << 53)-1) || value < -(1LL << 53)) {
+            return -1;
+        }
+        *(double*)ptr = (double)value;
+        break;
+    case EcsIPtr:
+        if (value > INTPTR_MAX) {
+            return -1;
+        }
+        *(intptr_t*)ptr = (intptr_t)value;
+        break;
+    case EcsUPtr:
+        *(uintptr_t*)ptr = (uintptr_t)value;
+        break;
+    default:
+        if(!value) return ecs_meta_set_null(cursor);
+        return -1;
+    }
+
+    return 0;
 }
 
 int ecs_meta_set_uint(
@@ -2513,7 +2582,7 @@ int ecs_meta_set_uint(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -2551,9 +2620,12 @@ int ecs_meta_set_uint(
             }
             *(uintptr_t*)ptr = (uintptr_t)value;
             break;
-        default:
-            return -1;
+        case EcsEntity:
+            *(ecs_entity_t*)ptr = value;
             break;
+        default:
+            if(!value) return ecs_meta_set_null(cursor);
+            return -1;
         }
 
         return 0;
@@ -2566,7 +2638,7 @@ int ecs_meta_set_float(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -2594,7 +2666,7 @@ int ecs_meta_set_string(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
@@ -2626,7 +2698,7 @@ int ecs_meta_set_entity(
 {
     ecs_meta_scope_t *scope = get_scope(cursor);
     ecs_type_op_t *op = get_op(scope);
-    
+
     if (op->kind != EcsOpPrimitive) {
         return -1;
     } else {
