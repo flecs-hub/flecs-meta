@@ -1,4 +1,6 @@
+#ifndef FLECS_META_IMPL
 #include "flecs_meta.h"
+#endif
 #ifndef FLECS_META_PARSER_H
 #define FLECS_META_PARSER_H
 
