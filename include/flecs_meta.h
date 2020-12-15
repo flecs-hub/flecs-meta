@@ -66,7 +66,7 @@ public:\
         return #T;\
     }\
     static EcsMetaType descriptor() {\
-        return (EcsMetaType){kind, sizeof(T), ECS_ALIGNOF(T), descr};\
+        return {kind, sizeof(T), ECS_ALIGNOF(T), descr, NULL};\
     }\
 };\
 }
