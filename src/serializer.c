@@ -1,5 +1,6 @@
 #include <flecs_meta.h>
 #include "parser.h"
+#include "serializer.h"
 
 static
 ecs_vector_t* serialize_type(
