@@ -32,16 +32,6 @@ ECS_COPY(EcsMetaType, dst, src, {
     dst->alias = src->alias;
 })
 
-ECS_MOVE(EcsMetaType, dst, src, {
-    dst->kind = src->kind;
-    dst->size = src->size;
-    dst->alignment = src->alignment;
-    dst->alias = src->alias;
-
-    src->descriptor = NULL;
-    src->alias = NULL;
-})
-
 ECS_CTOR(EcsStruct, ptr, {
     ptr->members = NULL;
     ptr->is_partial = false;
@@ -430,8 +420,7 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsMetaType, {
         .ctor = ecs_ctor(EcsMetaType),
         .dtor = ecs_dtor(EcsMetaType),
-        .copy = ecs_copy(EcsMetaType),
-        .move = ecs_move(EcsMetaType)
+        .copy = ecs_copy(EcsMetaType)
     });
 
     ecs_set_component_actions(world, EcsStruct, {
