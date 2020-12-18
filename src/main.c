@@ -233,6 +233,10 @@ void ecs_set_struct(
         ecs_assert(type != 0, ECS_INTERNAL_ERROR, NULL);
     }
 
+    if (!ecs_vector_count(members)) {
+        ecs_parser_error(name, type->descriptor, 0, "empty struct declaration");
+    }
+
     is_partial = token.is_partial;
 
     ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup_fullpath(world, "flecs.meta.Struct");
