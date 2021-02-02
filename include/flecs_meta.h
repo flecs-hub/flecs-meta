@@ -544,6 +544,14 @@ void ecs_new_meta(
     ECS_COMPONENT(world, T);\
     ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
+/** Define a meta component, store in variable outside of the current scope.
+* Use this macro in a header when defining a component identifier globally.
+* Must be used together with ECS_COMPONENT_DECLARE.
+*/
+#define ECS_META_DEFINE(world, T)\
+    ECS_COMPONENT_DEFINE(world, T);\
+    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+
 #ifdef __cplusplus
 }
 #endif
