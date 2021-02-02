@@ -21,6 +21,12 @@ ecs_entity_t ecs_meta_lookup_map(
     const char *params_decl,
     ecs_meta_parse_ctx_t *ctx);
 
+ecs_entity_t ecs_meta_lookup_bitmask(
+    ecs_world_t *world,
+    ecs_entity_t e,
+    const char *params_decl,
+    ecs_meta_parse_ctx_t *ctx);
+
 ecs_entity_t ecs_meta_lookup(
     ecs_world_t *world,
     ecs_meta_type_t *token,

@@ -3,18 +3,18 @@
 #include "serializer.h"
 #include "type.h"
 
-ECS_CTOR(EcsMetaType, ptr, {
+static ECS_CTOR(EcsMetaType, ptr, {
     ptr->descriptor = NULL;
     ptr->alias = NULL;
 })
 
-ECS_DTOR(EcsMetaType, ptr, {
+static ECS_DTOR(EcsMetaType, ptr, {
     ecs_os_free((char*)ptr->descriptor);
     ptr->descriptor = NULL;
     ptr->alias = NULL;
 })
 
-ECS_COPY(EcsMetaType, dst, src, {
+static ECS_COPY(EcsMetaType, dst, src, {
     if (dst->descriptor) {
         ecs_os_free((char*)dst->descriptor);
         dst->descriptor = NULL;
@@ -32,45 +32,45 @@ ECS_COPY(EcsMetaType, dst, src, {
     dst->alias = src->alias;
 })
 
-ECS_CTOR(EcsStruct, ptr, {
+static ECS_CTOR(EcsStruct, ptr, {
     ptr->members = NULL;
     ptr->is_partial = false;
 })
 
-ECS_DTOR(EcsStruct, ptr, {
+static ECS_DTOR(EcsStruct, ptr, {
     ecs_vector_each(ptr->members, EcsMember, m, {
         ecs_os_free(m->name);
     });
     ecs_vector_free(ptr->members);
 })
 
-ECS_CTOR(EcsEnum, ptr, {
+static ECS_CTOR(EcsEnum, ptr, {
     ptr->constants = NULL;
 })
 
-ECS_DTOR(EcsEnum, ptr, {
+static ECS_DTOR(EcsEnum, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
 })
 
-ECS_CTOR(EcsBitmask, ptr, {
+static ECS_CTOR(EcsBitmask, ptr, {
     ptr->constants = NULL;
 })
 
-ECS_DTOR(EcsBitmask, ptr, {
+static ECS_DTOR(EcsBitmask, ptr, {
     ecs_map_each(ptr->constants, char*, key, c_ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
 })
 
-ECS_CTOR(EcsMetaTypeSerializer, ptr, {
+static ECS_CTOR(EcsMetaTypeSerializer, ptr, {
     ptr->ops = NULL;
 })
 
-ECS_DTOR(EcsMetaTypeSerializer, ptr, {
+static ECS_DTOR(EcsMetaTypeSerializer, ptr, {
     ecs_vector_free(ptr->ops);
 })
 
