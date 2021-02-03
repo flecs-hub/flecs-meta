@@ -221,7 +221,7 @@ ecs_vector_t* serialize_struct(
         op->name = members[i].name;
 
         const EcsMetaType *meta_type = ecs_get(world, members[i].type, EcsMetaType);
-        ecs_size_t member_size = meta_type->size * op->count;
+        ecs_size_t member_size = meta_type->size * (meta_type->kind == EcsStructType ? 1 : op->count);
         int16_t member_alignment = meta_type->alignment;
 
         ecs_assert(member_size != 0, ECS_INTERNAL_ERROR, op->name);
@@ -307,7 +307,7 @@ ecs_vector_t* serialize_struct(
     ecs_assert(op_push->kind == EcsOpPush, ECS_INTERNAL_ERROR, NULL);
     op_push->size = size;
     op_push->alignment = alignment;
-    op_push->count = 1;
+    op_push->count = count;
 
     return ops;
 }
