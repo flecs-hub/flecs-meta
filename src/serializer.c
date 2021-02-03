@@ -109,8 +109,6 @@ ecs_vector_t* serialize_enum(
 {
     (void)type;
 
-    FlecsMetaImportHandles(*module);
-
     ecs_type_op_t *op;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -147,8 +145,6 @@ ecs_vector_t* serialize_bitmask(
 {
     (void)type;
 
-    FlecsMetaImportHandles(*module);
-
     ecs_type_op_t *op;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -184,8 +180,6 @@ ecs_vector_t* serialize_struct(
     int32_t offset,
     FlecsMeta *module)
 {
-    FlecsMetaImportHandles(*module);
-
     ecs_type_op_t *op_header = NULL;
     if (!ops) {
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
@@ -322,8 +316,6 @@ ecs_vector_t* serialize_array(
 {
     (void)entity;
 
-    FlecsMetaImportHandles(*handles);
-
     ecs_type_op_t *op_header = NULL;
     if (!ops) {
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
@@ -373,8 +365,6 @@ ecs_vector_t* serialize_vector(
 {
     (void)entity;
 
-    FlecsMetaImportHandles(*handles);
-
     ecs_type_op_t *op = NULL;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -411,8 +401,6 @@ ecs_vector_t* serialize_map(
     ecs_vector_t *ops,
     FlecsMeta *handles)
 {
-    FlecsMetaImportHandles(*handles);
-
     ecs_type_op_t *op = NULL;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -488,8 +476,6 @@ ecs_vector_t* serialize_type(
     int32_t offset,
     FlecsMeta *module)
 {
-    FlecsMetaImportHandles(*module);
-
     const EcsMetaType *type = ecs_get(world, entity, EcsMetaType);
     ecs_assert(type != NULL, ECS_INVALID_PARAMETER, NULL);
 
