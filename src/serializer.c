@@ -7,8 +7,7 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    int32_t offset,
-    FlecsMeta *module);
+    int32_t offset);
 
 static
 ecs_size_t ecs_get_primitive_size(
@@ -69,12 +68,10 @@ ecs_vector_t* serialize_primitive(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsPrimitive *type,
-    ecs_vector_t *ops,
-    FlecsMeta *module)
+    ecs_vector_t *ops)
 {
     (void)world;
     (void)entity;
-    (void)module;
 
     ecs_type_op_t *op;
     if (!ops) {
@@ -104,12 +101,9 @@ ecs_vector_t* serialize_enum(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsEnum *type,
-    ecs_vector_t *ops,
-    FlecsMeta *module)
+    ecs_vector_t *ops)
 {
     (void)type;
-
-    FlecsMetaImportHandles(*module);
 
     ecs_type_op_t *op;
     if (!ops) {
@@ -142,12 +136,9 @@ ecs_vector_t* serialize_bitmask(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsBitmask *type,
-    ecs_vector_t *ops,
-    FlecsMeta *module)
+    ecs_vector_t *ops)
 {
     (void)type;
-
-    FlecsMetaImportHandles(*module);
 
     ecs_type_op_t *op;
     if (!ops) {
@@ -181,11 +172,8 @@ ecs_vector_t* serialize_struct(
     ecs_entity_t entity,
     const EcsStruct *type,
     ecs_vector_t *ops,
-    int32_t offset,
-    FlecsMeta *module)
+    int32_t offset)
 {
-    FlecsMetaImportHandles(*module);
-
     ecs_type_op_t *op_header = NULL;
     if (!ops) {
         op_header = ecs_vector_add(&ops, ecs_type_op_t);
@@ -207,7 +195,7 @@ ecs_vector_t* serialize_struct(
     for (i = 0; i < count; i ++) {
         /* Add type operations of member to struct ops */
         int32_t prev_count = ecs_vector_count(ops);
-        ops = serialize_type(world, members[i].type, ops, offset + size, module);
+        ops = serialize_type(world, members[i].type, ops, offset + size);
 
 #ifndef NDEBUG
         int32_t op_count = ecs_vector_count(ops);
@@ -317,12 +305,9 @@ ecs_vector_t* serialize_array(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsArray *type,
-    ecs_vector_t *ops,
-    FlecsMeta *handles)
+    ecs_vector_t *ops)
 {
     (void)entity;
-
-    FlecsMetaImportHandles(*handles);
 
     ecs_type_op_t *op_header = NULL;
     if (!ops) {
@@ -368,12 +353,9 @@ ecs_vector_t* serialize_vector(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsVector *type,
-    ecs_vector_t *ops,
-    FlecsMeta *handles)
+    ecs_vector_t *ops)
 {
     (void)entity;
-
-    FlecsMetaImportHandles(*handles);
 
     ecs_type_op_t *op = NULL;
     if (!ops) {
@@ -408,11 +390,8 @@ ecs_vector_t* serialize_map(
     ecs_world_t *world,
     ecs_entity_t entity,
     const EcsMap *type,
-    ecs_vector_t *ops,
-    FlecsMeta *handles)
+    ecs_vector_t *ops)
 {
-    FlecsMetaImportHandles(*handles);
-
     ecs_type_op_t *op = NULL;
     if (!ops) {
         op = ecs_vector_add(&ops, ecs_type_op_t);
@@ -485,11 +464,8 @@ ecs_vector_t* serialize_type(
     ecs_world_t *world,
     ecs_entity_t entity,
     ecs_vector_t *ops,
-    int32_t offset,
-    FlecsMeta *module)
+    int32_t offset)
 {
-    FlecsMetaImportHandles(*module);
-
     const EcsMetaType *type = ecs_get(world, entity, EcsMetaType);
     ecs_assert(type != NULL, ECS_INVALID_PARAMETER, NULL);
 
@@ -497,43 +473,43 @@ ecs_vector_t* serialize_type(
     case EcsPrimitiveType: {
         const EcsPrimitive *t = ecs_get(world, entity, EcsPrimitive);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_primitive(world, entity, t, ops, module);
+        return serialize_primitive(world, entity, t, ops);
     }
 
     case EcsEnumType: {
         const EcsEnum *t = ecs_get(world, entity, EcsEnum);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_enum(world, entity, t, ops, module);
+        return serialize_enum(world, entity, t, ops);
     }
 
     case EcsBitmaskType: {
         const EcsBitmask *t = ecs_get(world, entity, EcsBitmask);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_bitmask(world, entity, t, ops, module);
+        return serialize_bitmask(world, entity, t, ops);
     }
 
     case EcsStructType: {
         const EcsStruct *t = ecs_get(world, entity, EcsStruct);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_struct(world, entity, t, ops, offset, module);
+        return serialize_struct(world, entity, t, ops, offset);
     }
 
     case EcsArrayType: {
         const EcsArray *t = ecs_get(world, entity, EcsArray);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_array(world, entity, t, ops, module);
+        return serialize_array(world, entity, t, ops);
     }
 
     case EcsVectorType: {
         const EcsVector *t = ecs_get(world, entity, EcsVector);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_vector(world, entity, t, ops, module);
+        return serialize_vector(world, entity, t, ops);
     }
 
     case EcsMapType: {
         const EcsMap *t = ecs_get(world, entity, EcsMap);
         ecs_assert(t != NULL, ECS_INTERNAL_ERROR, NULL);
-        return serialize_map(world, entity, t, ops, module);
+        return serialize_map(world, entity, t, ops);
     }
 
     default:
@@ -545,7 +521,6 @@ ecs_vector_t* serialize_type(
 
 void EcsSetPrimitive(ecs_iter_t *it) {
     EcsPrimitive *type = ecs_column(it, EcsPrimitive, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -565,14 +540,13 @@ void EcsSetPrimitive(ecs_iter_t *it) {
 
         ecs_set(world, e, EcsMetaTypeSerializer, {
             serialize_primitive(
-                world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+                world, e, &type[i], NULL)
         });
     }
 }
 
 void EcsSetEnum(ecs_iter_t *it) {
     EcsEnum *type = ecs_column(it, EcsEnum, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -581,14 +555,13 @@ void EcsSetEnum(ecs_iter_t *it) {
         ecs_entity_t e = it->entities[i];
 
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_enum(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+            serialize_enum(world, e, &type[i], NULL)
         });
     }
 }
 
 void EcsSetBitmask(ecs_iter_t *it) {
     EcsBitmask *type = ecs_column(it, EcsBitmask, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -596,14 +569,13 @@ void EcsSetBitmask(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_bitmask(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+            serialize_bitmask(world, e, &type[i], NULL)
         });
     }
 }
 
 void EcsSetStruct(ecs_iter_t *it) {
     EcsStruct *type = ecs_column(it, EcsStruct, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -611,14 +583,13 @@ void EcsSetStruct(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_struct(world, e, &type[i], NULL, 0, &ecs_module(FlecsMeta))
+            serialize_struct(world, e, &type[i], NULL, 0)
         });
     }
 }
 
 void EcsSetArray(ecs_iter_t *it) {
     EcsArray *type = ecs_column(it, EcsArray, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -626,14 +597,13 @@ void EcsSetArray(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_array(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+            serialize_array(world, e, &type[i], NULL)
         });
     }
 }
 
 void EcsSetVector(ecs_iter_t *it) {
     EcsVector *type = ecs_column(it, EcsVector, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -641,14 +611,13 @@ void EcsSetVector(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_vector(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+            serialize_vector(world, e, &type[i], NULL)
         });
     }
 }
 
 void EcsSetMap(ecs_iter_t *it) {
     EcsMap *type = ecs_column(it, EcsMap, 1);
-    ECS_IMPORT_COLUMN(it, FlecsMeta, 2);
 
     ecs_world_t *world = it->world;
 
@@ -656,7 +625,7 @@ void EcsSetMap(ecs_iter_t *it) {
     for (i = 0; i < it->count; i ++) {
         ecs_entity_t e = it->entities[i];
         ecs_set(it->world, e, EcsMetaTypeSerializer, {
-            serialize_map(world, e, &type[i], NULL, &ecs_module(FlecsMeta))
+            serialize_map(world, e, &type[i], NULL)
         });
     }
 }

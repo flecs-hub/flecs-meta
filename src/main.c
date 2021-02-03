@@ -3,6 +3,19 @@
 #include "serializer.h"
 #include "type.h"
 
+ECS_COMPONENT_DECLARE(EcsPrimitive);
+ECS_COMPONENT_DECLARE(EcsEnum);
+ECS_COMPONENT_DECLARE(EcsBitmask);
+ECS_COMPONENT_DECLARE(EcsMember);
+ECS_COMPONENT_DECLARE(EcsStruct);
+ECS_COMPONENT_DECLARE(EcsArray);
+ECS_COMPONENT_DECLARE(EcsVector);
+ECS_COMPONENT_DECLARE(EcsMap);
+ECS_COMPONENT_DECLARE(EcsMetaType);
+ECS_COMPONENT_DECLARE(ecs_type_op_kind_t);
+ECS_COMPONENT_DECLARE(ecs_type_op_t);
+ECS_COMPONENT_DECLARE(EcsMetaTypeSerializer);
+
 static ECS_CTOR(EcsMetaType, ptr, {
     ptr->descriptor = NULL;
     ptr->alias = NULL;
@@ -83,9 +96,6 @@ void ecs_set_primitive(
     ecs_assert(world != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
-
-    ecs_entity_t ecs_entity(EcsPrimitive) = ecs_lookup_fullpath(world, "flecs.meta.Primitive");
-    ecs_assert(ecs_entity(EcsPrimitive) != 0, ECS_INTERNAL_ERROR, NULL);
 
     const char *descr = type->descriptor;
 
@@ -188,9 +198,7 @@ void ecs_set_bitmask(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Bitmask");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set_constants(world, e, comp, true, type);
+    ecs_set_constants(world, e, ecs_entity(EcsBitmask), true, type);
 }
 
 static
@@ -199,9 +207,7 @@ void ecs_set_enum(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Enum");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set_constants(world, e, comp, false, type);
+    ecs_set_constants(world, e, ecs_entity(EcsEnum), false, type);
 }
 
 static
@@ -239,8 +245,6 @@ void ecs_set_struct(
 
     is_partial = token.is_partial;
 
-    ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup_fullpath(world, "flecs.meta.Struct");
-    ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set(world, e, EcsStruct, {members, is_partial});
 }
 
@@ -309,7 +313,7 @@ void ecs_set_map(
 
 static
 void EcsSetType(ecs_iter_t *it) {
-    ECS_COLUMN(it, EcsMetaType, type, 1);
+    EcsMetaType *type = ecs_column(it, EcsMetaType, 1);
 
     ecs_world_t *world = it->world;
 
@@ -376,8 +380,6 @@ void ecs_new_meta(
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_entity_t ecs_entity(EcsMetaType) =
-        ecs_lookup_fullpath(world, "flecs.meta.MetaType");
     ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
     if (meta_type->alias) {
@@ -406,18 +408,18 @@ void FlecsMetaImport(
 
     ecs_set_name_prefix(world, "Ecs");
 
-    ECS_COMPONENT(world, EcsPrimitive);
-    ECS_COMPONENT(world, EcsEnum);
-    ECS_COMPONENT(world, EcsBitmask);
-    ECS_COMPONENT(world, EcsMember);
-    ECS_COMPONENT(world, EcsStruct);
-    ECS_COMPONENT(world, EcsArray);
-    ECS_COMPONENT(world, EcsVector);
-    ECS_COMPONENT(world, EcsMap);
-    ECS_COMPONENT(world, EcsMetaType);
-    ECS_COMPONENT(world, ecs_type_op_kind_t);
-    ECS_COMPONENT(world, ecs_type_op_t);
-    ECS_COMPONENT(world, EcsMetaTypeSerializer);
+    ECS_COMPONENT_DEFINE(world, EcsPrimitive);
+    ECS_COMPONENT_DEFINE(world, EcsEnum);
+    ECS_COMPONENT_DEFINE(world, EcsBitmask);
+    ECS_COMPONENT_DEFINE(world, EcsMember);
+    ECS_COMPONENT_DEFINE(world, EcsStruct);
+    ECS_COMPONENT_DEFINE(world, EcsArray);
+    ECS_COMPONENT_DEFINE(world, EcsVector);
+    ECS_COMPONENT_DEFINE(world, EcsMap);
+    ECS_COMPONENT_DEFINE(world, EcsMetaType);
+    ECS_COMPONENT_DEFINE(world, ecs_type_op_kind_t);
+    ECS_COMPONENT_DEFINE(world, ecs_type_op_t);
+    ECS_COMPONENT_DEFINE(world, EcsMetaTypeSerializer);
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 
@@ -447,13 +449,13 @@ void FlecsMetaImport(
         .dtor = ecs_dtor(EcsMetaTypeSerializer)
     });
 
-    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive);
+    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum);
+    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask);
+    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct);
+    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array);
+    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector);
+    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
