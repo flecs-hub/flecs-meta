@@ -3,6 +3,19 @@
 #include "serializer.h"
 #include "type.h"
 
+ECS_COMPONENT_DECLARE(EcsPrimitive);
+ECS_COMPONENT_DECLARE(EcsEnum);
+ECS_COMPONENT_DECLARE(EcsBitmask);
+ECS_COMPONENT_DECLARE(EcsMember);
+ECS_COMPONENT_DECLARE(EcsStruct);
+ECS_COMPONENT_DECLARE(EcsArray);
+ECS_COMPONENT_DECLARE(EcsVector);
+ECS_COMPONENT_DECLARE(EcsMap);
+ECS_COMPONENT_DECLARE(EcsMetaType);
+ECS_COMPONENT_DECLARE(ecs_type_op_kind_t);
+ECS_COMPONENT_DECLARE(ecs_type_op_t);
+ECS_COMPONENT_DECLARE(EcsMetaTypeSerializer);
+
 static ECS_CTOR(EcsMetaType, ptr, {
     ptr->descriptor = NULL;
     ptr->alias = NULL;
@@ -406,18 +419,18 @@ void FlecsMetaImport(
 
     ecs_set_name_prefix(world, "Ecs");
 
-    ECS_COMPONENT(world, EcsPrimitive);
-    ECS_COMPONENT(world, EcsEnum);
-    ECS_COMPONENT(world, EcsBitmask);
-    ECS_COMPONENT(world, EcsMember);
-    ECS_COMPONENT(world, EcsStruct);
-    ECS_COMPONENT(world, EcsArray);
-    ECS_COMPONENT(world, EcsVector);
-    ECS_COMPONENT(world, EcsMap);
-    ECS_COMPONENT(world, EcsMetaType);
-    ECS_COMPONENT(world, ecs_type_op_kind_t);
-    ECS_COMPONENT(world, ecs_type_op_t);
-    ECS_COMPONENT(world, EcsMetaTypeSerializer);
+    ECS_COMPONENT_DEFINE(world, EcsPrimitive);
+    ECS_COMPONENT_DEFINE(world, EcsEnum);
+    ECS_COMPONENT_DEFINE(world, EcsBitmask);
+    ECS_COMPONENT_DEFINE(world, EcsMember);
+    ECS_COMPONENT_DEFINE(world, EcsStruct);
+    ECS_COMPONENT_DEFINE(world, EcsArray);
+    ECS_COMPONENT_DEFINE(world, EcsVector);
+    ECS_COMPONENT_DEFINE(world, EcsMap);
+    ECS_COMPONENT_DEFINE(world, EcsMetaType);
+    ECS_COMPONENT_DEFINE(world, ecs_type_op_kind_t);
+    ECS_COMPONENT_DEFINE(world, ecs_type_op_t);
+    ECS_COMPONENT_DEFINE(world, EcsMetaTypeSerializer);
 
     ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
 

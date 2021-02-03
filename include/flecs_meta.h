@@ -515,6 +515,19 @@ typedef struct FlecsMeta {
 extern "C" {
 #endif
 
+ECS_COMPONENT_EXTERN(EcsPrimitive);
+ECS_COMPONENT_EXTERN(EcsEnum);
+ECS_COMPONENT_EXTERN(EcsBitmask);
+ECS_COMPONENT_EXTERN(EcsMember);
+ECS_COMPONENT_EXTERN(EcsStruct);
+ECS_COMPONENT_EXTERN(EcsArray);
+ECS_COMPONENT_EXTERN(EcsVector);
+ECS_COMPONENT_EXTERN(EcsMap);
+ECS_COMPONENT_EXTERN(EcsMetaType);
+ECS_COMPONENT_EXTERN(ecs_type_op_kind_t);
+ECS_COMPONENT_EXTERN(ecs_type_op_t);
+ECS_COMPONENT_EXTERN(EcsMetaTypeSerializer);
+
 FLECS_META_API
 void FlecsMetaImport(
     ecs_world_t *world);
