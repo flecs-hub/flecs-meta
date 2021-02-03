@@ -198,7 +198,7 @@ void ecs_set_bitmask(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_set_constants(world, e, ecs_typeid(EcsBitmask), true, type);
+    ecs_set_constants(world, e, ecs_entity(EcsBitmask), true, type);
 }
 
 static
@@ -207,7 +207,7 @@ void ecs_set_enum(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_set_constants(world, e, ecs_typeid(EcsEnum), false, type);
+    ecs_set_constants(world, e, ecs_entity(EcsEnum), false, type);
 }
 
 static
@@ -313,7 +313,7 @@ void ecs_set_map(
 
 static
 void EcsSetType(ecs_iter_t *it) {
-    ECS_COLUMN(it, EcsMetaType, type, 1);
+    EcsMetaType *type = ecs_column(it, EcsMetaType, 1);
 
     ecs_world_t *world = it->world;
 
@@ -380,7 +380,7 @@ void ecs_new_meta(
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_assert(ecs_typeid(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
+    ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
     if (meta_type->alias) {
         EcsMetaType *alias = meta_type->alias;
