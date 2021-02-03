@@ -97,9 +97,6 @@ void ecs_set_primitive(
     ecs_assert(e != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(type != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    ecs_entity_t ecs_entity(EcsPrimitive) = ecs_lookup_fullpath(world, "flecs.meta.Primitive");
-    ecs_assert(ecs_entity(EcsPrimitive) != 0, ECS_INTERNAL_ERROR, NULL);
-
     const char *descr = type->descriptor;
 
     if (!strcmp(descr, "bool")) {
@@ -201,9 +198,7 @@ void ecs_set_bitmask(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Bitmask");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set_constants(world, e, comp, true, type);
+    ecs_set_constants(world, e, ecs_typeid(EcsBitmask), true, type);
 }
 
 static
@@ -212,9 +207,7 @@ void ecs_set_enum(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_entity_t comp = ecs_lookup_fullpath(world, "flecs.meta.Enum");
-    ecs_assert(comp != 0, ECS_INTERNAL_ERROR, NULL);
-    ecs_set_constants(world, e, comp, false, type);
+    ecs_set_constants(world, e, ecs_typeid(EcsEnum), false, type);
 }
 
 static
@@ -252,8 +245,6 @@ void ecs_set_struct(
 
     is_partial = token.is_partial;
 
-    ecs_entity_t ecs_entity(EcsStruct) = ecs_lookup_fullpath(world, "flecs.meta.Struct");
-    ecs_assert(ecs_entity(EcsStruct) != 0, ECS_INTERNAL_ERROR, NULL);
     ecs_set(world, e, EcsStruct, {members, is_partial});
 }
 

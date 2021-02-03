@@ -40,9 +40,6 @@ ecs_entity_t ecs_meta_lookup_array(
         });
     }
 
-    ecs_entity_t ecs_entity(EcsArray) = ecs_lookup_fullpath(world, "flecs.meta.Array");
-    ecs_assert(ecs_entity(EcsArray) != 0, ECS_INTERNAL_ERROR, NULL);
-
     ecs_assert(params.count <= INT32_MAX, ECS_INVALID_PARAMETER, NULL);
 
     return ecs_set(world, e, EcsArray, { element_type, (int32_t)params.count });
@@ -72,9 +69,6 @@ ecs_entity_t ecs_meta_lookup_vector(
     if (!e) {
         e = ecs_set(world, 0, EcsMetaType, {EcsVectorType, 0, 0, NULL, NULL});
     }
-
-    ecs_entity_t ecs_entity(EcsVector) = ecs_lookup_fullpath(world, "flecs.meta.Vector");
-    ecs_assert(ecs_entity(EcsVector) != 0, ECS_INTERNAL_ERROR, NULL);
 
     return ecs_set(world, e, EcsVector, { element_type });
 }
@@ -106,9 +100,6 @@ ecs_entity_t ecs_meta_lookup_map(
     if (!e) {
         e = ecs_set(world, 0, EcsMetaType, {EcsMapType, 0, 0, NULL, NULL});
     }
-
-    ecs_entity_t ecs_entity(EcsMap) = ecs_lookup_fullpath(world, "flecs.meta.Map");
-    ecs_assert(ecs_entity(EcsMap) != 0, ECS_INTERNAL_ERROR, NULL);
 
     return ecs_set(world, e, EcsMap, { key_type, element_type });
 }
