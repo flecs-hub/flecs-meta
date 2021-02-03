@@ -396,7 +396,6 @@ char* ecs_ptr_to_str(
     ecs_entity_t type, 
     void* ptr)
 {
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);
 
@@ -416,7 +415,6 @@ char* ecs_entity_to_str(
     ecs_entity_t *ids = (ecs_entity_t*)ecs_vector_first(type, ecs_entity_t);
     int32_t count = ecs_vector_count(type);
     
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) = ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
     ecs_strbuf_t str = ECS_STRBUF_INIT;
 
     const char *name = ecs_get_name(world, entity);

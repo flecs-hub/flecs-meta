@@ -41,9 +41,6 @@ ecs_meta_cursor_t ecs_meta_cursor(
     ecs_assert(base != NULL, ECS_INVALID_PARAMETER, NULL);
 
     ecs_meta_cursor_t result;
-    ecs_entity_t ecs_entity(EcsMetaTypeSerializer) =
-        ecs_lookup_fullpath(world, "flecs.meta.MetaTypeSerializer");
-    ecs_assert(ecs_entity(EcsMetaTypeSerializer) != 0, ECS_INVALID_PARAMETER, NULL);
 
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
     ecs_assert(ser != NULL, ECS_INVALID_PARAMETER, NULL);

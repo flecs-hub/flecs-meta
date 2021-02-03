@@ -389,9 +389,7 @@ void ecs_new_meta(
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_entity_t ecs_entity(EcsMetaType) =
-        ecs_lookup_fullpath(world, "flecs.meta.MetaType");
-    ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
+    ecs_assert(ecs_typeid(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
     if (meta_type->alias) {
         EcsMetaType *alias = meta_type->alias;
