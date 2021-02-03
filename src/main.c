@@ -449,13 +449,13 @@ void FlecsMetaImport(
         .dtor = ecs_dtor(EcsMetaTypeSerializer)
     });
 
-    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector, flecs.meta:flecs.meta);
-    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map, flecs.meta:flecs.meta);
+    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive);
+    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum);
+    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask);
+    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct);
+    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array);
+    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector);
+    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
