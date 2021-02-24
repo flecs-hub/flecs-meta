@@ -380,7 +380,7 @@ static bake_test_suite suites[] = {
         "Struct",
         NULL,
         NULL,
-        4,
+        5,
         Struct_testcases
     },
     {
