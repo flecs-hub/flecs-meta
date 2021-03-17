@@ -418,14 +418,14 @@ typedef struct ecs_meta_scope_t {
 } ecs_meta_scope_t;
 
 typedef struct ecs_meta_cursor_t {
-    ecs_world_t *world;
+    const ecs_world_t *world;
     ecs_meta_scope_t scope[ECS_META_MAX_SCOPE_DEPTH];
     int32_t depth;
 } ecs_meta_cursor_t;
 
 FLECS_META_API
 ecs_meta_cursor_t ecs_meta_cursor(
-    ecs_world_t *world,
+    const ecs_world_t *world,
     ecs_entity_t type,
     void *base);
 

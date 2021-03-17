@@ -32,7 +32,7 @@ ecs_type_op_t* get_ptr(
 }
 
 ecs_meta_cursor_t ecs_meta_cursor(
-    ecs_world_t *world,
+    const ecs_world_t *world,
     ecs_entity_t type,
     void *base)
 {
