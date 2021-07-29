@@ -8,16 +8,16 @@ ECS_BITMASK(Toppings, {
     Onion = 0x8,
     Egg = 0x10,
     Turkey = 0x20
-});
+})
 
 ECS_STRUCT(Sandwich, {
     int32_t cost;
     flecs::bitmask<Toppings> toppings;
-});
+})
 
 ECS_STRUCT(Menu, {
     flecs::map<flecs::string_t, Sandwich> items;
-});
+})
 
 int main(int argc, char *argv[]) {
     flecs::world world(argc, argv);

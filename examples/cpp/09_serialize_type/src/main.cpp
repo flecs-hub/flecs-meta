@@ -4,7 +4,7 @@
 ECS_STRUCT(Position, {
     float x;
     float y;
-});
+})
 
 int main(int argc, char *argv[]) {
     flecs::world world(argc, argv);

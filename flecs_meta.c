@@ -1487,7 +1487,7 @@ void ecs_set_primitive(
     if (!strcmp(descr, "uptr")) {
         ecs_set(world, e, EcsPrimitive, {EcsUPtr});
     } else
-    if (!strcmp(descr, "string")) {
+    if (!strcmp(descr, "string_t")) {
         ecs_set(world, e, EcsPrimitive, {EcsString});
     } else
     if (!strcmp(descr, "entity")) {

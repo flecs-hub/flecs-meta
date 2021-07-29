@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
         .an_int = -10, 
         .a_uint = 10,
         .a_float = 20.5, 
-        .a_string = "Hello World"
+        .a_string = (char*)"Hello World"
     };
 
     /* Pretty print the value */

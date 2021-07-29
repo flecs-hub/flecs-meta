@@ -6,23 +6,25 @@ typedef struct Position {
 } Position;
 
 int main(int argc, char *argv[]) {
-    ecs_world_t *world = ecs_init();
+    ecs_world_t *world = ecs_init_w_args(argc, argv);
 
     ECS_IMPORT(world, FlecsMeta);
 
     /* Create new entity for our type. This type will describe Position. */
-    ecs_entity_t position_type = ecs_set(world, 0, EcsName, {"Position"});
-
+    ecs_entity_t position_type = ecs_entity_init(world, &(ecs_entity_desc_t) {
+        .name = "Position"
+    });
+    
     /* Add an EcsStruct component to the type that holds our members */
     EcsStruct *type = ecs_get_mut(world, position_type, EcsStruct, NULL);
 
     /* Add the members to the members vector */
     EcsMember *m_x = ecs_vector_add(&type->members, EcsMember);
-    m_x->name = "x";
+    m_x->name = (char*)"x";
     m_x->type = ecs_lookup_fullpath(world, "float");
 
     EcsMember *m_y = ecs_vector_add(&type->members, EcsMember);
-    m_y->name = "y";
+    m_y->name = (char*)"y";
     m_y->type = ecs_lookup_fullpath(world, "float");
 
     /* Let the framework know we're done modifying EcsStruct */

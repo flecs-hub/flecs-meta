@@ -51,7 +51,7 @@
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static const char * __##name##__ = #__VA_ARGS__
+static const char * __##name##__ = #__VA_ARGS__;
 
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
@@ -68,9 +68,9 @@ typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
 static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
 
-#define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
-#define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
-#define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
+#define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
+#define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
 
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
@@ -96,7 +96,7 @@ class __meta__ { };
 }
 
 // Specialized C++ class that stores name and descriptor of type
-#define ECS_META_CPP(T, kind, descr);\
+#define ECS_META_CPP(T, kind, descr)\
 namespace flecs {\
 template<>\
 class __meta__ <T> {\
@@ -130,7 +130,7 @@ public:\
 // Define an enumeration
 #define ECS_ENUM(T, ...)\
     ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
-    ECS_META_CPP(T, EcsEnumType, #__VA_ARGS__);
+    ECS_META_CPP(T, EcsEnumType, #__VA_ARGS__)
 
 // Define a bitmask
 #define ECS_BITMASK(T, ...)\
@@ -189,8 +189,8 @@ typedef uint8_t ecs_byte_t;
 #ifdef __cplusplus
 
 namespace flecs {
-    using string = ecs_string_t;
-    using byte = ecs_byte_t;
+    using string_t = ecs_string_t;
+    using byte_t = ecs_byte_t;
 
     // Define a bitmask
     // In C++ trying to assign multiple flags to a variable of an enum type will
@@ -210,7 +210,7 @@ ECS_ENUM_BOOTSTRAP( ecs_type_kind_t, {
     EcsArrayType,
     EcsVectorType,
     EcsMapType
-});
+})
 
 ECS_STRUCT( EcsMetaType, {
     ecs_type_kind_t kind;
@@ -218,7 +218,7 @@ ECS_STRUCT( EcsMetaType, {
     int16_t alignment;
     const char *descriptor;
     void *alias;
-});
+})
 
 ECS_ENUM( ecs_primitive_kind_t, {
     EcsBool,
@@ -238,40 +238,40 @@ ECS_ENUM( ecs_primitive_kind_t, {
     EcsIPtr,
     EcsString,
     EcsEntity
-});
+})
 
 ECS_STRUCT( EcsPrimitive, {
     ecs_primitive_kind_t kind;
-});
+})
 
 // Define EcsBitmask for both C and C++. Both representations are equivalent in
 // memory, but allow for a nicer type-safe API in C++
 #if defined(__cplusplus) && !defined(FLECS_NO_CPP)
 ECS_STRUCT( EcsBitmask, {
-    flecs::map<int32_t, flecs::string> constants;
-});
+    flecs::map<int32_t, flecs::string_t> constants;
+})
 #else
 ECS_STRUCT( EcsBitmask, {
     ecs_map(int32_t, ecs_string_t) constants;
-});
+})
 #endif
 
 // Define EcsEnum for both C and C++. Both representations are equivalent in
 // memory, but allow for a nicer type-safe API in C++
 #if defined(__cplusplus) && !defined(FLECS_NO_CPP)
 ECS_STRUCT( EcsEnum, {
-    flecs::map<int32_t, flecs::string> constants;
-});
+    flecs::map<int32_t, flecs::string_t> constants;
+})
 #else
 ECS_STRUCT( EcsEnum, {
     ecs_map(int32_t, ecs_string_t) constants;
-});
+})
 #endif
 
 ECS_STRUCT( EcsMember, {
     char *name;
     ecs_entity_t type;
-});
+})
 
 // Define EcsStruct for both C and C++. Both representations are equivalent in
 // memory, but allow for a nicer type-safe API in C++
@@ -279,27 +279,27 @@ ECS_STRUCT( EcsMember, {
 ECS_STRUCT( EcsStruct, {
     flecs::vector<EcsMember> members;
     bool is_partial;
-});
+})
 #else
 ECS_STRUCT( EcsStruct, {
     ecs_vector(EcsMember) members;
     bool is_partial;
-});
+})
 #endif
 
 ECS_STRUCT( EcsArray, {
     ecs_entity_t element_type;
     int32_t count;
-});
+})
 
 ECS_STRUCT( EcsVector, {
     ecs_entity_t element_type;
-});
+})
 
 ECS_STRUCT( EcsMap, {
     ecs_entity_t key_type;
     ecs_entity_t element_type;
-});
+})
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -316,7 +316,7 @@ ECS_ENUM_C( ecs_type_op_kind_t, {
     EcsOpArray,
     EcsOpVector,
     EcsOpMap
-});
+})
 
 typedef ecs_vector_t ecs_type_op_vector_t;
 typedef ecs_vector_t ecs_constant_vector_t;
@@ -343,11 +343,11 @@ ECS_PRIVATE
             ecs_ref_t element;
         } map;
     } is;
-});
+})
 
 ECS_STRUCT_C( EcsMetaTypeSerializer, {
     ecs_vector(ecs_type_op_t) ops;
-});
+})
 
 #endif
 
@@ -571,16 +571,7 @@ FLECS_META_API
 void FlecsMetaImport(
     ecs_world_t *world);
 
-#define FlecsMetaImportHandles(handles)\
-    ECS_IMPORT_COMPONENT(handles, EcsPrimitive);\
-    ECS_IMPORT_COMPONENT(handles, EcsEnum);\
-    ECS_IMPORT_COMPONENT(handles, EcsBitmask);\
-    ECS_IMPORT_COMPONENT(handles, EcsStruct);\
-    ECS_IMPORT_COMPONENT(handles, EcsArray);\
-    ECS_IMPORT_COMPONENT(handles, EcsVector);\
-    ECS_IMPORT_COMPONENT(handles, EcsMap);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaType);\
-    ECS_IMPORT_COMPONENT(handles, EcsMetaTypeSerializer);
+#define FlecsMetaImportHandles(handles)
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Macro for inserting metadata in C application
@@ -641,18 +632,18 @@ public:
     };
 
     meta(flecs::world& world) {
-        FlecsMetaImport(world.c_ptr());
+        FlecsMetaImport(world);
 
-        flecs::module<flecs::components::meta>(world, "flecs::components::meta");
+        world.module<flecs::components::meta>("flecs::components::meta");
 
-        flecs::component<Primitive>(world, "EcsPrimitive");
-        flecs::component<Enum>(world, "EcsEnum");
-        flecs::component<Bitmask>(world, "EcsBitmask");
-        flecs::component<Struct>(world, "EcsStruct");
-        flecs::component<Array>(world, "EcsArray");
-        flecs::component<Vector>(world, "EcsVector");
-        flecs::component<Type>(world, "EcsMetaType");
-        flecs::component<TypeSerializer>(world, "EcsMetaTypeSerializer");
+        world.component<Primitive>("EcsPrimitive");
+        world.component<Enum>("EcsEnum");
+        world.component<Bitmask>("EcsBitmask");
+        world.component<Struct>("EcsStruct");
+        world.component<Array>("EcsArray");
+        world.component<Vector>("EcsVector");
+        world.component<Type>("EcsMetaType");
+        world.component<TypeSerializer>("EcsMetaTypeSerializer");
     }
 };
 }
@@ -675,29 +666,27 @@ flecs::entity meta(flecs::world& world) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-std::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
+flecs::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
     char *str = ecs_ptr_to_str(world.c_ptr(), type, &data);
-    std::string result = std::string(str);
-    free(str);
+    flecs::string result = flecs::string(str);
     return result;
 }
 
 template <typename T>
-std::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
+flecs::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
     return pretty_print(world, type.id(), data);
 }
 
 template <typename T>
-std::string pretty_print(flecs::world& world, T& data) {
-    entity_t type = _::component_info<T>::id();
+flecs::string pretty_print(flecs::world& world, T& data) {
+    entity_t type = _::cpp_type<T>::id();
     return flecs::pretty_print(world, type, data);
 }
 
 template <>
-inline std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
+inline flecs::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
     char *str = ecs_entity_to_str(world.c_ptr(), entity.id());
-    std::string result = std::string(str);
-    free(str);
+    flecs::string result = flecs::string(str);
     return result;
 }
 

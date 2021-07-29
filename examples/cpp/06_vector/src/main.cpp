@@ -4,11 +4,11 @@
 ECS_STRUCT(Vert2D, {
     float x;
     float y;
-});
+})
 
 ECS_STRUCT(Mesh, {
     flecs::vector<Vert2D> vertices;
-});
+})
 
 int main(int argc, char *argv[]) {
     flecs::world world(argc, argv);
@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
     /* Create an instance of the Mesh type */
     Mesh m = {
         {
-            {10, 20},
-            {30, 40},
-            {50, 60}
+            {10.0f, 20.0f},
+            {30.0f, 40.0f},
+            {50.0f, 60.0f}
         }
     };
 

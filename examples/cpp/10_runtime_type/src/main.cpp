@@ -15,9 +15,10 @@ int main(int argc, char *argv[]) {
     auto position_type = flecs::entity(world, "Position")
         .set<flecs::components::meta::Struct>({
             {
-                {"x", world.lookup("float").id()},
-                {"y", world.lookup("float").id()}
-            }
+                {const_cast<char*>("x"), world.lookup("float").id()},
+                {const_cast<char*>("y"), world.lookup("float").id()}
+            },
+            false
         });
 
     /* Create a dummy value */

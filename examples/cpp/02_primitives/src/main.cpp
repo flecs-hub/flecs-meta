@@ -9,29 +9,28 @@ ECS_STRUCT(Primitives, {
     uint32_t a_uint;
     float a_float;
     const char *a_string;
-});
+})
 
-int main(int argc, char *argv[]) {
-    flecs::world world(argc, argv);
+int main(int, char *[]) {
+    flecs::world ecs;
 
     /* Import meta module */
-    flecs::import<flecs::components::meta>(world);
+    ecs.import<flecs::components::meta>();
 
     /* Insert the meta definitions for Primitives. This will also register the
      * Primitives type as a component */
-    flecs::meta<Primitives>(world);
+    flecs::meta<Primitives>(ecs);
 
     /* Create an instance of the Primitives type */
-    Primitives p = {
-        .a_bool = true, 
-        .a_char = 'a', 
-        .a_byte = 16,
-        .an_int = -10, 
-        .a_uint = 10,
-        .a_float = 20.5, 
-        .a_string = "Hello World"
-    };
+    Primitives p;
+    p.a_bool = true;
+    p.a_char = 'a';
+    p.a_byte = 16;
+    p.an_int = -10;
+    p.a_uint = 10;
+    p.a_float = 20.5;
+    p.a_string = "Hello World";
 
     /* Pretty print the value */
-    std::cout << flecs::pretty_print(world, p) << std::endl;
+    std::cout << flecs::pretty_print(ecs, p) << std::endl;
 }

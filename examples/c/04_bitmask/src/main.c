@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     ECS_META(world, Sandwich);
 
     /* Create an instance of the Sandwich type */
-    Sandwich s = { "BLT", Bacon | Lettuce | Tomato };
+    Sandwich s = { (char*)"BLT", Bacon | Lettuce | Tomato };
 
     /* Pretty print the value */
     char *str = ecs_ptr_to_str(world, ecs_entity(Sandwich), &s);

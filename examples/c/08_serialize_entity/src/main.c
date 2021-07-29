@@ -27,10 +27,11 @@ int main(int argc, char *argv[]) {
     ECS_META(world, Agent);
 
     /* Create a player entity */
-    ecs_entity_t player = ecs_set(world, ecs_set(world, ecs_set(world, 0,
-        EcsName, {"Player One"}),
-        Agent, {Human}),
-        Position, {10, 20});
+    ecs_entity_t player = ecs_entity_init(world, &(ecs_entity_desc_t) {
+        .name = "Player One" });
+
+    ecs_set(world, player, Agent, {Human});
+    ecs_set(world, player, Position, {10, 20});
 
     /* Pretty print the player entity */
     char *str = ecs_entity_to_str(world, player);

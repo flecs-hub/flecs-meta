@@ -4,12 +4,12 @@
 ECS_STRUCT(Point, {
     int32_t x;
     int32_t y;
-});
+})
 
 ECS_STRUCT(Line, {
     Point start;
     Point stop;
-});
+})
 
 int main(int argc, char *argv[]) {
     flecs::world world(argc, argv);

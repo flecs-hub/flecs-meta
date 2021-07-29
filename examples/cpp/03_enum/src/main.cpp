@@ -5,13 +5,13 @@ ECS_ENUM(Color, {
     Red,
     Green,
     Blue
-});
+})
 
 ECS_STRUCT(Vert2D, {
     float x;
     float y;
     Color color;
-});
+})
 
 int main(int argc, char *argv[]) {
     flecs::world world(argc, argv);
