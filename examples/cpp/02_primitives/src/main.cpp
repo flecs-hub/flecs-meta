@@ -4,7 +4,7 @@
 ECS_STRUCT(Primitives, {
     bool a_bool;
     char a_char;
-    flecs::byte a_byte;
+    flecs::byte_t a_byte;
     int32_t an_int;
     uint32_t a_uint;
     float a_float;

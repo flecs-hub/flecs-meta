@@ -150,8 +150,8 @@ typedef uint8_t ecs_byte_t;
 #ifdef __cplusplus
 
 namespace flecs {
-    using string = ecs_string_t;
-    using byte = ecs_byte_t;
+    using string_t = ecs_string_t;
+    using byte_t = ecs_byte_t;
 
     // Define a bitmask
     // In C++ trying to assign multiple flags to a variable of an enum type will
@@ -209,7 +209,7 @@ ECS_STRUCT( EcsPrimitive, {
 // memory, but allow for a nicer type-safe API in C++
 #if defined(__cplusplus) && !defined(FLECS_NO_CPP)
 ECS_STRUCT( EcsBitmask, {
-    flecs::map<int32_t, flecs::string> constants;
+    flecs::map<int32_t, flecs::string_t> constants;
 });
 #else
 ECS_STRUCT( EcsBitmask, {
@@ -221,7 +221,7 @@ ECS_STRUCT( EcsBitmask, {
 // memory, but allow for a nicer type-safe API in C++
 #if defined(__cplusplus) && !defined(FLECS_NO_CPP)
 ECS_STRUCT( EcsEnum, {
-    flecs::map<int32_t, flecs::string> constants;
+    flecs::map<int32_t, flecs::string_t> constants;
 });
 #else
 ECS_STRUCT( EcsEnum, {
@@ -636,29 +636,27 @@ flecs::entity meta(flecs::world& world) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-std::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
+flecs::string pretty_print(flecs::world& world, flecs::entity_t type, T& data) {
     char *str = ecs_ptr_to_str(world.c_ptr(), type, &data);
-    std::string result = std::string(str);
-    free(str);
+    flecs::string result = flecs::string(str);
     return result;
 }
 
 template <typename T>
-std::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
+flecs::string pretty_print(flecs::world& world, flecs::entity type, T& data) {
     return pretty_print(world, type.id(), data);
 }
 
 template <typename T>
-std::string pretty_print(flecs::world& world, T& data) {
-    entity_t type = _::component_info<T>::id();
+flecs::string pretty_print(flecs::world& world, T& data) {
+    entity_t type = _::cpp_type<T>::id();
     return flecs::pretty_print(world, type, data);
 }
 
 template <>
-inline std::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
+inline flecs::string pretty_print<flecs::entity>(flecs::world& world, flecs::entity& entity) {
     char *str = ecs_entity_to_str(world.c_ptr(), entity.id());
-    std::string result = std::string(str);
-    free(str);
+    flecs::string result = flecs::string(str);
     return result;
 }
 

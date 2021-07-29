@@ -16,7 +16,7 @@ ECS_STRUCT(Sandwich, {
 });
 
 ECS_STRUCT(Menu, {
-    flecs::map<flecs::string, Sandwich> items;
+    flecs::map<flecs::string_t, Sandwich> items;
 });
 
 int main(int argc, char *argv[]) {

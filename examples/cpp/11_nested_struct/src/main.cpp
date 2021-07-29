@@ -1,4 +1,5 @@
 #include <nested_struct.h>
+#include <iostream>
 
 ECS_STRUCT(Point, {
     int32_t x;
