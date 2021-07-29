@@ -128,5 +128,5 @@ jobs:
 
       - name: run tests
         run: |
-          bake test
-
+          bake run test/serialize
+          bake run test/deserializer
