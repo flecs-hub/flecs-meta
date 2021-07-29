@@ -3,11 +3,11 @@
 ECS_STRUCT(Vert2D, {
     float x;
     float y;
-});
+})
 
 ECS_STRUCT(Mesh, {
     ecs_vector(Vert2D) vertices;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

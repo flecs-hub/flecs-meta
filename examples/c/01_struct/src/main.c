@@ -3,7 +3,7 @@
 ECS_STRUCT(Position, {
     int32_t x;
     int32_t y;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

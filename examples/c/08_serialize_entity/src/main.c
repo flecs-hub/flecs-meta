@@ -3,16 +3,16 @@
 ECS_STRUCT(Position, {
     float x;
     float y;
-});
+})
 
 ECS_ENUM(AgentKind, {
     Human,
     AI
-});
+})
 
 ECS_STRUCT(Agent, {
     AgentKind kind;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

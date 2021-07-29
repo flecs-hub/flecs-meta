@@ -3,12 +3,12 @@
 ECS_STRUCT(Point, {
     int32_t x;
     int32_t y;
-});
+})
 
 ECS_STRUCT(Line, {
     Point start;
     Point stop;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

@@ -4,13 +4,13 @@ ECS_ENUM(Color, {
     Red,
     Green,
     Blue
-});
+})
 
 ECS_STRUCT(Vert2D, {
     float x;
     float y;
     Color color;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

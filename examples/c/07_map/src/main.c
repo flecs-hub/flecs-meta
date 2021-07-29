@@ -7,16 +7,16 @@ ECS_BITMASK(Toppings, {
     Onion = 0x8,
     Egg = 0x10,
     Turkey = 0x20
-});
+})
 
 ECS_STRUCT(Sandwich, {
     int32_t cost;
     Toppings toppings;
-});
+})
 
 ECS_STRUCT(Menu, {
     ecs_map(ecs_string_t, Sandwich) items;
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

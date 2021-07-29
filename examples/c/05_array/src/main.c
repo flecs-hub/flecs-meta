@@ -2,7 +2,7 @@
 
 ECS_STRUCT(Vert2D, {
     float coord[2];
-});
+})
 
 int main(int argc, char *argv[]) {
     ecs_world_t *world = ecs_init_w_args(argc, argv);

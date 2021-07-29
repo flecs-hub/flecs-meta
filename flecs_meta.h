@@ -56,21 +56,21 @@ static const char * __##name##__ = #__VA_ARGS__;
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}\
+static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
+static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
 #define ECS_BITMASK_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
+static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
-#define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
-#define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
-#define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__);
+#define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
+#define ECS_BITMASK_C(T, ...) ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
@@ -124,17 +124,17 @@ public:\
 
 // Define a struct
 #define ECS_STRUCT(T, ...)\
-    ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+    ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)\
     ECS_META_CPP(T, EcsStructType, #__VA_ARGS__)
 
 // Define an enumeration
 #define ECS_ENUM(T, ...)\
-    ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+    ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)\
     ECS_META_CPP(T, EcsEnumType, #__VA_ARGS__)
 
 // Define a bitmask
 #define ECS_BITMASK(T, ...)\
-    ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__);\
+    ECS_BITMASK_IMPL(T, #__VA_ARGS__, __VA_ARGS__)\
     ECS_META_CPP(T, EcsBitmaskType, #__VA_ARGS__)
 
 #else
