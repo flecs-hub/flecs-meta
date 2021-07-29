@@ -493,8 +493,12 @@ void FlecsMetaImport(
      * registered with the name _Bool. To make sure meta also knows the type by
      * its regular name, check and register if necessary */
     if (!ecs_lookup(world, "bool")) {
-        ecs_entity_t type = ecs_new_component(
-            world, 0, "bool", sizeof(bool), ECS_ALIGNOF(bool));
+        ecs_entity_t type = ecs_component_init(world, &(ecs_component_desc_t) {
+            .entity.name = "bool",
+            .size = sizeof(bool),
+            .alignment = ECS_ALIGNOF(bool)
+        });
+
         ecs_set(world, type, EcsMetaType, {
             EcsPrimitiveType, 0, 0, NULL, NULL});
         ecs_set(world, type, EcsPrimitive, {EcsBool});
@@ -545,14 +549,6 @@ void FlecsMetaImport(
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
         .descriptor = "{int32_t size; int32_t alignment;}",
-        .alias = NULL
-    });
-
-    ecs_set(world, ecs_entity(EcsSignatureExpr), EcsMetaType, {
-        .kind = EcsStructType,
-        .size = sizeof(EcsSignatureExpr),
-        .alignment = ECS_ALIGNOF(EcsSignatureExpr),
-        .descriptor = "{const char *expr;}",
         .alias = NULL
     });
 }

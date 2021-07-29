@@ -92,7 +92,7 @@ static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(e
 // Unspecialized class (see below)
 namespace flecs {
 template <typename T>
-class __meta__ { };    
+class __meta__ { };
 }
 
 // Specialized C++ class that stores name and descriptor of type
@@ -120,7 +120,7 @@ public:\
 
 #ifdef __cplusplus
 
-// C++ 
+// C++
 
 // Define a struct
 #define ECS_STRUCT(T, ...)\
@@ -194,7 +194,7 @@ namespace flecs {
 
     // Define a bitmask
     // In C++ trying to assign multiple flags to a variable of an enum type will
-    // result in a compiler error. Use this template so that the serializer knows 
+    // result in a compiler error. Use this template so that the serializer knows
     // this value is a bitmask, while also keeping the compiler happy.
     template<typename T>
     using bitmask = int32_t;
@@ -326,7 +326,7 @@ ECS_STRUCT_C( ecs_type_op_t, {
     ecs_type_op_kind_t kind;
     ecs_size_t size;      /* Size of value or element type if array or vector */
     int16_t alignment; /* Alignment of value */
-    int32_t count;        /* Number of elements (only used for arrays) */
+    int32_t count;        /* Number of array elements or struct members */
     int32_t offset;       /* Offset of value */
     const char *name;     /* Name of value (only used for struct members) */
 
@@ -363,14 +363,14 @@ extern "C" {
 /** Convert value to a string. */
 FLECS_META_API
 char* ecs_ptr_to_str(
-    ecs_world_t *world, 
-    ecs_entity_t type, 
+    ecs_world_t *world,
+    ecs_entity_t type,
     void* ptr);
 
 /** Convert value to a string. */
 FLECS_META_API
 char* ecs_entity_to_str(
-    ecs_world_t *world, 
+    ecs_world_t *world,
     ecs_entity_t entity);
 
 
@@ -415,22 +415,22 @@ char* ecs_entity_to_str(
 /** Escape a character */
 FLECS_META_API
 char* ecs_chresc(
-    char *out, 
-    char in, 
+    char *out,
+    char in,
     char delimiter);
 
 /** Parse an escaped character */
 FLECS_META_API
 const char* ecs_chrparse(
-    const char *in, 
+    const char *in,
     char *out);
 
 /** Escape a string */
 FLECS_META_API
 ecs_size_t ecs_stresc(
-    char *out, 
-    ecs_size_t n, 
-    char delimiter, 
+    char *out,
+    ecs_size_t n,
+    char delimiter,
     const char *in);
 
 #ifdef __cplusplus
@@ -457,15 +457,15 @@ typedef struct ecs_meta_scope_t {
 } ecs_meta_scope_t;
 
 typedef struct ecs_meta_cursor_t {
-    ecs_world_t *world;
+    const ecs_world_t *world;
     ecs_meta_scope_t scope[ECS_META_MAX_SCOPE_DEPTH];
     int32_t depth;
 } ecs_meta_cursor_t;
 
 FLECS_META_API
 ecs_meta_cursor_t ecs_meta_cursor(
-    ecs_world_t *world,
-    ecs_entity_t type, 
+    const ecs_world_t *world,
+    ecs_entity_t type,
     void *base);
 
 FLECS_META_API
@@ -554,6 +554,19 @@ typedef struct FlecsMeta {
 extern "C" {
 #endif
 
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsPrimitive);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsEnum);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsBitmask);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsMember);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsStruct);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsArray);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsVector);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsMap);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaType);
+FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_kind_t);
+FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_t);
+FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaTypeSerializer);
+
 FLECS_META_API
 void FlecsMetaImport(
     ecs_world_t *world);
@@ -581,6 +594,14 @@ void ecs_new_meta(
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
+    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+
+/** Define a meta component, store in variable outside of the current scope.
+* Use this macro in a header when defining a component identifier globally.
+* Must be used together with ECS_COMPONENT_DECLARE.
+*/
+#define ECS_META_DEFINE(world, T)\
+    ECS_COMPONENT_DEFINE(world, T);\
     ecs_new_meta(world, ecs_entity(T), &__##T##__);
 
 #ifdef __cplusplus
@@ -616,7 +637,7 @@ public:
         StructType = EcsStructType,
         ArrayType = EcsArrayType,
         VectorType = EcsVectorType,
-        MapType = EcsMapType        
+        MapType = EcsMapType
     };
 
     meta(flecs::world& world) {

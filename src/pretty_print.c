@@ -68,7 +68,7 @@ void str_ser_primitive(
         ecs_strbuf_append(str, "%lld", *(int64_t*)base);
         break;
     case EcsF32:
-        ecs_strbuf_append(str, "%f", *(float*)base);
+        ecs_strbuf_append(str, "%f", (double)*(float*)base);
         break;
     case EcsF64:
         ecs_strbuf_append(str, "%f", *(double*)base);
@@ -102,12 +102,13 @@ void str_ser_primitive(
     }
     case EcsEntity: {
         ecs_entity_t e = *(ecs_entity_t*)base;
-        const char *name = ecs_get_name(world, e);
-        if (name) {
+        const char *name;
+        if (e && (name = ecs_get_name(world, e))) {
             ecs_strbuf_appendstr(str, name);
         } else {
             ecs_strbuf_append(str, "%u", e);
         }
+
         break;
     }
     }

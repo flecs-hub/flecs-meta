@@ -50,7 +50,7 @@ void Map_map_bool_bool() {
     ecs_map_set(value, true, &(bool){false});
     ecs_map_set(value, false, &(bool){true});
     char *str = ecs_ptr_to_str(world, ecs_entity(MapBoolBool), &value);
-    test_str(str, "{true = false, false = true}");
+    test_str(str, "{false = true, true = false}");
     ecs_os_free(str);
     ecs_map_free(value);
     }
@@ -291,7 +291,7 @@ void Map_map_int_map_int_bool() {
     ecs_map_set(value, 5, &m1);
     ecs_map_set(value, 6, &m2);
     char *str = ecs_ptr_to_str(world, ecs_entity(MapIntMapIntBool), &value);
-    test_str(str, "{5 = {1 = true, 2 = false}, 6 = {3 = false, 4 = true}}");
+    test_str(str, "{5 = {1 = true, 2 = false}, 6 = {4 = true, 3 = false}}");
     ecs_os_free(str);
     ecs_map_free(value);
     ecs_map_free(m1);
