@@ -42,6 +42,11 @@ jobs:
           make -C bake/build-$(uname)
           bake/bake setup
 
+      - name: install flecs
+        run: |
+          git clone https://github.com/SanderMertens/flecs
+          bake flecs
+
       - name: build (debug)
         run: |
           bake --strict --cfg debug
@@ -68,6 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ilammy/msvc-dev-cmd@v1
+
       - name: install bake
         run: |
           git clone https://github.com/SanderMertens/bake
@@ -75,6 +81,11 @@ jobs:
           nmake
           cd ..
           ./bake setup --local
+
+      - name: install flecs
+        run: |
+          git clone https://github.com/SanderMertens/flecs
+          bake flecs
 
       - name: build (debug)
         run: bake/bake --strict --cfg debug
@@ -100,11 +111,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: install bake
         run: |
           git clone https://github.com/SanderMertens/bake
           make -C bake/build-$(uname)
           bake/bake setup
+
+      - name: install flecs
+        run: |
+          git clone https://github.com/SanderMertens/flecs
+          bake flecs
 
       - name: build
         run: bake --strict
@@ -112,3 +129,4 @@ jobs:
       - name: run tests
         run: |
           bake test
+
