@@ -121,12 +121,12 @@ jobs:
       - name: install flecs
         run: |
           git clone https://github.com/SanderMertens/flecs
-          bake flecs
+          bake/bake flecs
 
       - name: build
-        run: bake --strict
+        run: bake/bake --strict
 
       - name: run tests
         run: |
-          bake run test/serialize
-          bake run test/deserializer
+          bake/bake run test/serialize
+          bake/bake run test/deserializer
