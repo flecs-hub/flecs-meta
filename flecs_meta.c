@@ -1853,12 +1853,11 @@ void FlecsMetaImport(
     ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
-    ecs_set_ptr(world, ecs_set(world, 0,
-        EcsName, {"ecs_primitive_kind_t", NULL, NULL}),
+    
+    ecs_set_ptr(world, ecs_set_name(world, 0, "ecs_primitive_kind_t"),
         EcsMetaType, &__ecs_primitive_kind_t__);
 
-    ecs_set(world, ecs_set(world, 0,
-        EcsName, {"ecs_type_kind_t", NULL, NULL}),
+    ecs_set(world, ecs_set_name(world, 0, "ecs_type_kind_t"),
         EcsMetaType, {
             EcsEnumType,
             sizeof(ecs_type_kind_t),

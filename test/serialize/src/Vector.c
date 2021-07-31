@@ -81,7 +81,7 @@ void Vector_vector_entity() {
 
     ECS_META(world, VectorEntity);
 
-    ecs_entity_t e = ecs_set(world, 0, EcsName, {"Foo"});
+    ecs_entity_t e = ecs_set_name(world, 0, "Foo");
 
     {
     ecs_vector_t *value = ecs_vector_from_array(ecs_entity_t, 3, ((ecs_entity_t[]){0, 1000, e}));

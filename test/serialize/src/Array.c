@@ -91,7 +91,7 @@ void Array_array_entity() {
     ECS_META(world, ArrayEntity);
 
     ecs_entity_t e1 = 2000;
-    ecs_entity_t e2 = ecs_set(world, 0, EcsName, {"Foo"});
+    ecs_entity_t e2 = ecs_set_name(world, 0, "Foo");
 
     {
     ecs_entity_t value[] = {e1, e2};
