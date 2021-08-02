@@ -1544,7 +1544,7 @@ void ecs_set_bitmask(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_set_constants(world, e, ecs_entity(EcsBitmask), true, type);
+    ecs_set_constants(world, e, ecs_id(EcsBitmask), true, type);
 }
 
 static
@@ -1553,7 +1553,7 @@ void ecs_set_enum(
     ecs_entity_t e,
     EcsMetaType *type)
 {
-    ecs_set_constants(world, e, ecs_entity(EcsEnum), false, type);
+    ecs_set_constants(world, e, ecs_id(EcsEnum), false, type);
 }
 
 static
@@ -1726,7 +1726,7 @@ void ecs_new_meta(
     ecs_entity_t component,
     EcsMetaType *meta_type)
 {
-    ecs_assert(ecs_entity(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
+    ecs_assert(ecs_id(EcsMetaType) != 0, ECS_MODULE_UNDEFINED, "flecs.meta");
 
     if (meta_type->alias) {
         EcsMetaType *alias = meta_type->alias;
@@ -1739,13 +1739,13 @@ void ecs_new_meta(
 
 /* Utility macro to insert meta data for type with meta descriptor */
 #define ECS_COMPONENT_TYPE(world, type)\
-    ecs_set_ptr(world, ecs_entity(type), EcsMetaType, &__##type##__)
+    ecs_set_ptr(world, ecs_id(type), EcsMetaType, &__##type##__)
 
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
     ECS_COMPONENT(world, type);\
-    ecs_set(world, ecs_entity(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL, NULL});\
-    ecs_set(world, ecs_entity(type), EcsPrimitive, {kind})
+    ecs_set(world, ecs_id(type), EcsMetaType, {EcsPrimitiveType, 0, 0, NULL, NULL});\
+    ecs_set(world, ecs_id(type), EcsPrimitive, {kind})
 
 void FlecsMetaImport(
     ecs_world_t *world)
@@ -1881,15 +1881,15 @@ void FlecsMetaImport(
     ECS_COMPONENT_TYPE(world, EcsMetaTypeSerializer);
 
     /* -- Initialize metadata for public Flecs core components -- */
-    ecs_set(world, ecs_entity(EcsName), EcsMetaType, {
+    ecs_set(world, ecs_id(EcsIdentifier), EcsMetaType, {
         .kind = EcsStructType,
-        .size = sizeof(EcsName),
-        .alignment = ECS_ALIGNOF(EcsName),
-        .descriptor = "{ecs_string_t value; ECS_PRIVATE; }",
+        .size = sizeof(EcsIdentifier),
+        .alignment = ECS_ALIGNOF(EcsIdentifier),
+        .descriptor = "{ char *value; ECS_PRIVATE }",
         .alias = NULL
     });
 
-    ecs_set(world, ecs_entity(EcsComponent), EcsMetaType, {
+    ecs_set(world, ecs_id(EcsComponent), EcsMetaType, {
         .kind = EcsStructType,
         .size = sizeof(EcsComponent),
         .alignment = ECS_ALIGNOF(EcsComponent),
