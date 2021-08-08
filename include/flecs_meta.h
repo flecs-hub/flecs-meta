@@ -121,7 +121,7 @@ public:\
 #define ECS_ALIAS(type, name)\
     typedef type name;\
     ECS_UNUSED \
-    static EcsMetaType ecs_meta(name) = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &FLECS__D##type};\
+    static EcsMetaType ecs_meta(name) = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &ecs_meta(type)};\
 
 #endif
 
@@ -549,7 +549,7 @@ void ecs_new_meta(
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &FLECS__D##T);
+    ecs_new_meta(world, ecs_entity(T), &ecs_meta(T));
 
 /** Define a meta component, store in variable outside of the current scope.
 * Use this macro in a header when defining a component identifier globally.
@@ -557,7 +557,7 @@ void ecs_new_meta(
 */
 #define ECS_META_DEFINE(world, T)\
     ECS_COMPONENT_DEFINE(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &FLECS__D##T);
+    ecs_new_meta(world, ecs_entity(T), &ecs_meta(T));
 
 #ifdef __cplusplus
 }
