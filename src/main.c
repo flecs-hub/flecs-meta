@@ -393,7 +393,7 @@ void ecs_new_meta(
 
 /* Utility macro to insert meta data for type with meta descriptor */
 #define ECS_COMPONENT_TYPE(world, type)\
-    ecs_set_ptr(world, ecs_id(type), EcsMetaType, &__##type##__)
+    ecs_set_ptr(world, ecs_id(type), EcsMetaType, &ecs_meta(type))
 
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
@@ -507,16 +507,16 @@ void FlecsMetaImport(
     ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
-    
+
     ecs_set_ptr(world, ecs_set_name(world, 0, "ecs_primitive_kind_t"),
-        EcsMetaType, &__ecs_primitive_kind_t__);
+        EcsMetaType, &ecs_meta(ecs_primitive_kind_t));
 
     ecs_set(world, ecs_set_name(world, 0, "ecs_type_kind_t"),
         EcsMetaType, {
             EcsEnumType,
             sizeof(ecs_type_kind_t),
             ECS_ALIGNOF(ecs_type_kind_t),
-            __ecs_type_kind_t__,
+            ecs_meta(ecs_type_kind_t),
             NULL
         });
 
