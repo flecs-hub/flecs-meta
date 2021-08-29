@@ -6,14 +6,14 @@
 static
 int str_ser_type(
     ecs_world_t *world,
-    ecs_vector_t *ser, 
-    const void *base, 
+    ecs_vector_t *ser,
+    const void *base,
     ecs_strbuf_t *str);
 
 static
 int str_ser_type_op(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
+    ecs_type_op_t *op,
     const void *base,
     ecs_strbuf_t *str);
 
@@ -21,9 +21,9 @@ int str_ser_type_op(
 static
 void str_ser_primitive(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
     const char *bool_str[] = { "false", "true" };
 
@@ -118,15 +118,15 @@ void str_ser_primitive(
 static
 int str_ser_enum(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
-    const EcsEnum *enum_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsEnum *enum_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(enum_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     int32_t value = *(int32_t*)base;
-    
+
     /* Enumeration constants are stored in a map that is keyed on the
      * enumeration value. */
     char **constant = ecs_map_get(enum_type->constants, char*, value);
@@ -143,11 +143,11 @@ int str_ser_enum(
 static
 int str_ser_bitmask(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
-    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsBitmask *bitmask_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     uint32_t value = *(uint32_t*)base;
@@ -180,9 +180,9 @@ int str_ser_bitmask(
 static
 int str_ser_elements(
     ecs_world_t *world,
-    ecs_vector_t *elem_ops, 
-    const void *base, 
-    int32_t elem_count, 
+    ecs_vector_t *elem_ops,
+    const void *base,
+    int32_t elem_count,
     int32_t elem_size,
     ecs_strbuf_t *str)
 {
@@ -208,11 +208,11 @@ int str_ser_elements(
 static
 int str_ser_array(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     return str_ser_elements(
@@ -223,23 +223,23 @@ int str_ser_array(
 static
 int str_ser_vector(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
     ecs_vector_t *value = *(ecs_vector_t**)base;
     if (!value) {
         ecs_strbuf_appendstr(str, "nullptr");
         return 0;
     }
-    
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     int32_t count = ecs_vector_count(value);
     void *array = ecs_vector_first_t(value, op->size, op->alignment);
     ecs_vector_t *elem_ops = ser->ops;
-    
+
     ecs_type_op_t *elem_op_hdr = (ecs_type_op_t*)ecs_vector_first(elem_ops, ecs_type_op_t);
     ecs_assert(elem_op_hdr != NULL, ECS_INTERNAL_ERROR, NULL);
     ecs_assert(elem_op_hdr->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
@@ -253,16 +253,16 @@ int str_ser_vector(
 static
 int str_ser_map(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_type_op_t *op,
+    const void *base,
+    ecs_strbuf_t *str)
 {
     ecs_map_t *value = *(ecs_map_t**)base;
 
-    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_entity(world, &op->is.map.key, 0, 0);
+    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_id(world, &op->is.map.key, 0, 0);
     ecs_assert(key_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_entity(world, &op->is.map.element, 0, 0);
+    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_id(world, &op->is.map.element, 0, 0);
     ecs_assert(elem_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     /* 2 instructions, one for the header */
@@ -272,8 +272,8 @@ int str_ser_map(
     ecs_assert(key_op->kind == EcsOpHeader, ECS_INTERNAL_ERROR, NULL);
     key_op = &key_op[1];
 
-    ecs_map_iter_t it = ecs_map_iter(value);  
-    ecs_map_key_t key; 
+    ecs_map_iter_t it = ecs_map_iter(value);
+    ecs_map_key_t key;
     void *ptr;
 
     ecs_strbuf_list_push(str, "{", ", ");
@@ -285,7 +285,7 @@ int str_ser_map(
         }
 
         ecs_strbuf_appendstr(str, " = ");
-        
+
         if (str_ser_type(world, elem_ser->ops, ptr, str)) {
             return -1;
         }
@@ -302,9 +302,9 @@ int str_ser_map(
 static
 int str_ser_type_op(
     ecs_world_t *world,
-    ecs_type_op_t *op, 
+    ecs_type_op_t *op,
     const void *base,
-    ecs_strbuf_t *str) 
+    ecs_strbuf_t *str)
 {
     switch(op->kind) {
     case EcsOpHeader:
@@ -350,9 +350,9 @@ int str_ser_type_op(
 static
 int str_ser_type(
     ecs_world_t *world,
-    ecs_vector_t *ser, 
-    const void *base, 
-    ecs_strbuf_t *str) 
+    ecs_vector_t *ser,
+    const void *base,
+    ecs_strbuf_t *str)
 {
     ecs_type_op_t *ops = (ecs_type_op_t*)ecs_vector_first(ser, ecs_type_op_t);
     int32_t count = ecs_vector_count(ser);
@@ -393,8 +393,8 @@ error:
 }
 
 char* ecs_ptr_to_str(
-    ecs_world_t *world, 
-    ecs_entity_t type, 
+    ecs_world_t *world,
+    ecs_entity_t type,
     void* ptr)
 {
     const EcsMetaTypeSerializer *ser = ecs_get(world, type, EcsMetaTypeSerializer);
@@ -409,13 +409,13 @@ char* ecs_ptr_to_str(
 }
 
 char* ecs_entity_to_str(
-    ecs_world_t *world, 
+    ecs_world_t *world,
     ecs_entity_t entity)
 {
     ecs_type_t type = ecs_get_type(world, entity);
     ecs_entity_t *ids = (ecs_entity_t*)ecs_vector_first(type, ecs_entity_t);
     int32_t count = ecs_vector_count(type);
-    
+
     ecs_strbuf_t str = ECS_STRBUF_INIT;
 
     const char *name = ecs_get_name(world, entity);
@@ -429,7 +429,7 @@ char* ecs_entity_to_str(
     for (i = 0; i < count; i ++) {
         const EcsMetaTypeSerializer *ser = ecs_get(world, ids[i], EcsMetaTypeSerializer);
         if (ser) {
-            const void *ptr = ecs_get_w_entity(world, entity, ids[i]);
+            const void *ptr = ecs_get_id(world, entity, ids[i]);
             ecs_strbuf_append(&str, "    %s: ", ecs_get_name(world, ids[i]));
             if (str_ser_type(world, ser->ops, ptr, &str)) {
                 goto error;
@@ -442,7 +442,7 @@ char* ecs_entity_to_str(
 
     ecs_strbuf_appendstr(&str, "}");
 
-    return ecs_strbuf_get(&str);  
+    return ecs_strbuf_get(&str);
 error:
     ecs_strbuf_reset(&str);
     return NULL;

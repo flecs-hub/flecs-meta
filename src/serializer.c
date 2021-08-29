@@ -520,7 +520,7 @@ ecs_vector_t* serialize_type(
 }
 
 void EcsSetPrimitive(ecs_iter_t *it) {
-    EcsPrimitive *type = ecs_column(it, EcsPrimitive, 1);
+    EcsPrimitive *type = ecs_term(it, EcsPrimitive, 1);
 
     ecs_world_t *world = it->world;
 
@@ -546,7 +546,7 @@ void EcsSetPrimitive(ecs_iter_t *it) {
 }
 
 void EcsSetEnum(ecs_iter_t *it) {
-    EcsEnum *type = ecs_column(it, EcsEnum, 1);
+    EcsEnum *type = ecs_term(it, EcsEnum, 1);
 
     ecs_world_t *world = it->world;
 
@@ -561,7 +561,7 @@ void EcsSetEnum(ecs_iter_t *it) {
 }
 
 void EcsSetBitmask(ecs_iter_t *it) {
-    EcsBitmask *type = ecs_column(it, EcsBitmask, 1);
+    EcsBitmask *type = ecs_term(it, EcsBitmask, 1);
 
     ecs_world_t *world = it->world;
 
@@ -575,7 +575,7 @@ void EcsSetBitmask(ecs_iter_t *it) {
 }
 
 void EcsSetStruct(ecs_iter_t *it) {
-    EcsStruct *type = ecs_column(it, EcsStruct, 1);
+    EcsStruct *type = ecs_term(it, EcsStruct, 1);
 
     ecs_world_t *world = it->world;
 
@@ -589,7 +589,7 @@ void EcsSetStruct(ecs_iter_t *it) {
 }
 
 void EcsSetArray(ecs_iter_t *it) {
-    EcsArray *type = ecs_column(it, EcsArray, 1);
+    EcsArray *type = ecs_term(it, EcsArray, 1);
 
     ecs_world_t *world = it->world;
 
@@ -603,7 +603,7 @@ void EcsSetArray(ecs_iter_t *it) {
 }
 
 void EcsSetVector(ecs_iter_t *it) {
-    EcsVector *type = ecs_column(it, EcsVector, 1);
+    EcsVector *type = ecs_term(it, EcsVector, 1);
 
     ecs_world_t *world = it->world;
 
@@ -617,7 +617,7 @@ void EcsSetVector(ecs_iter_t *it) {
 }
 
 void EcsSetMap(ecs_iter_t *it) {
-    EcsMap *type = ecs_column(it, EcsMap, 1);
+    EcsMap *type = ecs_term(it, EcsMap, 1);
 
     ecs_world_t *world = it->world;
 

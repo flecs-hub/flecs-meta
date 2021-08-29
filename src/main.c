@@ -288,7 +288,7 @@ void ecs_set_constants(
         last_value ++;
     }
 
-    ecs_set_ptr_w_entity(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
+    ecs_set_id(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
         .constants = constants
     });
 }
@@ -414,7 +414,7 @@ void ecs_set_map(
 
 static
 void EcsSetType(ecs_iter_t *it) {
-    EcsMetaType *type = ecs_column(it, EcsMetaType, 1);
+    EcsMetaType *type = ecs_term(it, EcsMetaType, 1);
 
     ecs_world_t *world = it->world;
 
