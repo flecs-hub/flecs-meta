@@ -28,21 +28,27 @@ static ECS_DTOR(EcsMetaType, ptr, {
 })
 
 static ECS_COPY(EcsMetaType, dst, src, {
-    if (dst->descriptor) {
-        ecs_os_free((char*)dst->descriptor);
-        dst->descriptor = NULL;
-    }
+    ecs_os_free((char*)dst->descriptor);
 
-    if (src->descriptor) {
-        dst->descriptor = ecs_os_strdup(src->descriptor);
-    } else {
-        dst->descriptor = NULL;
-    }
+    dst->descriptor = ecs_os_strdup(src->descriptor);
 
     dst->kind = src->kind;
     dst->size = src->size;
     dst->alignment = src->alignment;
     dst->alias = src->alias;
+})
+
+static ECS_MOVE(EcsMetaType, dst, src, {
+    ecs_os_free((char*)dst->descriptor);
+
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->descriptor = src->descriptor;
+    dst->alias = src->alias;
+
+    src->descriptor = NULL;
+    src->alias = NULL;
 })
 
 static ECS_CTOR(EcsStruct, ptr, {
@@ -57,6 +63,34 @@ static ECS_DTOR(EcsStruct, ptr, {
     ecs_vector_free(ptr->members);
 })
 
+static ECS_COPY(EcsStruct, dst, src, {
+    ecs_vector_each(dst->members, EcsMember, m, {
+        ecs_os_free(m->name);
+    });
+    ecs_vector_free(dst->members);
+
+    dst->members = ecs_vector_copy(src->members, EcsMember);
+    EcsMember *src_struct = ecs_vector_first(src->members, EcsMember);
+
+    ecs_vector_each(dst->members, EcsMember, m, {
+        m->name = ecs_os_strdup(src_struct->name);
+        src_struct++;
+    });
+    dst->is_partial = src->is_partial;
+})
+
+static ECS_MOVE(EcsStruct, dst, src, {
+    ecs_vector_each(dst->members, EcsMember, m, {
+        ecs_os_free(m->name);
+    });
+    ecs_vector_free(dst->members);
+
+    dst->members = src->members;
+    dst->is_partial = src->is_partial;
+
+    src->members = NULL;
+})
+
 static ECS_CTOR(EcsEnum, ptr, {
     ptr->constants = NULL;
 })
@@ -66,6 +100,33 @@ static ECS_DTOR(EcsEnum, ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
+
+    ptr->constants = NULL;
+})
+
+static ECS_COPY(EcsEnum, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    int32_t count = ecs_map_count(src->constants);
+    dst->constants = ecs_map_new(char*, count);
+
+    ecs_map_each(src->constants, char*, key, c_ptr, {
+        char *constant_name = ecs_os_strdup(*c_ptr);
+        ecs_map_set(dst->constants, key, &constant_name);
+    })
+})
+
+static ECS_MOVE(EcsEnum, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    dst->constants = src->constants;
+    src->constants = NULL;
 })
 
 static ECS_CTOR(EcsBitmask, ptr, {
@@ -77,6 +138,33 @@ static ECS_DTOR(EcsBitmask, ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
+
+    ptr->constants = NULL;
+})
+
+static ECS_COPY(EcsBitmask, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    int32_t count = ecs_map_count(src->constants);
+    dst->constants = ecs_map_new(char*, count);
+
+    ecs_map_each(src->constants, char*, key, c_ptr, {
+        char *constant_name = ecs_os_strdup(*c_ptr);
+        ecs_map_set(dst->constants, key, &constant_name);
+    })
+})
+
+static ECS_MOVE(EcsBitmask, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    dst->constants = src->constants;
+    src->constants = NULL;
 })
 
 static ECS_CTOR(EcsMetaTypeSerializer, ptr, {
@@ -85,6 +173,19 @@ static ECS_CTOR(EcsMetaTypeSerializer, ptr, {
 
 static ECS_DTOR(EcsMetaTypeSerializer, ptr, {
     ecs_vector_free(ptr->ops);
+    ptr->ops = NULL;
+})
+
+static ECS_COPY(EcsMetaTypeSerializer, dst, src, {
+    ecs_vector_free(dst->ops);
+    dst->ops = ecs_vector_copy(src->ops, ecs_type_op_t);
+})
+
+static ECS_MOVE(EcsMetaTypeSerializer, dst, src, {
+    ecs_vector_free(dst->ops);
+
+    dst->ops = src->ops;
+    src->ops = NULL;
 })
 
 static
@@ -426,27 +527,36 @@ void FlecsMetaImport(
     ecs_set_component_actions(world, EcsMetaType, {
         .ctor = ecs_ctor(EcsMetaType),
         .dtor = ecs_dtor(EcsMetaType),
-        .copy = ecs_copy(EcsMetaType)
+        .copy = ecs_copy(EcsMetaType),
+        .move = ecs_move(EcsMetaType)
     });
 
     ecs_set_component_actions(world, EcsStruct, {
         .ctor = ecs_ctor(EcsStruct),
-        .dtor = ecs_dtor(EcsStruct)
+        .dtor = ecs_dtor(EcsStruct),
+        .copy = ecs_copy(EcsStruct),
+        .move = ecs_move(EcsStruct)
     });
 
     ecs_set_component_actions(world, EcsEnum, {
         .ctor = ecs_ctor(EcsEnum),
-        .dtor = ecs_dtor(EcsEnum)
+        .dtor = ecs_dtor(EcsEnum),
+        .copy = ecs_copy(EcsEnum),
+        .move = ecs_move(EcsEnum)
     });
 
     ecs_set_component_actions(world, EcsBitmask, {
         .ctor = ecs_ctor(EcsBitmask),
-        .dtor = ecs_dtor(EcsBitmask)
+        .dtor = ecs_dtor(EcsBitmask),
+        .copy = ecs_copy(EcsBitmask),
+        .move = ecs_move(EcsBitmask)
     });
 
     ecs_set_component_actions(world, EcsMetaTypeSerializer, {
         .ctor = ecs_ctor(EcsMetaTypeSerializer),
-        .dtor = ecs_dtor(EcsMetaTypeSerializer)
+        .dtor = ecs_dtor(EcsMetaTypeSerializer),
+        .copy = ecs_copy(EcsMetaTypeSerializer),
+        .move = ecs_move(EcsMetaTypeSerializer)
     });
 
     ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive);
