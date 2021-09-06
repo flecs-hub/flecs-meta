@@ -196,7 +196,7 @@ int ecs_meta_push(
     case EcsOpArray:
     case EcsOpVector: {
         void *ptr = ECS_OFFSET(scope->base, op->offset);
-        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world,
+        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(cursor->world,
             &op->is.collection, 0, 0);
         ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
