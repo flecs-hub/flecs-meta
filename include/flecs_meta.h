@@ -22,6 +22,10 @@ typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
 static EcsMetaType ecs_meta(name) = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
+#define ECS_STRUCT_EXTERN_IMPL(name, descriptor)\
+ECS_UNUSED \
+static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL}
+
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
@@ -40,6 +44,10 @@ static EcsMetaType ecs_meta(name) = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(n
 typedef T name[length];\
 ECS_UNUSED \
 static EcsMetaType ecs_meta(name) = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")", NULL}
+
+#define ECS_ARRAY_EXTERN(name, T, length)\
+ECS_UNUSED \
+static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(name), "(" #T "," #length ")", NULL}
 
 #define ECS_VECTOR(name, T)\
 typedef ecs_vector_t *name;\
@@ -108,6 +116,10 @@ public:\
 // Define a struct
 #define ECS_STRUCT(name, ...)\
     ECS_STRUCT_IMPL(name, #__VA_ARGS__, __VA_ARGS__)
+
+// Define an external struct
+#define ECS_STRUCT_EXTERN(name, ...)\
+    ECS_STRUCT_EXTERN_IMPL(name, #__VA_ARGS__)
 
 // Define an enumeration
 #define ECS_ENUM(name, ...)\
