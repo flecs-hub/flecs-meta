@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     Position p = {10, 20};
 
     /* Pretty print the value */
-    char *str = ecs_ptr_to_str(world, ecs_entity(Position), &p);
+    char *str = ecs_ptr_to_str(world, ecs_id(Position), &p);
     printf("%s\n", str);
     free(str);
 

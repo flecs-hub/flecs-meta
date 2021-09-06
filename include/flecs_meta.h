@@ -518,18 +518,18 @@ typedef struct FlecsMeta {
 extern "C" {
 #endif
 
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsPrimitive);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsEnum);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsBitmask);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMember);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsStruct);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsArray);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsVector);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMap);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaType);
-FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_kind_t);
-FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_t);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaTypeSerializer);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsPrimitive);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsEnum);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsBitmask);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMember);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsStruct);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsArray);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsVector);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMap);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMetaType);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(ecs_type_op_kind_t);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(ecs_type_op_t);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMetaTypeSerializer);
 
 FLECS_META_API
 void FlecsMetaImport(
@@ -549,7 +549,7 @@ void ecs_new_meta(
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &ecs_meta(T));
+    ecs_new_meta(world, ecs_id(T), &ecs_meta(T));
 
 /** Define a meta component, store in variable outside of the current scope.
 * Use this macro in a header when defining a component identifier globally.
@@ -557,7 +557,7 @@ void ecs_new_meta(
 */
 #define ECS_META_DEFINE(world, T)\
     ECS_COMPONENT_DEFINE(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &ecs_meta(T));
+    ecs_new_meta(world, ecs_id(T), &ecs_meta(T));
 
 #ifdef __cplusplus
 }
