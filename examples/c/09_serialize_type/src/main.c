@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
     /* Pretty print the type. Because the type is an entity, the metadata is 
      * stored in components that support reflection, we can serialize types. */
-    char *str = ecs_entity_to_str(world, ecs_entity(Position));
+    char *str = ecs_entity_to_str(world, ecs_id(Position));
     printf("%s\n", str);
     free(str);
 

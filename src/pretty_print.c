@@ -122,7 +122,7 @@ int str_ser_enum(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsEnum *enum_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsEnum *enum_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(enum_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     int32_t value = *(int32_t*)base;
@@ -147,7 +147,7 @@ int str_ser_bitmask(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsBitmask *bitmask_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     uint32_t value = *(uint32_t*)base;
@@ -212,7 +212,7 @@ int str_ser_array(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     return str_ser_elements(
@@ -233,7 +233,7 @@ int str_ser_vector(
         return 0;
     }
     
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     int32_t count = ecs_vector_count(value);
@@ -259,10 +259,10 @@ int str_ser_map(
 {
     ecs_map_t *value = *(ecs_map_t**)base;
 
-    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_entity(world, &op->is.map.key, 0, 0);
+    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_id(world, &op->is.map.key, 0, 0);
     ecs_assert(key_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_entity(world, &op->is.map.element, 0, 0);
+    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_id(world, &op->is.map.element, 0, 0);
     ecs_assert(elem_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     /* 2 instructions, one for the header */
@@ -429,7 +429,7 @@ char* ecs_entity_to_str(
     for (i = 0; i < count; i ++) {
         const EcsMetaTypeSerializer *ser = ecs_get(world, ids[i], EcsMetaTypeSerializer);
         if (ser) {
-            const void *ptr = ecs_get_w_entity(world, entity, ids[i]);
+            const void *ptr = ecs_get_id(world, entity, ids[i]);
             ecs_strbuf_append(&str, "    %s: ", ecs_get_name(world, ids[i]));
             if (str_ser_type(world, ser->ops, ptr, &str)) {
                 goto error;

@@ -609,7 +609,7 @@ ecs_vector_t* serialize_type(
 }
 
 void EcsSetPrimitive(ecs_iter_t *it) {
-    EcsPrimitive *type = ecs_column(it, EcsPrimitive, 1);
+    EcsPrimitive *type = ecs_term(it, EcsPrimitive, 1);
 
     ecs_world_t *world = it->world;
 
@@ -635,7 +635,7 @@ void EcsSetPrimitive(ecs_iter_t *it) {
 }
 
 void EcsSetEnum(ecs_iter_t *it) {
-    EcsEnum *type = ecs_column(it, EcsEnum, 1);
+    EcsEnum *type = ecs_term(it, EcsEnum, 1);
 
     ecs_world_t *world = it->world;
 
@@ -650,7 +650,7 @@ void EcsSetEnum(ecs_iter_t *it) {
 }
 
 void EcsSetBitmask(ecs_iter_t *it) {
-    EcsBitmask *type = ecs_column(it, EcsBitmask, 1);
+    EcsBitmask *type = ecs_term(it, EcsBitmask, 1);
 
     ecs_world_t *world = it->world;
 
@@ -664,7 +664,7 @@ void EcsSetBitmask(ecs_iter_t *it) {
 }
 
 void EcsSetStruct(ecs_iter_t *it) {
-    EcsStruct *type = ecs_column(it, EcsStruct, 1);
+    EcsStruct *type = ecs_term(it, EcsStruct, 1);
 
     ecs_world_t *world = it->world;
 
@@ -678,7 +678,7 @@ void EcsSetStruct(ecs_iter_t *it) {
 }
 
 void EcsSetArray(ecs_iter_t *it) {
-    EcsArray *type = ecs_column(it, EcsArray, 1);
+    EcsArray *type = ecs_term(it, EcsArray, 1);
 
     ecs_world_t *world = it->world;
 
@@ -692,7 +692,7 @@ void EcsSetArray(ecs_iter_t *it) {
 }
 
 void EcsSetVector(ecs_iter_t *it) {
-    EcsVector *type = ecs_column(it, EcsVector, 1);
+    EcsVector *type = ecs_term(it, EcsVector, 1);
 
     ecs_world_t *world = it->world;
 
@@ -706,7 +706,7 @@ void EcsSetVector(ecs_iter_t *it) {
 }
 
 void EcsSetMap(ecs_iter_t *it) {
-    EcsMap *type = ecs_column(it, EcsMap, 1);
+    EcsMap *type = ecs_term(it, EcsMap, 1);
 
     ecs_world_t *world = it->world;
 
@@ -987,7 +987,7 @@ int str_ser_enum(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsEnum *enum_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsEnum *enum_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(enum_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     int32_t value = *(int32_t*)base;
@@ -1012,7 +1012,7 @@ int str_ser_bitmask(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsBitmask *bitmask_type = ecs_get_ref_w_entity(world, &op->is.constant, 0, 0);
+    const EcsBitmask *bitmask_type = ecs_get_ref_w_id(world, &op->is.constant, 0, 0);
     ecs_assert(bitmask_type != NULL, ECS_INVALID_PARAMETER, NULL);
 
     uint32_t value = *(uint32_t*)base;
@@ -1077,7 +1077,7 @@ int str_ser_array(
     const void *base, 
     ecs_strbuf_t *str) 
 {
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     return str_ser_elements(
@@ -1098,7 +1098,7 @@ int str_ser_vector(
         return 0;
     }
     
-    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(world, &op->is.collection, 0, 0);
+    const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(world, &op->is.collection, 0, 0);
     ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     int32_t count = ecs_vector_count(value);
@@ -1124,10 +1124,10 @@ int str_ser_map(
 {
     ecs_map_t *value = *(ecs_map_t**)base;
 
-    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_entity(world, &op->is.map.key, 0, 0);
+    const EcsMetaTypeSerializer *key_ser = ecs_get_ref_w_id(world, &op->is.map.key, 0, 0);
     ecs_assert(key_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
-    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_entity(world, &op->is.map.element, 0, 0);
+    const EcsMetaTypeSerializer *elem_ser = ecs_get_ref_w_id(world, &op->is.map.element, 0, 0);
     ecs_assert(elem_ser != NULL, ECS_INTERNAL_ERROR, NULL);
 
     /* 2 instructions, one for the header */
@@ -1294,7 +1294,7 @@ char* ecs_entity_to_str(
     for (i = 0; i < count; i ++) {
         const EcsMetaTypeSerializer *ser = ecs_get(world, ids[i], EcsMetaTypeSerializer);
         if (ser) {
-            const void *ptr = ecs_get_w_entity(world, entity, ids[i]);
+            const void *ptr = ecs_get_id(world, entity, ids[i]);
             ecs_strbuf_append(&str, "    %s: ", ecs_get_name(world, ids[i]));
             if (str_ser_type(world, ser->ops, ptr, &str)) {
                 goto error;
@@ -1374,21 +1374,27 @@ static ECS_DTOR(EcsMetaType, ptr, {
 })
 
 static ECS_COPY(EcsMetaType, dst, src, {
-    if (dst->descriptor) {
-        ecs_os_free((char*)dst->descriptor);
-        dst->descriptor = NULL;
-    }
+    ecs_os_free((char*)dst->descriptor);
 
-    if (src->descriptor) {
-        dst->descriptor = ecs_os_strdup(src->descriptor);
-    } else {
-        dst->descriptor = NULL;
-    }
+    dst->descriptor = ecs_os_strdup(src->descriptor);
 
     dst->kind = src->kind;
     dst->size = src->size;
     dst->alignment = src->alignment;
     dst->alias = src->alias;
+})
+
+static ECS_MOVE(EcsMetaType, dst, src, {
+    ecs_os_free((char*)dst->descriptor);
+
+    dst->kind = src->kind;
+    dst->size = src->size;
+    dst->alignment = src->alignment;
+    dst->descriptor = src->descriptor;
+    dst->alias = src->alias;
+
+    src->descriptor = NULL;
+    src->alias = NULL;
 })
 
 static ECS_CTOR(EcsStruct, ptr, {
@@ -1403,6 +1409,34 @@ static ECS_DTOR(EcsStruct, ptr, {
     ecs_vector_free(ptr->members);
 })
 
+static ECS_COPY(EcsStruct, dst, src, {
+    ecs_vector_each(dst->members, EcsMember, m, {
+        ecs_os_free(m->name);
+    });
+    ecs_vector_free(dst->members);
+
+    dst->members = ecs_vector_copy(src->members, EcsMember);
+    EcsMember *src_struct = ecs_vector_first(src->members, EcsMember);
+
+    ecs_vector_each(dst->members, EcsMember, m, {
+        m->name = ecs_os_strdup(src_struct->name);
+        src_struct++;
+    });
+    dst->is_partial = src->is_partial;
+})
+
+static ECS_MOVE(EcsStruct, dst, src, {
+    ecs_vector_each(dst->members, EcsMember, m, {
+        ecs_os_free(m->name);
+    });
+    ecs_vector_free(dst->members);
+
+    dst->members = src->members;
+    dst->is_partial = src->is_partial;
+
+    src->members = NULL;
+})
+
 static ECS_CTOR(EcsEnum, ptr, {
     ptr->constants = NULL;
 })
@@ -1412,6 +1446,33 @@ static ECS_DTOR(EcsEnum, ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
+
+    ptr->constants = NULL;
+})
+
+static ECS_COPY(EcsEnum, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    int32_t count = ecs_map_count(src->constants);
+    dst->constants = ecs_map_new(char*, count);
+
+    ecs_map_each(src->constants, char*, key, c_ptr, {
+        char *constant_name = ecs_os_strdup(*c_ptr);
+        ecs_map_set(dst->constants, key, &constant_name);
+    })
+})
+
+static ECS_MOVE(EcsEnum, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    dst->constants = src->constants;
+    src->constants = NULL;
 })
 
 static ECS_CTOR(EcsBitmask, ptr, {
@@ -1423,6 +1484,33 @@ static ECS_DTOR(EcsBitmask, ptr, {
         ecs_os_free(*c_ptr);
     })
     ecs_map_free(ptr->constants);
+
+    ptr->constants = NULL;
+})
+
+static ECS_COPY(EcsBitmask, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    int32_t count = ecs_map_count(src->constants);
+    dst->constants = ecs_map_new(char*, count);
+
+    ecs_map_each(src->constants, char*, key, c_ptr, {
+        char *constant_name = ecs_os_strdup(*c_ptr);
+        ecs_map_set(dst->constants, key, &constant_name);
+    })
+})
+
+static ECS_MOVE(EcsBitmask, dst, src, {
+    ecs_map_each(dst->constants, char*, key, c_ptr, {
+        ecs_os_free(*c_ptr);
+    })
+    ecs_map_free(dst->constants);
+
+    dst->constants = src->constants;
+    src->constants = NULL;
 })
 
 static ECS_CTOR(EcsMetaTypeSerializer, ptr, {
@@ -1431,6 +1519,19 @@ static ECS_CTOR(EcsMetaTypeSerializer, ptr, {
 
 static ECS_DTOR(EcsMetaTypeSerializer, ptr, {
     ecs_vector_free(ptr->ops);
+    ptr->ops = NULL;
+})
+
+static ECS_COPY(EcsMetaTypeSerializer, dst, src, {
+    ecs_vector_free(dst->ops);
+    dst->ops = ecs_vector_copy(src->ops, ecs_type_op_t);
+})
+
+static ECS_MOVE(EcsMetaTypeSerializer, dst, src, {
+    ecs_vector_free(dst->ops);
+
+    dst->ops = src->ops;
+    src->ops = NULL;
 })
 
 static
@@ -1533,7 +1634,7 @@ void ecs_set_constants(
         last_value ++;
     }
 
-    ecs_set_ptr_w_entity(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
+    ecs_set_id(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
         .constants = constants
     });
 }
@@ -1659,7 +1760,7 @@ void ecs_set_map(
 
 static
 void EcsSetType(ecs_iter_t *it) {
-    EcsMetaType *type = ecs_column(it, EcsMetaType, 1);
+    EcsMetaType *type = ecs_term(it, EcsMetaType, 1);
 
     ecs_world_t *world = it->world;
 
@@ -1739,7 +1840,7 @@ void ecs_new_meta(
 
 /* Utility macro to insert meta data for type with meta descriptor */
 #define ECS_COMPONENT_TYPE(world, type)\
-    ecs_set_ptr(world, ecs_id(type), EcsMetaType, &__##type##__)
+    ecs_set_ptr(world, ecs_id(type), EcsMetaType, &ecs_meta(type))
 
 /* Utility macro to insert metadata for primitive type */
 #define ECS_COMPONENT_PRIMITIVE(world, type, kind)\
@@ -1767,41 +1868,50 @@ void FlecsMetaImport(
     ECS_COMPONENT_DEFINE(world, ecs_type_op_t);
     ECS_COMPONENT_DEFINE(world, EcsMetaTypeSerializer);
 
-    ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
+    ECS_OBSERVER(world, EcsSetType, EcsOnSet, EcsMetaType);
 
     ecs_set_component_actions(world, EcsMetaType, {
         .ctor = ecs_ctor(EcsMetaType),
         .dtor = ecs_dtor(EcsMetaType),
-        .copy = ecs_copy(EcsMetaType)
+        .copy = ecs_copy(EcsMetaType),
+        .move = ecs_move(EcsMetaType)
     });
 
     ecs_set_component_actions(world, EcsStruct, {
         .ctor = ecs_ctor(EcsStruct),
-        .dtor = ecs_dtor(EcsStruct)
+        .dtor = ecs_dtor(EcsStruct),
+        .copy = ecs_copy(EcsStruct),
+        .move = ecs_move(EcsStruct)
     });
 
     ecs_set_component_actions(world, EcsEnum, {
         .ctor = ecs_ctor(EcsEnum),
-        .dtor = ecs_dtor(EcsEnum)
+        .dtor = ecs_dtor(EcsEnum),
+        .copy = ecs_copy(EcsEnum),
+        .move = ecs_move(EcsEnum)
     });
 
     ecs_set_component_actions(world, EcsBitmask, {
         .ctor = ecs_ctor(EcsBitmask),
-        .dtor = ecs_dtor(EcsBitmask)
+        .dtor = ecs_dtor(EcsBitmask),
+        .copy = ecs_copy(EcsBitmask),
+        .move = ecs_move(EcsBitmask)
     });
 
     ecs_set_component_actions(world, EcsMetaTypeSerializer, {
         .ctor = ecs_ctor(EcsMetaTypeSerializer),
-        .dtor = ecs_dtor(EcsMetaTypeSerializer)
+        .dtor = ecs_dtor(EcsMetaTypeSerializer),
+        .copy = ecs_copy(EcsMetaTypeSerializer),
+        .move = ecs_move(EcsMetaTypeSerializer)
     });
 
-    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive);
-    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum);
-    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask);
-    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct);
-    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array);
-    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector);
-    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map);
+    ECS_OBSERVER(world, EcsSetPrimitive, EcsOnSet, Primitive);
+    ECS_OBSERVER(world, EcsSetEnum, EcsOnSet, Enum);
+    ECS_OBSERVER(world, EcsSetBitmask, EcsOnSet, Bitmask);
+    ECS_OBSERVER(world, EcsSetStruct, EcsOnSet, Struct);
+    ECS_OBSERVER(world, EcsSetArray, EcsOnSet, Array);
+    ECS_OBSERVER(world, EcsSetVector, EcsOnSet, Vector);
+    ECS_OBSERVER(world, EcsSetMap, EcsOnSet, Map);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);
@@ -1853,16 +1963,16 @@ void FlecsMetaImport(
     ecs_set_scope(world, old_scope);
 
     /* -- Initialize builtin meta components -- */
-    
+
     ecs_set_ptr(world, ecs_set_name(world, 0, "ecs_primitive_kind_t"),
-        EcsMetaType, &__ecs_primitive_kind_t__);
+        EcsMetaType, &ecs_meta(ecs_primitive_kind_t));
 
     ecs_set(world, ecs_set_name(world, 0, "ecs_type_kind_t"),
         EcsMetaType, {
             EcsEnumType,
             sizeof(ecs_type_kind_t),
             ECS_ALIGNOF(ecs_type_kind_t),
-            __ecs_type_kind_t__,
+            ecs_meta(ecs_type_kind_t),
             NULL
         });
 
@@ -2302,7 +2412,7 @@ int ecs_meta_push(
     case EcsOpArray:
     case EcsOpVector: {
         void *ptr = ECS_OFFSET(scope->base, op->offset);
-        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_entity(cursor->world,
+        const EcsMetaTypeSerializer *ser = ecs_get_ref_w_id(cursor->world,
             &op->is.collection, 0, 0);
         ecs_assert(ser != NULL, ECS_INTERNAL_ERROR, NULL);
 

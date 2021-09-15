@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     Sandwich s = { (char*)"BLT", Bacon | Lettuce | Tomato };
 
     /* Pretty print the value */
-    char *str = ecs_ptr_to_str(world, ecs_entity(Sandwich), &s);
+    char *str = ecs_ptr_to_str(world, ecs_id(Sandwich), &s);
     printf("%s\n", str);
     free(str);
 

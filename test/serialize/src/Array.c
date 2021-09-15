@@ -34,7 +34,7 @@ void Array_array_bool() {
 
     {
     bool value[] = {true, false};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayBool), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayBool), value);
     test_str(str, "[true, false]");
     ecs_os_free(str);
     }
@@ -51,7 +51,7 @@ void Array_array_int() {
 
     {
     int32_t value[] = {10, -20};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayInt), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayInt), value);
     test_str(str, "[10, -20]");
     ecs_os_free(str);
     }
@@ -68,14 +68,14 @@ void Array_array_string() {
 
     {
     char* value[] = {"Hello", "World"};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayString), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayString), value);
     test_str(str, "[\"Hello\", \"World\"]");
     ecs_os_free(str);
     }
 
     {
     char* value[] = {"Hello", NULL};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayString), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayString), value);
     test_str(str, "[\"Hello\", nullptr]");
     ecs_os_free(str);
     }    
@@ -95,7 +95,7 @@ void Array_array_entity() {
 
     {
     ecs_entity_t value[] = {e1, e2};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayEntity), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayEntity), value);
     test_str(str, "[2000, Foo]");
     ecs_os_free(str);
     }
@@ -112,7 +112,7 @@ void Array_struct_array_int() {
 
     {
     Struct_w_array value = {{10, -20}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(Struct_w_array), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Struct_w_array), &value);
     test_str(str, "{ints = [10, -20]}");
     ecs_os_free(str);
     }
@@ -130,7 +130,7 @@ void Array_array_struct() {
 
     {
     Point value[] = {{10, 20}, {30, 40}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayPoint), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayPoint), &value);
     test_str(str, "[{x = 10, y = 20}, {x = 30, y = 40}]");
     ecs_os_free(str);
     }
@@ -149,7 +149,7 @@ void Array_array_nested_struct() {
 
     {
     Line value[] = {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayLine), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayLine), &value);
     test_str(str, "[{start = {x = 10, y = 20}, stop = {x = 30, y = 40}}, {start = {x = 50, y = 60}, stop = {x = 70, y = 80}}]");
     ecs_os_free(str);
     }
@@ -167,7 +167,7 @@ void Array_array_array_int() {
 
     {
     int value[2][2] = {{10, 20}, {30, 40}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayArrayInt), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayArrayInt), value);
     test_str(str, "[[10, 20], [30, 40]]");
     ecs_os_free(str);
     }
@@ -185,7 +185,7 @@ void Array_array_array_string() {
 
     {
     char* value[2][2] = {{"Hello", "World"}, {"Foo", "Bar"}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayArrayString), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayArrayString), value);
     test_str(str, "[[\"Hello\", \"World\"], [\"Foo\", \"Bar\"]]");
     ecs_os_free(str);
     }
@@ -204,7 +204,7 @@ void Array_array_array_struct() {
 
     {
     Point value[2][2] = {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayArrayPoint), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayArrayPoint), value);
     test_str(str, "[[{x = 10, y = 20}, {x = 30, y = 40}], [{x = 50, y = 60}, {x = 70, y = 80}]]");
     ecs_os_free(str);
     }
@@ -229,7 +229,7 @@ void Array_array_array_nested_struct() {
     Line l4 = {{130, 140}, {150, 160}};
 
     Line value[2][2] = {{l1, l2}, {l3, l4}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(ArrayArrayLine), value);
+    char *str = ecs_ptr_to_str(world, ecs_id(ArrayArrayLine), value);
     test_str(str, 
         "[[{start = {x = 10, y = 20}, stop = {x = 30, y = 40}}, "
           "{start = {x = 50, y = 60}, stop = {x = 70, y = 80}}], "

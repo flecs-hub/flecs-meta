@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     Line l = {{10, 20}, {30, 40}};
 
     /* Pretty print the value */
-    char *str = ecs_ptr_to_str(world, ecs_entity(Line), &l);
+    char *str = ecs_ptr_to_str(world, ecs_id(Line), &l);
     printf("%s\n", str);
     free(str);
 

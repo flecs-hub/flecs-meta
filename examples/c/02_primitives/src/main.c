@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     };
 
     /* Pretty print the value */
-    char *str = ecs_ptr_to_str(world, ecs_entity(Primitives), &p);
+    char *str = ecs_ptr_to_str(world, ecs_id(Primitives), &p);
     printf("%s\n", str);
     free(str);
 

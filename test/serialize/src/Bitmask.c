@@ -15,7 +15,7 @@ void Bitmask_bitmask_1() {
 
     {
     Toppings value = Bacon;
-    char *str = ecs_ptr_to_str(world, ecs_entity(Toppings), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Toppings), &value);
     test_str(str, "Bacon");
     ecs_os_free(str);
     }  
@@ -32,7 +32,7 @@ void Bitmask_bitmask_2() {
 
     {
     Toppings value = Bacon | Lettuce;
-    char *str = ecs_ptr_to_str(world, ecs_entity(Toppings), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Toppings), &value);
     test_str(str, "Bacon | Lettuce");
     ecs_os_free(str);
     }
@@ -49,7 +49,7 @@ void Bitmask_bitmask_3() {
 
     {
     Toppings value = Bacon | Lettuce | Tomato;
-    char *str = ecs_ptr_to_str(world, ecs_entity(Toppings), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Toppings), &value);
     test_str(str, "Tomato | Bacon | Lettuce");
     ecs_os_free(str);
     }    
@@ -66,7 +66,7 @@ void Bitmask_bitmask_0_value() {
 
     {
     Toppings value = 0;
-    char *str = ecs_ptr_to_str(world, ecs_entity(Toppings), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Toppings), &value);
     test_str(str, "0");
     ecs_os_free(str);
     }    

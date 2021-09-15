@@ -288,7 +288,7 @@ void ecs_set_constants(
         last_value ++;
     }
 
-    ecs_set_ptr_w_entity(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
+    ecs_set_id(world, e, comp, sizeof(EcsEnum), &(EcsEnum){
         .constants = constants
     });
 }
@@ -414,7 +414,7 @@ void ecs_set_map(
 
 static
 void EcsSetType(ecs_iter_t *it) {
-    EcsMetaType *type = ecs_column(it, EcsMetaType, 1);
+    EcsMetaType *type = ecs_term(it, EcsMetaType, 1);
 
     ecs_world_t *world = it->world;
 
@@ -522,7 +522,7 @@ void FlecsMetaImport(
     ECS_COMPONENT_DEFINE(world, ecs_type_op_t);
     ECS_COMPONENT_DEFINE(world, EcsMetaTypeSerializer);
 
-    ECS_SYSTEM(world, EcsSetType, EcsOnSet, EcsMetaType);
+    ECS_OBSERVER(world, EcsSetType, EcsOnSet, EcsMetaType);
 
     ecs_set_component_actions(world, EcsMetaType, {
         .ctor = ecs_ctor(EcsMetaType),
@@ -559,13 +559,13 @@ void FlecsMetaImport(
         .move = ecs_move(EcsMetaTypeSerializer)
     });
 
-    ECS_SYSTEM(world, EcsSetPrimitive, EcsOnSet, Primitive);
-    ECS_SYSTEM(world, EcsSetEnum, EcsOnSet, Enum);
-    ECS_SYSTEM(world, EcsSetBitmask, EcsOnSet, Bitmask);
-    ECS_SYSTEM(world, EcsSetStruct, EcsOnSet, Struct);
-    ECS_SYSTEM(world, EcsSetArray, EcsOnSet, Array);
-    ECS_SYSTEM(world, EcsSetVector, EcsOnSet, Vector);
-    ECS_SYSTEM(world, EcsSetMap, EcsOnSet, Map);
+    ECS_OBSERVER(world, EcsSetPrimitive, EcsOnSet, Primitive);
+    ECS_OBSERVER(world, EcsSetEnum, EcsOnSet, Enum);
+    ECS_OBSERVER(world, EcsSetBitmask, EcsOnSet, Bitmask);
+    ECS_OBSERVER(world, EcsSetStruct, EcsOnSet, Struct);
+    ECS_OBSERVER(world, EcsSetArray, EcsOnSet, Array);
+    ECS_OBSERVER(world, EcsSetVector, EcsOnSet, Vector);
+    ECS_OBSERVER(world, EcsSetMap, EcsOnSet, Map);
 
     ECS_EXPORT_COMPONENT(EcsPrimitive);
     ECS_EXPORT_COMPONENT(EcsEnum);

@@ -66,7 +66,7 @@ void Struct_struct() {
     ECS_META(world, Point);
 
     Point value = { 0 };
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Point), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Point), &value);
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_int(&it, 11), 0);
     test_int(ecs_meta_next(&it), 0);
@@ -88,7 +88,7 @@ void Struct_struct_primitives() {
 
     Primitives value = { 0 };
 
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Primitives), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Primitives), &value);
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_bool(&it, true), 0); // b
     test_int(ecs_meta_next(&it), 0);
@@ -151,7 +151,7 @@ void Struct_nested_struct() {
     ECS_META(world, Line);
 
     Line value = { 0 };
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Line), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Line), &value);
     
     test_int(ecs_meta_push(&it), 0);
 
@@ -187,7 +187,7 @@ void Struct_struct_by_name() {
     ECS_META(world, Point);
 
     Point value = { 0 };
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Point), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Point), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_move_name(&it, "y"), 0);
@@ -211,7 +211,7 @@ void Struct_nested_struct_by_name() {
     ECS_META(world, Line);
 
     Line value = { 0 };
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Line), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Line), &value);
     
     test_int(ecs_meta_push(&it), 0);
 
@@ -250,7 +250,7 @@ void Struct_struct_w_array() {
 
     Struct_w_array value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_array), &value);
+        world, ecs_id(Struct_w_array), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_bool(&it, true), 0); // before_arr_1
@@ -296,7 +296,7 @@ void Struct_struct_w_array_by_name() {
 
     Struct_w_array value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_array), &value);
+        world, ecs_id(Struct_w_array), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_move_name(&it, "after_arr_2"), 0);
@@ -347,7 +347,7 @@ void Struct_struct_w_array_nested_struct() {
 
     Struct_w_array_nested_struct value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_array_nested_struct), &value);
+        world, ecs_id(Struct_w_array_nested_struct), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_bool(&it, true), 0); // before_arr_1
@@ -418,7 +418,7 @@ void Struct_struct_w_array_nested_struct_by_name() {
 
     Struct_w_array_nested_struct value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_array_nested_struct), &value);
+        world, ecs_id(Struct_w_array_nested_struct), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_move_name(&it, "after_arr_2"), 0);
@@ -495,7 +495,7 @@ void Struct_struct_w_vector() {
 
     Struct_w_vector value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_bool(&it, true), 0); // before_vec_1
@@ -550,7 +550,7 @@ void Struct_struct_w_vector_by_name() {
 
     Struct_w_vector value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_move_name(&it, "after_vec_2"), 0);
@@ -610,7 +610,7 @@ void Struct_struct_w_vector_nested_struct() {
 
     Struct_w_vector_nested_struct value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector_nested_struct), &value);
+        world, ecs_id(Struct_w_vector_nested_struct), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_set_bool(&it, true), 0); // before_vec_1
@@ -690,7 +690,7 @@ void Struct_struct_w_vector_nested_struct_by_name() {
 
     Struct_w_vector_nested_struct value = { 0 };
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector_nested_struct), &value);
+        world, ecs_id(Struct_w_vector_nested_struct), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_move_name(&it, "after_vec_2"), 0);
@@ -776,7 +776,7 @@ void Struct_struct_reassign_string() {
 
     Primitives value = { 0 };
 
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Primitives), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Primitives), &value);
     test_int(ecs_meta_push(&it), 0);
 
     test_int(ecs_meta_move_name(&it, "str"), 0);
@@ -803,7 +803,7 @@ void Struct_struct_reassign_null() {
 
     Primitives value = { 0 };
 
-    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_entity(Primitives), &value);
+    ecs_meta_cursor_t it = ecs_meta_cursor(world, ecs_id(Primitives), &value);
     test_int(ecs_meta_push(&it), 0);
 
     test_int(ecs_meta_move_name(&it, "str"), 0);
@@ -834,7 +834,7 @@ void Struct_struct_reassign_vector() {
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_next(&it), 0);
@@ -878,7 +878,7 @@ void Struct_struct_reassign_smaller_vector() {
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_next(&it), 0);
@@ -921,7 +921,7 @@ void Struct_struct_reassign_larger_vector() {
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_next(&it), 0);
@@ -968,7 +968,7 @@ void Struct_struct_reassign_vector_null() {
     };
 
     ecs_meta_cursor_t it = ecs_meta_cursor(
-        world, ecs_entity(Struct_w_vector), &value);
+        world, ecs_id(Struct_w_vector), &value);
     
     test_int(ecs_meta_push(&it), 0);
     test_int(ecs_meta_next(&it), 0);

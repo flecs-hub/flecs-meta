@@ -29,7 +29,7 @@ void Struct_struct() {
 
     {
     Point value = {10, 20};
-    char *str = ecs_ptr_to_str(world, ecs_entity(Point), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Point), &value);
     test_str(str, "{x = 10, y = 20}");
     ecs_os_free(str);
     }
@@ -47,7 +47,7 @@ void Struct_nested_struct() {
 
     {
     Line value = {{10, 20}, {30, 40}};
-    char *str = ecs_ptr_to_str(world, ecs_entity(Line), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(Line), &value);
     test_str(str, "{start = {x = 10, y = 20}, stop = {x = 30, y = 40}}");
     ecs_os_free(str);
     }
@@ -64,7 +64,7 @@ void Struct_struct_bool_i32() {
 
     {
     bool_i32 value = {false, 10};
-    char *str = ecs_ptr_to_str(world, ecs_entity(bool_i32), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(bool_i32), &value);
     test_str(str, "{b = false, i = 10}");
     ecs_os_free(str);
     }
@@ -81,7 +81,7 @@ void Struct_struct_i32_bool() {
 
     {
     i32_bool value = {10, false};
-    char *str = ecs_ptr_to_str(world, ecs_entity(i32_bool), &value);
+    char *str = ecs_ptr_to_str(world, ecs_id(i32_bool), &value);
     test_str(str, "{i = 10, b = false}");
     ecs_os_free(str);
     }

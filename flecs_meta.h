@@ -1,3 +1,4 @@
+// Comment out this line when using as DLL
 #define flecs_meta_STATIC
 #ifndef FLECS_META_H
 #define FLECS_META_H
@@ -48,25 +49,28 @@
 //// Utility macro's (do not use in code!)
 ////////////////////////////////////////////////////////////////////////////////
 
+/** Translate C type to metatype. */
+#define ecs_meta(name) FLECS__D##name
+
 #define ECS_ENUM_BOOTSTRAP(name, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static const char * __##name##__ = #__VA_ARGS__;
+static const char * ecs_meta(name) = #__VA_ARGS__;
 
 #define ECS_STRUCT_IMPL(name, descriptor, ...)\
 typedef struct name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
+static EcsMetaType ecs_meta(name) = {EcsStructType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
 #define ECS_ENUM_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
+static EcsMetaType ecs_meta(name) = {EcsEnumType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
 #define ECS_BITMASK_IMPL(name, descriptor, ...)\
 typedef enum name __VA_ARGS__ name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
+static EcsMetaType ecs_meta(name) = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(name), descriptor, NULL};
 
 #define ECS_STRUCT_C(T, ...) ECS_STRUCT_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
 #define ECS_ENUM_C(T, ...) ECS_ENUM_IMPL(T, #__VA_ARGS__, __VA_ARGS__)
@@ -75,17 +79,17 @@ static EcsMetaType __##name##__ = {EcsBitmaskType, sizeof(name), ECS_ALIGNOF(nam
 #define ECS_ARRAY(name, T, length)\
 typedef T name[length];\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")", NULL}
+static EcsMetaType ecs_meta(name) = {EcsArrayType, sizeof(T) * length, ECS_ALIGNOF(T), "(" #T "," #length ")", NULL}
 
 #define ECS_VECTOR(name, T)\
 typedef ecs_vector_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")", NULL}
+static EcsMetaType ecs_meta(name) = {EcsVectorType, sizeof(ecs_vector_t*), ECS_ALIGNOF(ecs_vector_t*), "(" #T ")", NULL}
 
 #define ECS_MAP(name, K, T)\
 typedef ecs_map_t *name;\
 ECS_UNUSED \
-static EcsMetaType __##name##__ = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")", NULL}
+static EcsMetaType ecs_meta(name) = {EcsMapType, sizeof(ecs_map_t*), ECS_ALIGNOF(ecs_map_t*), "(" #K "," #T ")", NULL}
 
 #ifdef __cplusplus
 
@@ -157,7 +161,7 @@ public:\
 #define ECS_ALIAS(type, name)\
     typedef type name;\
     ECS_UNUSED \
-    static EcsMetaType __##name##__ = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &__##type##__};\
+    static EcsMetaType ecs_meta(name) = {0, sizeof(name), ECS_ALIGNOF(name), NULL, &ecs_meta(type)};\
 
 #endif
 
@@ -554,18 +558,18 @@ typedef struct FlecsMeta {
 extern "C" {
 #endif
 
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsPrimitive);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsEnum);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsBitmask);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMember);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsStruct);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsArray);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsVector);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMap);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaType);
-FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_kind_t);
-FLECS_META_API ECS_COMPONENT_EXTERN(ecs_type_op_t);
-FLECS_META_API ECS_COMPONENT_EXTERN(EcsMetaTypeSerializer);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsPrimitive);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsEnum);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsBitmask);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMember);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsStruct);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsArray);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsVector);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMap);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMetaType);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(ecs_type_op_kind_t);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(ecs_type_op_t);
+FLECS_META_API extern ECS_COMPONENT_DECLARE(EcsMetaTypeSerializer);
 
 FLECS_META_API
 void FlecsMetaImport(
@@ -585,7 +589,7 @@ void ecs_new_meta(
 
 #define ECS_META(world, T)\
     ECS_COMPONENT(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+    ecs_new_meta(world, ecs_id(T), &ecs_meta(T));
 
 /** Define a meta component, store in variable outside of the current scope.
 * Use this macro in a header when defining a component identifier globally.
@@ -593,7 +597,7 @@ void ecs_new_meta(
 */
 #define ECS_META_DEFINE(world, T)\
     ECS_COMPONENT_DEFINE(world, T);\
-    ecs_new_meta(world, ecs_entity(T), &__##T##__);
+    ecs_new_meta(world, ecs_id(T), &ecs_meta(T));
 
 #ifdef __cplusplus
 }
