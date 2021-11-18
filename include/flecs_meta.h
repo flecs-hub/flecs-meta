@@ -185,7 +185,7 @@ ECS_STRUCT( EcsMetaType, {
 })
 
 ECS_ENUM( ecs_primitive_kind_t, {
-    EcsBool,
+    EcsBool = 1,
     EcsChar,
     EcsByte,
     EcsU8,
